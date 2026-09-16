@@ -21,7 +21,6 @@
     "@3dverse/livelink": "^0.8.43",
     "@3dverse/livelink-react": "^0.2.49",
     "@3dverse/livelink-react-ui": "^0.3.5",
-    "@3dverse/livelink-webxr": "^0.1.12",
     "@grpc/grpc-js": "^1.13.4",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
@@ -58,6 +57,7 @@
     "tsx": "^4.20.4",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-plugin-node-polyfills": "^0.28.0"
   }
 }

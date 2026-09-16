@@ -10,8 +10,8 @@ import {
   LivelinkContext,
   DefaultCameraController,
 } from "@3dverse/livelink-react";
+
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-import { WebXRHelper, WebXR } from "@3dverse/livelink-webxr";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
@@ -76,10 +76,6 @@ export function App() {
                   ) : (
                     <>
                       <AppLayout />
-                      <div className="absolute bottom-[5vh] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 z-[99999]">
-                        <XRButton mode="immersive-ar" setXRMode={setXRMode} />
-                        <XRButton mode="immersive-vr" setXRMode={setXRMode} />
-                      </div>
                     </>
                   )}
                 </WebSocketProvider>
@@ -120,7 +116,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
             {[
               ["NJ130 2.05", "759ed8c4-fb60-432c-a41e-cf0f39f92d6f"],
               ["NJ40", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
-              ["Test_Kuka [deprecated]", "516d270a-5a6b-44e6-99c6-44df631bf475"],
+              ["Comau racer 3", "516d270a-5a6b-44e6-99c6-44df631bf475"],
               ["Test_primitive [deprecated]", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
             ].map(([label, id]) => (
               <div className="flex justify-center" key={id}>
@@ -133,7 +129,6 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
               </div>
             ))}
           </div>
-
           <div className="flex justify-center pt-4">
             <button
               type="submit"
@@ -152,7 +147,6 @@ function AppLayout() {
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
   const cameraControllerRef = useRef<DefaultCameraController>(null);
-
   const [showPipCamera, setShowPipCamera] = useState(false);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
@@ -171,14 +165,17 @@ function AppLayout() {
     });
   }, [pickedEntity]);
 
-  // 🔥 Boucle qui lance createEntity toutes les 100ms
-  useEffect(() => {
+useEffect(() => {
     let active = true;
 
     const loop = async () => {
       while (active) {
+        if (!instance || !instance.scene) {
+          await new Promise((r) => setTimeout(r, 100));
+          continue;
+        }
+
         try {
-          await createEntity();
         } catch (e) {
           console.error("createEntity error:", e);
         }
@@ -192,13 +189,11 @@ function AppLayout() {
     return () => {
       active = false;
     };
-  }, []);
+}, [instance]);
 
   useEffect(() => {
     if (!cameraEntity?.camera) return;
-
     const { dataJSON } = cameraEntity.camera;
-
     cameraEntity.camera.dataJSON = {
       ...dataJSON,
       ambientBRDF: true,
@@ -293,46 +288,6 @@ function AppLayout() {
         />
       </Canvas>
     </CameraEntityContext.Provider>
-  );
-}
-
-function XRButton({
-  mode,
-  setXRMode,
-  text = "Enter",
-}: {
-  mode: XRSessionMode;
-  text?: string;
-  setXRMode: (mode: XRSessionMode) => void;
-}) {
-  const [isSessionSupported, setIsSessionSupported] = useState(false);
-  const [message, setMessage] = useState("");
-  const xrModeTitle = mode.endsWith("ar") ? "AR" : "VR";
-
-  useEffect(() => {
-    if (!window.isSecureContext) {
-      setMessage("WebXR requires a secure context (https).");
-      return;
-    }
-
-    WebXRHelper.isSessionSupported(mode).then((supported) => {
-      if (!supported) {
-        setMessage(`WebXR '${mode}' is not supported on this device.`);
-      } else {
-        setIsSessionSupported(true);
-      }
-    });
-  }, [mode]);
-
-  return (
-    <button
-      className={"button button-primary" + (!isSessionSupported ? " opacity-50" : "")}
-      onClick={() => setXRMode(mode)}
-      disabled={!isSessionSupported}
-      style={isSessionSupported ? {} : { cursor: "not-allowed" }}
-      title={message}>
-      {text} {xrModeTitle}
-    </button>
   );
 }
 

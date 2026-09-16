@@ -25,20 +25,11 @@ export const getMaterialFromTemperature = (temp: number) => {
 
 export const getScaleFromTemperature = (temp: number): [number, number, number] => {
     const t = temp / 100;
-    const min = 0.004;
-    const max = 0.010;
+    const min = 0.002;
+    const max = 0.006;
     const value = min + (max - min) * t;
-
-    return [value, value, value * 2];
+    return [value, value , value * 2.5];
 };
-
-export const createEntityOpt = async(
-    instance: any
-) =>{
-    await instance.scene.newEntity({name : "newBead"});
-    rotaRef: 
-
-}
 
 export const createEntity = async (
     instance: any,
@@ -61,18 +52,29 @@ export const createEntity = async (
     });
 };
 
+const MAX_CONCURRENT_CREATES = 3;
+
+const SAMPLE_INTERVAL_MS = 32;
+
+const MIN_MOVE_DISTANCE = 0.008;
+
 export function EntityCreator() {
     const { instance } = useContext(LivelinkContext);
 
     const [temperature, setTemperature] = useState(50);
     const [latency, setLatency] = useState(0);
     const [autoWeld, setAutoWeld] = useState(false);
-
     const { entity: torch } = useEntity({
         euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
     });
 
     const lastPosition = useRef<[number, number, number] | null>(null);
+    const temperatureRef = useRef(temperature);
+    useEffect(() => {
+        temperatureRef.current = temperature;
+    }, [temperature]);
+    const queue = useRef<[number, number, number][]>([]);
+    const inFlight = useRef(0);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -91,37 +93,60 @@ export function EntityCreator() {
     };
 
     useEffect(() => {
-        if (!autoWeld || !instance || !torch) return;
-        let active = true;
-        const loop = async () => {
-            while (active) {
+        if (!autoWeld || !torch) return;
 
-                const pos = torch?.global_transform?.position;
+        const id = setInterval(() => {
+            const pos = torch?.global_transform?.position as
+                | [number, number, number]
+                | undefined;
 
-                if (pos) {
-                    if (!lastPosition.current) {
-                        lastPosition.current = [...pos];
-                    }
-                    const moved =
-                        distance(pos, lastPosition.current) > 0.001;
-                    if (moved) {
-                        await createEntity(
-                            instance,
-                            pos as [number, number, number],
-                            temperature
-                        );
-                        lastPosition.current = [...pos];
-                    }
-                }
-                await new Promise(r => setTimeout(r, 200));
+            if (!pos) return;
+
+            if (!lastPosition.current) {
+                lastPosition.current = [...pos];
+                return;
             }
+            if (distance(pos, lastPosition.current) > MIN_MOVE_DISTANCE) {
+                queue.current.push([...pos] as [number, number, number]);
+                lastPosition.current = [...pos];
+            }
+        }, SAMPLE_INTERVAL_MS);
+        return () => clearInterval(id);
+    }, [autoWeld, torch]);
+    useEffect(() => {
+        if (!autoWeld || !instance) return;
+
+        let active = true;
+
+        const drain = () => {
+            if (!active) return;
+
+            while (queue.current.length && inFlight.current < MAX_CONCURRENT_CREATES) {
+                const pos = queue.current.shift()!;
+                inFlight.current++;
+
+                createEntity(instance, pos, temperatureRef.current)
+                    .catch((err) => console.error("createEntity failed", err))
+                    .finally(() => {
+                        inFlight.current--;
+                    });
+            }
+            requestAnimationFrame(drain);
         };
-        loop();
+
+        const frame = requestAnimationFrame(drain);
+
         return () => {
             active = false;
+            cancelAnimationFrame(frame);
         };
-
-    }, [autoWeld, instance, torch, temperature]);
+    }, [autoWeld, instance]);
+    useEffect(() => {
+        if (!autoWeld) {
+            queue.current = [];
+            lastPosition.current = null;
+        }
+    }, [autoWeld]);
 
     const handleCreate = async () => {
 
@@ -138,14 +163,12 @@ export function EntityCreator() {
 
     return (
         <div className="absolute text-white top-32 left-5 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
-
             <button
                 className="button button-overlay"
                 onClick={handleCreate}
                 disabled={!instance}>
                 Create Entity
             </button>
-
             <button
                 className="button button-overlay"
                 onClick={() => setAutoWeld(v => !v)}
@@ -157,7 +180,7 @@ export function EntityCreator() {
                 Température: {temperature}
                 <br />
                 Latency: {`${latency.toFixed(0)}ms`}
-
+                <br />
                 <input
                     type="range"
                     min={0}
