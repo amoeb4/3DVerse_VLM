@@ -13,7 +13,6 @@ import { setOrientation } from "./movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-// ---------------------- Speed Context ----------------------
 type SpeedContextType = {
   delayMs: number;
   setDelayMs: (value: number) => void;
@@ -82,7 +81,6 @@ export function eulerToQuat(
   ];
 }
 
-// ---------------------- Control Panel ----------------------
 export default function ControlPanel() {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
@@ -129,13 +127,11 @@ export default function ControlPanel() {
         <h1 className="text-2xl font-bold">Control Panel</h1>
         <button
           className="text-sm bg-white/10 border border-white/30 rounded-md px-2 py-1 hover:bg-white/20 transition"
-          onClick={() => setIsExpanded(false)}
-        >
+          onClick={() => setIsExpanded(false)}>
           Minimize
         </button>
       </div>
 
-      {/* --- Entity / Sliders --- */}
       <div className="flex flex-wrap gap-4 items-center justify-between mt-4">
         <EntityDropdown />
         <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">

@@ -111,6 +111,9 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
   };
 }
 
+//Fonction de déplacement principale
+// --> Intégrer EntityCreator si le bool torch === active
+
 export function rotateHierarchy(
   entityName: string,
   deltaQuatDeg: [number, number, number],
@@ -190,3 +193,4 @@ function applyStepRotation(
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+

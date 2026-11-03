@@ -42,3 +42,10 @@ grpc:
 	gnome-terminal --tab -- bash -c "source /home/obedience/latest/GRPC/venv/bin/activate && python OPC-UA/server_grpc.py; exec bash"
 	gnome-terminal --tab -- bash -c "npx tsx grpc_proxy.ts; exec bash"
 	$(open_browser)
+
+test:
+	gnome-terminal --tab -- bash -c "npm run dev; exec bash"
+	gnome-terminal --tab -- bash -c "cd tester_python && source .venv/bin/activate && python server.py; exec bash"
+	sleep 0.1
+	gnome-terminal --tab -- bash -c "cd tester_python && node server.js; exec bash"
+	$(open_browser)

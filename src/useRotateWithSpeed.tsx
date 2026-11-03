@@ -8,7 +8,6 @@ export const useRotateWithSpeed = (
 ) => {
   const { speed } = useSpeed();
   const delayMs = Math.max(10, 1000 / speed);
-
   return (
     entityName: string,
     deltaQuatDeg: [number, number, number],

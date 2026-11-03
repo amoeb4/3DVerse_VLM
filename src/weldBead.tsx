@@ -1,6 +1,7 @@
 "use client";
 import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
+import { eulerToQuat } from "./Interface";
 
 const MATERIAL_REFS = [
     "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
@@ -28,7 +29,7 @@ export const getScaleFromTemperature = (temp: number): [number, number, number] 
     const min = 0.002;
     const max = 0.006;
     const value = min + (max - min) * t;
-    return [value, value , value * 2.5];
+    return [value, value * 2.5, value];
 };
 
 export const createEntity = async (
@@ -52,7 +53,7 @@ export const createEntity = async (
     });
 };
 
-const MAX_CONCURRENT_CREATES = 3;
+const MAX_CONCURRENT_CREATES = 5;
 
 const SAMPLE_INTERVAL_MS = 32;
 
@@ -64,9 +65,8 @@ export function EntityCreator() {
     const [temperature, setTemperature] = useState(50);
     const [latency, setLatency] = useState(0);
     const [autoWeld, setAutoWeld] = useState(false);
-    const { entity: torch } = useEntity({
-        euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
-    });
+    const { entity: torch } = useEntity({euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912"});
+    const {entity : plateau} = useEntity({euid: "19a0b434-94d5-4546-8e8a-7b894148c504"});
 
     const lastPosition = useRef<[number, number, number] | null>(null);
     const temperatureRef = useRef(temperature);
@@ -157,8 +157,9 @@ export function EntityCreator() {
         await createEntity(
             instance,
             pos as [number, number, number],
-            temperature
+            temperature,
         );
+
     };
 
     return (

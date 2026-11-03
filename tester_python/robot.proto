@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package robot;
+
+service RobotStream {
+  // Flux serveur : l'état des 6 axes est poussé en continu
+  rpc StreamJoints (StreamRequest) returns (stream RobotState);
+}
+
+message StreamRequest {
+  double rate_hz = 1;   // fréquence souhaitée (0 = défaut serveur)
+}
+
+message Joint {
+  string name = 1;        // "part_1" ... "part_6" (noms des entités 3DVerse)
+  double angle_deg = 2;   // angle de l'axe en degrés
+}
+
+message RobotState {
+  int64 timestamp_ms = 1;
+  repeated Joint joints = 2;
+}

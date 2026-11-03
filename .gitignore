@@ -1,11 +1,8 @@
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Production build output
-node_modules/
 build/
-dist/
 public/build/
 
 # Environment variables

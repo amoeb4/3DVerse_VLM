@@ -1,5 +1,7 @@
 import { WebSocketServer } from 'ws';
 
+//Principal server.js
+
 const wss = new WebSocketServer({ port: 8767 });
 
 console.log('Server launched, awaiting message from client...');

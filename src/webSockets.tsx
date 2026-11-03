@@ -22,6 +22,8 @@ export function useWebSocket() {
   return useContext(WSContext);
 }
 
+//Fonction principale websocket
+
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(
     null
@@ -79,11 +81,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
         if(parsed.name === "part_1") {
           const now = performance.now();
-          const deltaTime = now - lastPart1MessageTime;
+//          const deltaTime = now - lastPart1MessageTime;
           lastPart1MessageTime = now;
-          if(deltaTime > 100) {
-            console.warn("Warnning, delta time gap:", deltaTime);
-          }
+//          if(deltaTime > 100) {
+//            console.warn("Warnning, delta time gap:", deltaTime);
+//          }
         }
         const [x, y, z] = parsed.location;
         //console.debug("WS message orientation:", parsed.name, [x, y, z]);
