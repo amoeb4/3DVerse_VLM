@@ -25,6 +25,7 @@ import "./App.css";
 import { EntityCreator, createEntity } from "./weldBead.tsx";
 import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";
 import { DisplayDashboard } from "./Dashboard.tsx";
+import { XRButton } from "./webXR.tsx";
 import type { Entity } from "@3dverse/livelink";
 
 export function App() {
