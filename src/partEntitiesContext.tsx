@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
-import { Entity, Scene } from "@3dverse/livelink";
-import type { Vec3, Quat } from "@3dverse/livelink.core";
+import { LivelinkContext } from "@3dverse/livelink-react";
+import { Entity } from "@3dverse/livelink";
+import type { Quat } from "@3dverse/livelink.core";
 //import { debugEntityTransform } from "./debugTools";
 import * as THREE from "three";
 //import { OneFactor, StereoCamera } from "three";

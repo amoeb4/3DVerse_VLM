@@ -27,8 +27,8 @@ export function useWebSocket() {
 //Fonction principale websocket
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(
-    null,
+  const [selectedEntityName] = useState<string | null>(
+    null
   );
   const { speed } = useSpeed();
   const delayMs = Math.max(10, 1000 / speed);
@@ -43,8 +43,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
   const selectedEntityRef = useRef<string | null>(null);
-  const messageQueue = useRef<any[]>([]);
-  const [flushTrigger, setFlushTrigger] = useState(0);
 
   useEffect(() => {
     selectedEntityRef.current = selectedEntity?.name ?? null;
@@ -63,7 +61,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    let lastPart1MessageTime = performance.now();
+    // let lastPart1MessageTime = performance.now();
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
 
@@ -84,14 +82,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        if (parsed.name === "part_1") {
-          const now = performance.now();
-          //          const deltaTime = now - lastPart1MessageTime;
-          lastPart1MessageTime = now;
-          //          if(deltaTime > 100) {
-          //            console.warn("Warnning, delta time gap:", deltaTime);
-          //          }
-        }
+//        if(parsed.name === "part_1") {
+//          const now = performance.now();
+//          const deltaTime = now - lastPart1MessageTime;
+//          lastPart1MessageTime = now;
+//          if(deltaTime > 100) {
+//            console.warn("Warnning, delta time gap:", deltaTime);
+//          }
+//        }
         const [x, y, z] = parsed.location;
         //console.debug("WS message orientation:", parsed.name, [x, y, z]);
         rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
@@ -122,6 +120,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Commented by SEB
   /*
+  const messageQueue = useRef<any[]>([]);
+  const [flushTrigger, setFlushTrigger] = useState(0);
+
   useEffect(() => {
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);

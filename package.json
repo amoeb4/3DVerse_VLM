@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "typecheck": "tsc -b",
     "preview": "vite preview",
     "server": "cd server && ./start.sh && cd ..",
     "nrd": "npm run dev",
@@ -19,11 +20,11 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@3dverse/api": "^0.8.9",
+    "@3dverse/api": "^0.16.0",
     "@3dverse/design-tokens": "^0.1.28",
-    "@3dverse/livelink": "^0.8.43",
-    "@3dverse/livelink-react": "^0.2.49",
-    "@3dverse/livelink-react-ui": "^0.3.5",
+    "@3dverse/livelink": "^0.8.73",
+    "@3dverse/livelink-react": "^0.2.69",
+    "@3dverse/livelink-react-ui": "^0.3.29",
     "@3dverse/livelink-webxr": "^0.8.4",
     "@3dverse/ui-lib": "^0.2.7",
     "@fortawesome/fontawesome-free": "^7.3.1",
@@ -42,7 +43,6 @@
     "react-dom": "^19.1.0",
     "react-router": "^8.5.1",
     "three": "^0.178.0",
-    "webxr": "^0.0.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
@@ -51,6 +51,8 @@
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/three": "~0.178.1",
+    "@types/webxr": "^0.5.24",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.0",

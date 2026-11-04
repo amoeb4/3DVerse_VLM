@@ -38,9 +38,7 @@ export default function KeyboardHandler() {
         if (key === "-") move(0, -1, 0);
 
         const cameraEntities = entities.filter((entity) => {
-          const name = entity.name?.toLowerCase?.();
-          const type = entity.type?.toLowerCase?.();
-          return name === "camera" || type === "camera";
+          return entity.name?.toLowerCase?.() === "camera";
         });
         if (key === "a")
           oriKey(instance, cameraEntities, 0, 2, 0, eulerToQuat2);
@@ -105,9 +103,7 @@ export async function oriKey(
       entity_uuid: entity.id,
     });
     if (fullEntity) {
-      const [x, y, z, w] = fullEntity.local_transform.orientation || [
-        0, 0, 0, 1,
-      ];
+      const [x, y, z] = fullEntity.local_transform.orientation || [0, 0, 0, 1];
       if (param1 === -90 && param2 === 0 && param3 === 0) {
         fullEntity.local_transform = {
           orientation: eulerToQuat(-90, 0, 0),
@@ -139,9 +135,9 @@ export async function camKey(
     const isCamera = name === "camera" || type === "camera";
     if (!isCamera) continue;
 
-    const position = vec3.fromValues(...fullEntity.local_transform.position);
+    const position = vec3.clone(fullEntity.local_transform.position);
     const orientation = fullEntity.local_transform.orientation || [0, 0, 0, 1];
-    const rotationQuat = quat.fromValues(...orientation);
+    const rotationQuat = quat.clone(orientation);
 
     if (moveX === 0 && moveY === 0 && moveZ === 0) {
       fullEntity.local_transform.position = [200, 86, 30];
