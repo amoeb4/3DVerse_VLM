@@ -23,7 +23,7 @@ return (
   <div className="flex flex-col gap-2">
     <button onClick={() => toggleEntity(flame, flame)}>Allumer/Éteindre flamme</button>
     <button onClick={() => toggleEntity(fronius, effecteur)}>Broche fronius</button>
-    <button onClick={() => toggleEntity(effecteur, fronius)}>Broche effecteur</button>
+    <button onClick={() => toggleEntity(effecteur, fronius)}>Broche de fraisage</button>
   </div>
   );
 }

@@ -49,3 +49,4 @@ test:
 	sleep 0.1
 	gnome-terminal --tab -- bash -c "cd tester_python && node server.js; exec bash"
 	$(open_browser)
+
