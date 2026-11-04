@@ -57,3 +57,4 @@ dist/
 
 # Python virtualenv (make python)
 .venv/
+env/
