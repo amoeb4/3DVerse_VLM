@@ -47,12 +47,14 @@ export function App() {
               <SpeedProvider>
                 <WebSocketProvider>
                   <KeyboardHandler />
+                  
                   {xrMode ? (
+                    /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
                       <AppLayout />
                       <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-[99999]">
                         <button
-                          className="button button-primary"
+                          className="button button-danger"
                           onClick={() => setXRMode(null)}>
                           Exit XR
                         </button>
@@ -75,8 +77,23 @@ export function App() {
                       </div>
                     </WebXR>
                   ) : (
+                    /* --- MODE NORMAL (Navigateur Classique) --- */
                     <>
                       <AppLayout />
+                      
+                      {/* Interface d'entrée WebXR fixe sur l'écran classique */}
+                      <div className="fixed bottom-6 right-6 flex gap-4 z-[99999] bg-slate-900/80 p-3 rounded-xl backdrop-blur-sm">
+                        <XRButton
+                          mode="immersive-vr"
+                          text="Enter"
+                          setXRMode={setXRMode}
+                        />
+                        <XRButton
+                          mode="immersive-ar"
+                          text="Enter"
+                          setXRMode={setXRMode}
+                        />
+                      </div>
                     </>
                   )}
                 </WebSocketProvider>
@@ -88,6 +105,7 @@ export function App() {
     </>
   );
 }
+
 
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");

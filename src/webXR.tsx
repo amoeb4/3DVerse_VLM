@@ -1,5 +1,8 @@
-import { WebXRHelper, WebXR } from "@3dverse/livelink-webxr";
+import { WebXR } from "@3dverse/livelink-webxr";
 import { useState, useEffect } from "react";
+
+// Explicitly type the WebXR mode strings
+type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
 
 export function XRButton({
     mode,
@@ -20,7 +23,13 @@ export function XRButton({
             return;
         }
 
-        WebXRHelper.isSessionSupported(mode).then(supported => {
+        // FIX: The package exposes an underlying webxr implementation check natively or via WebXR
+        // Since WebXR is exported, check if it contains the check or fallback to native browser checking
+        const checkSupport = navigator.xr?.isSessionSupported 
+            ? navigator.xr.isSessionSupported(mode)
+            : Promise.resolve(false);
+
+        checkSupport.then(supported => {
             if (!supported) {
                 setMessage(`WebXR '${mode}' is not supported on this device.`);
             } else {
