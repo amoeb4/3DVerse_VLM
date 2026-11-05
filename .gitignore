@@ -47,3 +47,8 @@ Thumbs.db
 compile_commands.json
 .vercel
 .env*
+
+node_modules/
+.vercel
+dist/
+

@@ -7,7 +7,7 @@ class CLMClient:
     """
     Close Loop Monitoring Client class Module
     """
-    def __init__(self, host="127.0.0.1", port=50051):
+    def __init__(self, host="192.168.214.252", port=50051):
         """
         Constructor of the CLMClient class
         :param host: Host IP address or hostname (default: '127.0.0.1')

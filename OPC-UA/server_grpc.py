@@ -6,15 +6,15 @@ import cnc_pb2
 import cnc_pb2_grpc
 import time
 
-OPC_UA_ENDPOINT = "opc.tcp://192.168.0.100:4840"
+OPC_UA_ENDPOINT = "opc.tcp://192.168.214.252:50051"
 TIMEOUT = 5.0  # secondes
 
 class CNCServiceServicer(cnc_pb2_grpc.CNCServiceServicer):
 
     def ReadVariable(self, request, context):
-#       client = Client(OPC_UA_ENDPOINT)
+#       initial
 #        client.set_security_string("None")
-#        try:
+#        try:dd
 #            client.connect(timeout=TIMEOUT)
 #            node = client.get_node(request.node_id)
 #            value = node.get_value()

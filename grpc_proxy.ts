@@ -17,11 +17,12 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
+
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const CLMService: any = protoDescriptor.CLMService;
 
 const client = new CLMService(
-  "192.168.10.75:50051",
+  "192.168.214.252:50051",
   grpc.credentials.createInsecure()
 );
 if (!client) console.error("❌ Impossible de créer le client gRPC");
@@ -81,5 +82,4 @@ function query_rpc_server() {
     setTimeout(query_rpc_server, 33);
   });
 }
-
 query_rpc_server();
