@@ -16,9 +16,11 @@ function isTypingInField(target: EventTarget | null) {
 export function useKeyboardShortcuts({
   onReset,
   onToggleControlPanel,
+  onToggleTheme,
 }: {
   onReset: () => void;
   onToggleControlPanel: () => void;
+  onToggleTheme: () => void;
 }) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -39,10 +41,13 @@ export function useKeyboardShortcuts({
         case SHORTCUTS.controlPanel:
           onToggleControlPanel();
           break;
+        case SHORTCUTS.theme:
+          onToggleTheme();
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onReset, onToggleControlPanel]);
+  }, [onReset, onToggleControlPanel, onToggleTheme]);
 }

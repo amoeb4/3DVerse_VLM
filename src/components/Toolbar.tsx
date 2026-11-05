@@ -5,6 +5,7 @@ import { InvitePanel } from "../invite/InvitePanel";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
+import type { SceneTheme } from "../hooks/useSceneTheme";
 
 const SHOW_KBD_SHORTCUTS = false;
 
@@ -12,11 +13,15 @@ export function Toolbar({
   onToggleControlPanel,
   showDOM3D,
   setShowDOM3D,
+  theme,
+  onToggleTheme,
   cameraController,
 }: {
   onToggleControlPanel: () => void;
   showDOM3D: boolean;
   setShowDOM3D: (show: boolean) => void;
+  theme: SceneTheme | null;
+  onToggleTheme: () => void;
   cameraController: DefaultCameraController | null;
 }) {
   return (
@@ -46,6 +51,15 @@ export function Toolbar({
             {SHORTCUTS.controlPanel.toUpperCase()}
           </Kbd>
         )}
+      </Button>
+      <Button
+        variant="overlay-outline"
+        className="py-2 before:opacity-100 before:backdrop-blur-xl"
+        title={`${theme === "dark" ? "Light" : "Dark"} theme (${SHORTCUTS.theme.toUpperCase()})`}
+        onClick={onToggleTheme}
+        disabled={!theme}
+      >
+        <Icon className={cn("fas", theme === "dark" ? "fa-sun" : "fa-moon")} />
       </Button>
       <Button
         variant="overlay-outline"

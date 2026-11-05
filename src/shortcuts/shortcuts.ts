@@ -4,4 +4,5 @@ export const SHORTCUTS = {
   // Not "r": keyBindings.tsx already uses it to move every entity back to the origin.
   reset: "p",
   controlPanel: "c",
+  theme: "t",
 } as const;

@@ -30,6 +30,7 @@ import { ResetPositionButton } from "./components/ResetPositionButton";
 import { StartupPanel } from "./components/StartupPanel";
 import { useResetCamera } from "./hooks/useResetCamera";
 import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
+import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
 
 type SceneSelection = { sceneId: string; name: string; sessionId?: string };
 
@@ -218,7 +219,14 @@ function AppLayout({
 
   const { resetCamera, isAtDefaultPosition } = useResetCamera(cameraController);
 
-  useKeyboardShortcuts({ onReset: resetCamera, onToggleControlPanel });
+  useSceneThemeWatcher();
+  const { theme, toggleTheme } = useSceneTheme();
+
+  useKeyboardShortcuts({
+    onReset: resetCamera,
+    onToggleControlPanel,
+    onToggleTheme: toggleTheme,
+  });
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -231,6 +239,8 @@ function AppLayout({
           onToggleControlPanel={onToggleControlPanel}
           showDOM3D={showDOM3D}
           setShowDOM3D={setShowDOM3D}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
         <ControlPanel
           isOpen={isControlPanelOpen}
@@ -288,8 +298,8 @@ function AppLayout({
         )}
       >
         <div className="place-self-start [align-self:end] flex *:-ml-px *:first:rounded-r-none *:last:rounded-l-none pointer-events-auto">
-          <XRButton mode="immersive-vr" text="Enter" setXRMode={setXRMode} />
-          <XRButton mode="immersive-ar" text="Enter" setXRMode={setXRMode} />
+          <XRButton mode="immersive-vr" text="" setXRMode={setXRMode} />
+          <XRButton mode="immersive-ar" text="" setXRMode={setXRMode} />
         </div>
         <div className="place-self-center mb-16 pointer-events-auto">
           <ResetPositionButton
