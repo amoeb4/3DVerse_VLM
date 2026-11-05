@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2020",                 // modern JS features
-    "module": "ESNext",               // Node can run it
+    "target": "ES2020", // modern JS features
+    "module": "ESNext", // Node can run it
     "moduleResolution": "node",
-    "esModuleInterop": true,            // allow default imports from CJS
+    "esModuleInterop": true, // allow default imports from CJS
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

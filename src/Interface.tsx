@@ -19,7 +19,9 @@ type SpeedContextType = {
   speed: number;
 };
 
-export const SpeedContext = createContext<SpeedContextType | undefined>(undefined);
+export const SpeedContext = createContext<SpeedContextType | undefined>(
+  undefined,
+);
 
 export const SpeedProvider = ({ children }: { children: ReactNode }) => {
   const [delayMs, setDelayMs] = useState(100);
@@ -47,7 +49,8 @@ const EntityContext = createContext<EntityContextType | undefined>(undefined);
 
 export const useEntitySimple = () => {
   const context = useContext(EntityContext);
-  if (!context) throw new Error("useEntity must be used within an EntityProvider");
+  if (!context)
+    throw new Error("useEntity must be used within an EntityProvider");
   return context;
 };
 
@@ -64,7 +67,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
 export function eulerToQuat(
   x: number,
   y: number,
-  z: number
+  z: number,
 ): [number, number, number, number] {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const c1 = Math.cos(rad(y) / 2),
@@ -84,7 +87,7 @@ export function eulerToQuat(
 export default function ControlPanel() {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
-    ["material"]
+    ["material"],
   );
   const { selectedEntity } = useEntitySimple();
   const { instance } = useContext(LivelinkContext);
@@ -115,7 +118,8 @@ export default function ControlPanel() {
     return (
       <button
         className="fixed top-[3%] right-[3%] z-50 bg-white/10 text-white border border-white/20 backdrop-blur px-3 py-2 rounded-full shadow hover:bg-white/20 transition"
-        onClick={() => setIsExpanded(true)}>
+        onClick={() => setIsExpanded(true)}
+      >
         Control Panel
       </button>
     );
@@ -127,7 +131,8 @@ export default function ControlPanel() {
         <h1 className="text-2xl font-bold">Control Panel</h1>
         <button
           className="text-sm bg-white/10 border border-white/30 rounded-md px-2 py-1 hover:bg-white/20 transition"
-          onClick={() => setIsExpanded(false)}>
+          onClick={() => setIsExpanded(false)}
+        >
           Minimize
         </button>
       </div>
@@ -194,7 +199,7 @@ export default function ControlPanel() {
           onChange={handleSliderChange("z")}
           color="green"
         />
-        <TorchExample/>
+        <TorchExample />
       </div>
     </div>
   );
@@ -250,9 +255,11 @@ export function EntityDropdown() {
 
   useEffect(() => {
     if (partEntities.length === 0) return;
-    
-    console.log(`🔍 EntityDropdown: ${partEntities.length} entités récupérées depuis PartEntitiesContext`);
-    
+
+    console.log(
+      `🔍 EntityDropdown: ${partEntities.length} entités récupérées depuis PartEntitiesContext`,
+    );
+
     const entitiesWithNames = partEntities
       .filter((e) => /^part_\d+$/.test(e.name ?? ""))
       .map((e) => {
@@ -261,9 +268,9 @@ export function EntityDropdown() {
       .sort(
         (a, b) =>
           parseInt(a.name!.split("_")[1], 10) -
-          parseInt(b.name!.split("_")[1], 10)
+          parseInt(b.name!.split("_")[1], 10),
       );
-    
+
     setEntities(entitiesWithNames);
   }, [partEntities]);
 
@@ -287,7 +294,8 @@ export function EntityDropdown() {
                   onClick={() => setSelectedEntity(entity)}
                   className={`${
                     active ? "bg-gray-100 text-gray-900" : "text-gray-700"
-                  } block w-full text-left px-4 py-2 text-sm`}>
+                  } block w-full text-left px-4 py-2 text-sm`}
+                >
                   {entity.name}
                 </button>
               )}

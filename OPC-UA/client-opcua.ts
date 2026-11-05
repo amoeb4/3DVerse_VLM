@@ -32,27 +32,30 @@ const positions: Record<string, [number, number, number]> = {
   part_8: [0.0, 0.0, 0.0],
 };
 
-function convertAngleToLocation(angleDeg: number, joint: string): [number, number, number] {
+function convertAngleToLocation(
+  angleDeg: number,
+  joint: string,
+): [number, number, number] {
   // Exemple de conversion angle -> position 3D
   // Vous pouvez adapter cette logique selon vos besoins
-  
+
   switch (joint) {
     case "A1": // Rotation base (axe Z)
       return [0, 0, 1];
     case "A2": // Épaule (axe Z)
-      return [Math.sin(angleDeg * Math.PI / 180),0,0];
+      return [Math.sin((angleDeg * Math.PI) / 180), 0, 0];
     case "A3": // Coude (axe Z)
-      return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
+      return [0, 0, Math.cos((angleDeg * Math.PI) / 180)];
     case "A4": // Poignet 1 (axe X)
-      return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
+      return [0, 0, Math.cos((angleDeg * Math.PI) / 180)];
     case "A5": // Poignet 2 (axe Z)
-      return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
+      return [0, 0, Math.cos((angleDeg * Math.PI) / 180)];
     case "A6": // Poignet 3 (axe X)
-      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+      return [Math.sin((angleDeg * Math.PI) / 180), 0, 0];
     case "A7": // berceau vireur (axe X)
-      return [0,Math.sin(angleDeg * Math.PI / 180), 0];
+      return [0, Math.sin((angleDeg * Math.PI) / 180), 0];
     case "A8": // plateau vireur (axe Y)
-      return [0, Math.sin(angleDeg * Math.PI / 180), 0];
+      return [0, Math.sin((angleDeg * Math.PI) / 180), 0];
     default:
       return [0, 0, 0];
   }
@@ -95,7 +98,7 @@ async function main() {
       const monitoredItem = await subscription.monitor(
         itemToMonitor,
         { samplingInterval: 33, discardOldest: true, queueSize: 10 },
-        TimestampsToReturn.Both
+        TimestampsToReturn.Both,
       );
 
       monitoredItem.on("changed", (value) => {
@@ -108,11 +111,12 @@ async function main() {
         if (ws.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({
             name: partName,
-            location: location
+            location: location,
           });
           ws.send(message);
           console.log(`Commande envoyée : ${message}`);
-        }""
+        }
+        ("");
       });
     }
 

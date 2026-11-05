@@ -29,7 +29,9 @@ import { XRButton } from "./webXR.tsx";
 import type { Entity } from "@3dverse/livelink";
 
 export function App() {
-  const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ sceneId: string } | null>(
+    null,
+  );
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
   return (
@@ -41,13 +43,14 @@ export function App() {
           isTransient={false}
           sceneId={credentials.sceneId}
           token="public_ml59vXKlgs9fTJlx"
-          LoadingPanel={LoadingOverlay}>
+          LoadingPanel={LoadingOverlay}
+        >
           <EntityProvider>
             <PartEntitiesProvider>
               <SpeedProvider>
                 <WebSocketProvider>
                   <KeyboardHandler />
-                  
+
                   {xrMode ? (
                     /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
@@ -55,7 +58,8 @@ export function App() {
                       <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-[99999]">
                         <button
                           className="button button-danger"
-                          onClick={() => setXRMode(null)}>
+                          onClick={() => setXRMode(null)}
+                        >
                           Exit XR
                         </button>
 
@@ -80,7 +84,7 @@ export function App() {
                     /* --- MODE NORMAL (Navigateur Classique) --- */
                     <>
                       <AppLayout />
-                      
+
                       {/* Interface d'entrée WebXR fixe sur l'écran classique */}
                       <div className="fixed bottom-6 right-6 flex gap-4 z-[99999] bg-slate-900/80 p-3 rounded-xl backdrop-blur-sm">
                         <XRButton
@@ -106,8 +110,11 @@ export function App() {
   );
 }
 
-
-function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
+function StartupModal({
+  onSubmit,
+}: {
+  onSubmit: (cred: { sceneId: string }) => void;
+}) {
   const [sceneId, setSceneId] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,7 +127,10 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
       <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full border border-gray-200">
         <Dtext />
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4 w-full max-w-2xl">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 space-y-4 w-full max-w-2xl"
+        >
           <label className="block flex flex-col">
             <input
               type="text"
@@ -136,13 +146,17 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
               ["NJ130 2.05", "759ed8c4-fb60-432c-a41e-cf0f39f92d6f"],
               ["NJ40", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
               ["Comau racer 3", "516d270a-5a6b-44e6-99c6-44df631bf475"],
-              ["Test_primitive [deprecated]", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
+              [
+                "Test_primitive [deprecated]",
+                "ec33e19d-da9f-4593-8412-a9c0c32cc5ba",
+              ],
             ].map(([label, id]) => (
               <div className="flex justify-center" key={id}>
                 <button
                   type="button"
                   onClick={() => setSceneId(id)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition">
+                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition"
+                >
                   Load {label}
                 </button>
               </div>
@@ -151,7 +165,8 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition">
+              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
+            >
               Submit
             </button>
           </div>
@@ -171,8 +186,12 @@ function AppLayout() {
 
   const { instance } = useContext(LivelinkContext);
 
-  const [pickedEntity, setPickedEntity] = useState<{ entity: Entity } | null>(null);
-  const [hoveredEntity, setHoveredEntity] = useState<{ entity: Entity } | null>(null);
+  const [pickedEntity, setPickedEntity] = useState<{ entity: Entity } | null>(
+    null,
+  );
+  const [hoveredEntity, setHoveredEntity] = useState<{ entity: Entity } | null>(
+    null,
+  );
 
   useEffect(() => {
     document.body.style.cursor = hoveredEntity ? "pointer" : "default";
@@ -184,7 +203,7 @@ function AppLayout() {
     });
   }, [pickedEntity]);
 
-useEffect(() => {
+  useEffect(() => {
     let active = true;
 
     const loop = async () => {
@@ -208,7 +227,7 @@ useEffect(() => {
     return () => {
       active = false;
     };
-}, [instance]);
+  }, [instance]);
 
   useEffect(() => {
     if (!cameraEntity?.camera) return;
@@ -256,7 +275,8 @@ useEffect(() => {
       <div className="absolute bottom-[5%] right-[1.15%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowPipCamera((prev) => !prev)}>
+          onClick={() => setShowPipCamera((prev) => !prev)}
+        >
           {showPipCamera ? "Minimize" : "Alt. Camera"}
         </button>
       </div>
@@ -264,7 +284,8 @@ useEffect(() => {
       <div className="absolute bottom-[3%] left-[3%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowDOM3D((prev) => !prev)}>
+          onClick={() => setShowDOM3D((prev) => !prev)}
+        >
           {showDOM3D ? "Hide infos" : "Show infos"}
         </button>
       </div>
@@ -274,7 +295,8 @@ useEffect(() => {
           cameraEntity={cameraEntity}
           className="w-full h-full"
           setHoveredEntity={setHoveredEntity}
-          setPickedEntity={setPickedEntity}>
+          setPickedEntity={setPickedEntity}
+        >
           {!isConnecting && (
             <a
               href="https://docs.3dverse.com/livelink.react/"

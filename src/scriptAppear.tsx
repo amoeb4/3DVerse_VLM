@@ -4,7 +4,7 @@ export async function updateMaterialInput(
   instance: any,
   entity: EntityCore | undefined,
   param: string,
-  value: number
+  value: number,
 ) {
   if (!instance || !entity) {
     console.warn("Instance ou entité manquante");

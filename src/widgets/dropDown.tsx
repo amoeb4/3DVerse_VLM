@@ -9,7 +9,11 @@ interface DropDownProps {
   setSceneId: (id: string) => void;
 }
 
-export default function DropDown({ scenes, selectedSceneId, setSceneId }: DropDownProps) {
+export default function DropDown({
+  scenes,
+  selectedSceneId,
+  setSceneId,
+}: DropDownProps) {
   return (
     <div className="absolute bottom-4 flex items-center justify-center w-full">
       <select

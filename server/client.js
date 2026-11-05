@@ -7,7 +7,9 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 socket.on("open", () => {
-  console.log("Connexion au serveur établie\nUtilisez la commande !help pour obtenir la liste des commandes\n");
+  console.log(
+    "Connexion au serveur établie\nUtilisez la commande !help pour obtenir la liste des commandes\n",
+  );
   socket.send("Client connected");
   promptUser();
 });

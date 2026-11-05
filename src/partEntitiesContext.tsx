@@ -3,11 +3,11 @@ import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { Entity, Scene } from "@3dverse/livelink";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
 //import { debugEntityTransform } from "./debugTools";
-import * as THREE from 'three';
+import * as THREE from "three";
 //import { OneFactor, StereoCamera } from "three";
 //import { add } from "three/tsl";
 //import { GPU_CHUNK_BYTES } from "three/src/renderers/common/Constants.js";
-import { mat4, quat, vec3 } from 'gl-matrix';
+import { mat4, quat, vec3 } from "gl-matrix";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
@@ -21,7 +21,7 @@ export type EntityWithParentId = Entity & {
 
 export async function getDescendants(
   root: EntityWithParentId,
-  entitiesMap: Map<string, EntityWithParentId>
+  entitiesMap: Map<string, EntityWithParentId>,
 ): Promise<EntityWithParentId[]> {
   const descendants: EntityWithParentId[] = [];
   const visited = new Set<string>();
@@ -49,10 +49,16 @@ export const PartEntitiesContext = createContext<PartEntitiesContextType>({
   entitiesMap: new Map(),
 });
 
-export function PartEntitiesProvider({ children }: { children: React.ReactNode }) {
+export function PartEntitiesProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { instance } = useContext(LivelinkContext);
   const [entities, setEntities] = useState<EntityWithParentId[]>([]);
-  const [entitiesMap, setEntitiesMap] = useState<Map<string, EntityWithParentId>>(new Map());
+  const [entitiesMap, setEntitiesMap] = useState<
+    Map<string, EntityWithParentId>
+  >(new Map());
 
   useEffect(() => {
     const fetchEntities = async () => {
@@ -66,12 +72,16 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-        console.log(`📦 ${foundEntities.length} entités récupérées depuis la scène`);
-        const filtered = foundEntities.filter(
-          (entity) => /^part_\d+$/.test(entity.name)
+        console.log(
+          `📦 ${foundEntities.length} entités récupérées depuis la scène`,
+        );
+        const filtered = foundEntities.filter((entity) =>
+          /^part_\d+$/.test(entity.name),
         );
 
-        console.log(`🧽 ${filtered.length} entités filtrées avec le pattern /part_\\d+/`);
+        console.log(
+          `🧽 ${filtered.length} entités filtrées avec le pattern /part_\\d+/`,
+        );
 
         const enriched: EntityWithParentId[] = filtered.map((entity) => {
           (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
@@ -86,7 +96,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
 
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
-        
+
         console.log(`Chargé ${enriched.length} entités dans entitiesMap`);
       } catch (err) {
         console.error("❌ Erreur chargement des entités part_x :", err);
@@ -117,7 +127,7 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 export function rotateHierarchy(
   entityName: string,
   deltaQuatDeg: [number, number, number],
-  entitiesMap: Map<string, EntityWithParentId>
+  entitiesMap: Map<string, EntityWithParentId>,
 ) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
   if (!entity) {
@@ -133,9 +143,8 @@ export async function rotateHierarchyProgressive(
   deltaQuatDeg: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>,
   delayMs: number,
-  stepDeg: number = 1
-) 
-{
+  stepDeg: number = 1,
+) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
   if (!entity) {
     console.warn(`Entité ${entityName} introuvable`);
@@ -146,7 +155,7 @@ export async function rotateHierarchyProgressive(
   const steps = Math.max(
     Math.ceil(Math.abs(totalDx) / stepDeg),
     Math.ceil(Math.abs(totalDy) / stepDeg),
-    Math.ceil(Math.abs(totalDz) / stepDeg)
+    Math.ceil(Math.abs(totalDz) / stepDeg),
   );
 
   const stepDx = totalDx / steps;
@@ -167,16 +176,16 @@ export async function rotateHierarchyProgressive(
 
 function applyStepRotation(
   entity: EntityWithParentId,
-  deltaDeg: [number, number, number]
+  deltaDeg: [number, number, number],
 ) {
   const [dx, dy, dz] = deltaDeg;
   const eulerRad = new THREE.Euler(
     (dx * Math.PI) / 180,
     (dy * Math.PI) / 180,
     (dz * Math.PI) / 180,
-    "ZYX"
+    "ZYX",
   );
-  
+
   const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
   const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
   const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
@@ -193,4 +202,3 @@ function applyStepRotation(
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-

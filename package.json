@@ -14,7 +14,9 @@
     "full": "node ./src/server.js",
     "bridge:start": "node --loader ts-node/esm ./src/server-opcua.ts",
     "bridge:dev": "tsx ./src/server-opcua.ts",
-    "grpc:client": "tsx OPC-UA/grpc_proxy.ts"
+    "grpc:client": "tsx OPC-UA/grpc_proxy.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@3dverse/api": "^0.8.9",
@@ -53,6 +55,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "postcss": "^8.5.6",
+    "prettier": "3.9.10",
     "tailwindcss": "^3.3.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.4",

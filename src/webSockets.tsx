@@ -8,10 +8,7 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import {
-  rotateHierarchy,
-  PartEntitiesContext,
-} from "./partEntitiesContext";
+import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
 import { useSpeed } from "./Interface";
 
 const WSContext = createContext({
@@ -26,12 +23,12 @@ export function useWebSocket() {
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(
-    null
+    null,
   );
   const { speed } = useSpeed();
   const delayMs = Math.max(10, 1000 / speed);
   const { entity: selectedEntity } = useEntity(
-    selectedEntityName ? { name: selectedEntityName } : { name: "" }
+    selectedEntityName ? { name: selectedEntityName } : { name: "" },
   );
   const { entitiesMap } = useContext(PartEntitiesContext);
   const { instance } = useContext(LivelinkContext);
@@ -79,19 +76,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        if(parsed.name === "part_1") {
+        if (parsed.name === "part_1") {
           const now = performance.now();
-//          const deltaTime = now - lastPart1MessageTime;
+          //          const deltaTime = now - lastPart1MessageTime;
           lastPart1MessageTime = now;
-//          if(deltaTime > 100) {
-//            console.warn("Warnning, delta time gap:", deltaTime);
-//          }
+          //          if(deltaTime > 100) {
+          //            console.warn("Warnning, delta time gap:", deltaTime);
+          //          }
         }
         const [x, y, z] = parsed.location;
         //console.debug("WS message orientation:", parsed.name, [x, y, z]);
         rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
-      }
-      catch(error) {
+      } catch (error) {
         console.error("Failed to parse WS message:", error);
       }
     };
@@ -128,19 +124,23 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   */
 
   useEffect(() => {
-    if(!instance ||entitiesMap.size === 0) {
+    if (!instance || entitiesMap.size === 0) {
       return;
     }
 
     connectWebSocket();
     return () => {
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (reconnectTimeoutRef.current)
+        clearTimeout(reconnectTimeoutRef.current);
       socketRef.current?.close();
     };
   }, [instance, entitiesMap]);
 
   useEffect(() => {
-    if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
+    if (
+      selectedEntity?.name &&
+      socketRef.current?.readyState === WebSocket.OPEN
+    ) {
       socketRef.current.send(`select ${selectedEntity.name}`);
     }
   }, [selectedEntity]);
@@ -159,8 +159,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <WSContext.Provider value={{ register }}>
-      {children}
-    </WSContext.Provider>
+    <WSContext.Provider value={{ register }}>{children}</WSContext.Provider>
   );
 }

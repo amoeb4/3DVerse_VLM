@@ -1,5 +1,11 @@
 // opcua6AxisBridge.ts
-import { OPCUAClient as OPCUANodeClient, ClientSession, AttributeIds, UserIdentityInfoUserName, UserTokenType } from "node-opcua";
+import {
+  OPCUAClient as OPCUANodeClient,
+  ClientSession,
+  AttributeIds,
+  UserIdentityInfoUserName,
+  UserTokenType,
+} from "node-opcua";
 import WebSocket from "ws";
 
 type OpcUaJoint = {
@@ -17,7 +23,7 @@ export class OpcUa6AxisBridge {
   private pollingInterval: number;
   private pollingTimer: NodeJS.Timer | null = null;
   private reconnectDelay = 2000;
-         
+
   constructor(joints: OpcUaJoint[], wsUrl: string, pollingInterval = 16) {
     this.client = OPCUANodeClient.create({ endpointMustExist: false });
     this.joints = joints;
@@ -25,26 +31,29 @@ export class OpcUa6AxisBridge {
     this.pollingInterval = pollingInterval;
   }
 
-async connectOpcUa(endpoint: string, username?: string, password?: string) {
-  try {
-    await this.client.connect(endpoint);
+  async connectOpcUa(endpoint: string, username?: string, password?: string) {
+    try {
+      await this.client.connect(endpoint);
 
-    let userIdentity: UserIdentityInfoUserName | undefined;
-    if (username && password) {
-      userIdentity = {
-        type: UserTokenType.UserName,
-        userName: username,
-        password: password,
-      };
-  }
+      let userIdentity: UserIdentityInfoUserName | undefined;
+      if (username && password) {
+        userIdentity = {
+          type: UserTokenType.UserName,
+          userName: username,
+          password: password,
+        };
+      }
 
-    this.session = await this.client.createSession(userIdentity);
-    console.log("✅ OPC-UA session established");
-  } catch (err) {
-    console.error("⚠️ Failed to connect OPC-UA:", err);
-    setTimeout(() => this.connectOpcUa(endpoint, username, password), this.reconnectDelay);
+      this.session = await this.client.createSession(userIdentity);
+      console.log("✅ OPC-UA session established");
+    } catch (err) {
+      console.error("⚠️ Failed to connect OPC-UA:", err);
+      setTimeout(
+        () => this.connectOpcUa(endpoint, username, password),
+        this.reconnectDelay,
+      );
+    }
   }
-}
 
   connectWebSocket() {
     this.ws = new WebSocket(this.wsUrl);
@@ -63,7 +72,10 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
     });
   }
 
-  private sendUpdate(update: { name: string; location: [number, number, number, number?] }) {
+  private sendUpdate(update: {
+    name: string;
+    location: [number, number, number, number?];
+  }) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(update));
     }
@@ -74,7 +86,10 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
     if (!this.ws) this.connectWebSocket();
 
     this.pollingTimer = setInterval(async () => {
-      const updates: { name: string; location: [number, number, number, number?] }[] = [];
+      const updates: {
+        name: string;
+        location: [number, number, number, number?];
+      }[] = [];
 
       for (const joint of this.joints) {
         try {
@@ -92,11 +107,11 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
 
       updates.forEach((update) => this.sendUpdate(update));
     }, this.pollingInterval);
-}
+  }
 
-async disconnect() {
-  await this.session?.close();
-  await this.client.disconnect();
-  if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
-}
+  async disconnect() {
+    await this.session?.close();
+    await this.client.disconnect();
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
+  }
 }

@@ -13,7 +13,7 @@ npm run dev       # Lancer le site en mode développement
 npm run build     # Construire l'exécutable à déployer
 npm run preview   # Lancer le site avec l’intégration Vite
 npm run server    # Lancer le serveur WebSocket (en cours de développement)
-npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous 
+npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous
 ```
 
 ---
@@ -31,7 +31,7 @@ npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous
 
 ### Souris
 
-- **Click gauche** : Travelling 
+- **Click gauche** : Travelling
 - **Molette** : Zoom in/out
 - **Click droit** : Drag fluide
 - **Click molette** : Drag fixe
@@ -43,19 +43,21 @@ npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous
 - `J` : Affiche le nom et l'UUID de toutes les entités
 - `M` : Déplace l'entité principale de `Y +0.5` et `Z +5`
 - `R` : Réinitialise la position de l'entité principale (`X=0`, `Y=0`, `Z=0`)
-- `K` : Fixe la caméra sur l'entité principale *(WIP)*
+- `K` : Fixe la caméra sur l'entité principale _(WIP)_
 
 ---
 
 ## Utilisation du serveur WebSocket
 
 ### Websocket blender :
+
 ```
 blender && import server_blender.py
 run server_blender.py -> port 8767 (local)
 python3 client_blender.py
 >>> [name] [flag] [arg1] [arg2] [arg3]
 ```
+
 Flags :
 -I : Incrémente la position initiale
 -P : Donne une position à l'objet

@@ -1,17 +1,17 @@
-import { WebSocketServer } from 'ws';
+import { WebSocketServer } from "ws";
 
 //Principal server.js
 
 const wss = new WebSocketServer({ port: 8767 });
 
-console.log('Server launched, awaiting message from client...');
+console.log("Server launched, awaiting message from client...");
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-wss.on('connection', (ws) => {
+wss.on("connection", (ws) => {
   console.log(`✅ Client connected (${wss.clients.size} total)`);
 
-  ws.on('message', async (message) => {
+  ws.on("message", async (message) => {
     const text = message.toString();
     console.log("📨 Message received:", text);
 
@@ -31,7 +31,6 @@ wss.on('connection', (ws) => {
             await sleep(300);
           }
         }
-
       } else if (typeof data.select === "string") {
         console.log(`Request to select entity: ${data.select}`);
 
@@ -49,7 +48,7 @@ wss.on('connection', (ws) => {
       ws.send("Error: Invalid JSON");
     }
   });
-  ws.on('close', () => {
+  ws.on("close", () => {
     console.log(`❌ Client disconnected (${wss.clients.size - 1} remaining)`);
   });
 });

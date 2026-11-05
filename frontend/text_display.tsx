@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react'
-import DecryptedText from './DecryptedText'
-import "../src/index.css"
+import { useEffect, useState } from "react";
+import DecryptedText from "./DecryptedText";
+import "../src/index.css";
 
 export default function Dtext() {
-  const [showSecondLine, setShowSecondLine] = useState(false)
+  const [showSecondLine, setShowSecondLine] = useState(false);
 
   useEffect(() => {
-
     const timeout = setTimeout(() => {
-      setShowSecondLine(true)
-    }, 800)
+      setShowSecondLine(true);
+    }, 800);
 
-    return () => clearTimeout(timeout)
-  }, [])
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <div className="flex flex-col items-center text-center">
@@ -37,5 +36,5 @@ export default function Dtext() {
         />
       )}
     </div>
-  )
+  );
 }

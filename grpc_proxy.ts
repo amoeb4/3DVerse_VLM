@@ -23,7 +23,7 @@ const CLMService: any = protoDescriptor.CLMService;
 
 const client = new CLMService(
   "192.168.214.252:50051",
-  grpc.credentials.createInsecure()
+  grpc.credentials.createInsecure(),
 );
 if (!client) console.error("❌ Impossible de créer le client gRPC");
 
@@ -33,23 +33,27 @@ ws.on("open", () => {
   console.log("🔗 Connected to WebSocket server");
 });
 
-const orientationMap: Record<number, (val: number) => [number, number, number]> = {
+const orientationMap: Record<
+  number,
+  (val: number) => [number, number, number]
+> = {
   1: (val) => [90, 0, -val],
-  2: (val) => [-90, -val+270, 90],
-  3: (val) => [0, 0, val-180],
+  2: (val) => [-90, -val + 270, 90],
+  3: (val) => [0, 0, val - 180],
   4: (val) => [-val, 0, 90],
-  5: (val) => [-180, 0, -val+180],
-  6: (val) => [-val+180, 0, 180],
+  5: (val) => [-180, 0, -val + 180],
+  6: (val) => [-val + 180, 0, 180],
 };
 
-function parsePartsFromResponse(response: any): { name: string; location: number[] }[] {
+function parsePartsFromResponse(
+  response: any,
+): { name: string; location: number[] }[] {
   if (!response?.values || !Array.isArray(response.values)) return [];
 
   const parts: { name: string; location: number[] }[] = [];
   for (let i = 1; i <= 7; i++) {
     const floatVal = response.values[i]?.float_value ?? null;
-    if (i == 7)
-      break;
+    if (i == 7) break;
     if (floatVal !== null && !isNaN(floatVal)) {
       const location = orientationMap[i](floatVal);
       parts.push({
