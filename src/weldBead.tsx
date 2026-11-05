@@ -1,54 +1,57 @@
 "use client";
 import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
+import { Button, Panel, Slider } from "@3dverse/ui-lib";
 import { eulerToQuat } from "./Interface";
 
 const MATERIAL_REFS = [
-  "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
-  "561b317b-017f-410b-a04e-f925519dea62",
-  "3a2488f6-aa20-4698-883a-6eb5693964f9",
-  "cdcbac06-a458-4f35-b868-34ac8d57ddaa",
-  "92548856-c45a-45b5-a9d5-45c77bc7660b",
-  "63b13bc0-5491-414e-8980-ba67e32ff91f",
-  "21514595-395d-45a7-9c20-2a12bc1b520c",
-  "529dd88c-c943-41f0-88a7-b96419e1e8b8",
-  "de9844ab-3c9e-4ce7-9e2b-dec91474d11d",
-  "58ab98c3-25d3-4187-a407-24158f213996",
+    "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
+    "561b317b-017f-410b-a04e-f925519dea62",
+    "3a2488f6-aa20-4698-883a-6eb5693964f9",
+    "cdcbac06-a458-4f35-b868-34ac8d57ddaa",
+    "92548856-c45a-45b5-a9d5-45c77bc7660b",
+    "63b13bc0-5491-414e-8980-ba67e32ff91f",
+    "21514595-395d-45a7-9c20-2a12bc1b520c",
+    "529dd88c-c943-41f0-88a7-b96419e1e8b8",
+    "de9844ab-3c9e-4ce7-9e2b-dec91474d11d",
+    "58ab98c3-25d3-4187-a407-24158f213996",
 ] as const;
 
 export const getMaterialFromTemperature = (temp: number) => {
-  const index = Math.min(MATERIAL_REFS.length - 1, Math.floor(temp / 10));
-  return MATERIAL_REFS[index];
+    const index = Math.min(
+        MATERIAL_REFS.length - 1,
+        Math.floor(temp / 10)
+    );
+    return MATERIAL_REFS[index];
 };
 
-export const getScaleFromTemperature = (
-  temp: number,
-): [number, number, number] => {
-  const t = temp / 100;
-  const min = 0.002;
-  const max = 0.006;
-  const value = min + (max - min) * t;
-  return [value, value * 2.5, value];
+export const getScaleFromTemperature = (temp: number): [number, number, number] => {
+    const t = temp / 100;
+    const min = 0.002;
+    const max = 0.006;
+    const value = min + (max - min) * t;
+    return [value, value * 2.5, value];
 };
 
 export const createEntity = async (
-  instance: any,
-  position: [number, number, number],
-  temperature: number,
+    instance: any,
+    position: [number, number, number],
+    temperature: number
 ) => {
-  await instance.scene.newEntity({
-    name: "Weld Bead",
-    components: {
-      local_transform: {
-        position,
-        scale: getScaleFromTemperature(temperature),
-      },
-      mesh_ref: { value: "53daef4f-eef0-4b09-9815-50733891ed10" },
-      material_ref: {
-        value: getMaterialFromTemperature(temperature),
-      },
-    },
-  });
+
+    await instance.scene.newEntity({
+        name: "Weld Bead",
+        components: {
+            local_transform: {
+                position,
+                scale: getScaleFromTemperature(temperature),
+            },
+            mesh_ref: { value: "53daef4f-eef0-4b09-9815-50733891ed10" },
+            material_ref: {
+                value: getMaterialFromTemperature(temperature),
+            },
+        },
+    });
 };
 
 const MAX_CONCURRENT_CREATES = 5;
@@ -60,7 +63,7 @@ const MIN_MOVE_DISTANCE = 0.008;
 export function EntityCreator() {
   const { instance } = useContext(LivelinkContext);
 
-  const [temperature, setTemperature] = useState(50);
+  const [temperature, setTemperature] = useState<number>(50);
   const [latency, setLatency] = useState(0);
   const [autoWeld, setAutoWeld] = useState(false);
   const { entity: torch } = useEntity({
@@ -159,36 +162,45 @@ export function EntityCreator() {
   };
 
   return (
-    <div className="absolute text-white top-32 left-5 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
-      <button
-        className="button button-overlay"
-        onClick={handleCreate}
-        disabled={!instance}
-      >
-        Create Entity
-      </button>
-      <button
-        className="button button-overlay"
-        onClick={() => setAutoWeld((v) => !v)}
-        disabled={!instance}
-      >
-        {autoWeld ? "Stop Weld" : "Start Weld"}
-      </button>
-
-      <label className="flex flex-col text-white text-sm">
-        Température: {temperature}
-        <br />
-        Latency: {`${latency.toFixed(0)}ms`}
-        <br />
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={temperature}
-          onChange={(e) => setTemperature(Number(e.target.value))}
-          className="w-40"
-        />
-      </label>
-    </div>
+    <Panel className="absolute top-14 left-5 min-w-68 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col gap-2 px-4 py-3 text-3xs">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex justify-between">
+            <label>Temperature</label>
+            <p className="text-accent tabular-nums">{temperature}°C</p>
+          </div>
+          <Slider
+            min={0}
+            max={100}
+            value={temperature}
+            onValueChange={(value) => setTemperature(value)}
+            size="2xs"
+          />
+        </div>
+        <div className="flex justify-between">
+          <label>Latency</label>
+          <p className="text-accent tabular-nums">{latency.toFixed(0)} ms</p>
+        </div>
+      </div>
+      <div className="flex gap-2 px-4 py-3 border-t border-tertiary">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCreate}
+          disabled={!instance}
+        >
+          Create Entity
+        </Button>
+        <Button
+          variant="accent"
+          size="sm"
+          onClick={() => setAutoWeld((v) => !v)}
+          disabled={!instance}
+          className="text-white! grow"
+        >
+          {autoWeld ? "Stop Weld" : "Start Weld"}
+        </Button>
+      </div>
+    </Panel>
   );
 }

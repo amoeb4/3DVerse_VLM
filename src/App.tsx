@@ -12,6 +12,7 @@ import {
 } from "@3dverse/livelink-react";
 
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
@@ -21,17 +22,27 @@ import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 import Dtext from "../frontend/text_display.tsx";
 import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
-import "./App.css";
 import { EntityCreator, createEntity } from "./weldBead.tsx";
 import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";
 import { DisplayDashboard } from "./Dashboard.tsx";
 import { XRButton } from "./webXR.tsx";
 import type { Entity } from "@3dverse/livelink";
+import { Toolbar } from "./widgets/Toolbar.tsx";
+
+const MACHINES = [
+  { name: "NJ130 2.05", sceneId: "759ed8c4-fb60-432c-a41e-cf0f39f92d6f" },
+  { name: "NJ40", sceneId: "a1d7bb38-1a12-46fb-8485-36b29460cd2c" },
+  { name: "Comau racer 3", sceneId: "516d270a-5a6b-44e6-99c6-44df631bf475" },
+  {
+    name: "Test_primitive [deprecated]",
+    sceneId: "ec33e19d-da9f-4593-8412-a9c0c32cc5ba",
+  },
+];
+
+type SceneSelection = { sceneId: string; name: string };
 
 export function App() {
-  const [credentials, setCredentials] = useState<{ sceneId: string } | null>(
-    null,
-  );
+  const [credentials, setCredentials] = useState<SceneSelection | null>(null);
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
   return (
@@ -54,14 +65,9 @@ export function App() {
                   {xrMode ? (
                     /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
-                      <AppLayout />
-                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-[99999]">
-                        <button
-                          className="button button-danger"
-                          onClick={() => setXRMode(null)}
-                        >
-                          Exit XR
-                        </button>
+                      <AppLayout machineName={credentials.name} />
+                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
+                        <Button variant="overlay-outline" className="before:opacity-100 before:backdrop-blur-xl" onClick={() => setXRMode(null)}>Exit XR</Button>
 
                         {xrMode !== "immersive-ar" && (
                           <XRButton
@@ -83,10 +89,10 @@ export function App() {
                   ) : (
                     /* --- MODE NORMAL (Navigateur Classique) --- */
                     <>
-                      <AppLayout />
-
+                      <AppLayout machineName={credentials.name} />
+                      
                       {/* Interface d'entrée WebXR fixe sur l'écran classique */}
-                      <div className="fixed bottom-6 right-6 flex gap-4 z-[99999] bg-slate-900/80 p-3 rounded-xl backdrop-blur-sm">
+                      <div className="absolute bottom-4 left-4 flex *:first:rounded-r-none *:last:rounded-l-none z-99999 pointer-events-auto">
                         <XRButton
                           mode="immersive-vr"
                           text="Enter"
@@ -113,62 +119,59 @@ export function App() {
 function StartupModal({
   onSubmit,
 }: {
-  onSubmit: (cred: { sceneId: string }) => void;
+  onSubmit: (selection: SceneSelection) => void;
 }) {
-  const [sceneId, setSceneId] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ sceneId });
-  };
+  const [customSceneId, setCustomSceneId] = useState("");
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full border border-gray-200">
+    <div className="h-screen w-screen flex items-center justify-center">
+      <div className="w-full max-w-md mx-2 px-4 md:px-10 py-4 md:py-6 border border-tertiary bg-ground rounded-3xl [corner-shape:squircle]">
         <Dtext />
 
+        <nav className="flex flex-col mt-6 *:rounded-none *:first:rounded-t-xl! *:last:rounded-b-xl!">
+          {MACHINES.map(({ name, sceneId }) => (
+            <Button
+              key={sceneId}
+              variant="outline"
+              size="lg"
+              className="group w-full justify-between -mt-px py-2 border-secondary hover:border-accent/40 hover:text-accent hover:z-1 transition-all duration-500"
+              onClick={() => onSubmit({ sceneId, name })}
+            >
+              {name}
+              <Icon className="fas fa-angle-right text-3xs opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+            </Button>
+          ))}
+        </nav>
+
         <form
-          onSubmit={handleSubmit}
-          className="mt-6 space-y-4 w-full max-w-2xl"
+          onSubmit={(e) => {
+            e.preventDefault(); // keep the browser from reloading the page
+            onSubmit({ sceneId: customSceneId, name: "Custom scene" });
+          }}
+          className="mt-6 w-full max-w-2xl border-t border-tertiary pt-6"
         >
-          <label className="block flex flex-col">
+          <div className="relative flex">
             <input
               type="text"
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={sceneId}
-              onChange={(e) => setSceneId(e.target.value)}
+              name="customSceneId"
+              className="w-full px-3 py-1 border border-secondary bg-ground text-xs text-tertiary rounded-xl [corner-shape:squircle] focus:outline-hidden focus:ring-2 focus:ring-accent"
+              value={customSceneId}
+              placeholder="Custom scene "
+              onChange={(e) => setCustomSceneId(e.target.value)}
               required
             />
-          </label>
 
-          <div className="space-y-2">
-            {[
-              ["NJ130 2.05", "759ed8c4-fb60-432c-a41e-cf0f39f92d6f"],
-              ["NJ40", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
-              ["Comau racer 3", "516d270a-5a6b-44e6-99c6-44df631bf475"],
-              [
-                "Test_primitive [deprecated]",
-                "ec33e19d-da9f-4593-8412-a9c0c32cc5ba",
-              ],
-            ].map(([label, id]) => (
-              <div className="flex justify-center" key={id}>
-                <button
-                  type="button"
-                  onClick={() => setSceneId(id)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition"
-                >
-                  Load {label}
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-center pt-4">
-            <button
+            <Button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
+              variant={customSceneId ? "accent" : "ghost"}
+              size="icon-sm"
+              className={cn(
+                "absolute right-0 top-0 h-full px-4 rounded-l-none",
+                customSceneId ? "text-white!" : "",
+              )}
             >
-              Submit
-            </button>
+              <Icon className="fas fa-angle-right text-3xs" />
+            </Button>
           </div>
         </form>
       </div>
@@ -176,12 +179,12 @@ function StartupModal({
   );
 }
 
-function AppLayout() {
+function AppLayout({ machineName }: { machineName: string }) {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
   const cameraControllerRef = useRef<DefaultCameraController>(null);
-  const [showPipCamera, setShowPipCamera] = useState(false);
+  const [showPipCamera, setShowPipCamera] = useState(true);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
   const { instance } = useContext(LivelinkContext);
@@ -263,31 +266,37 @@ function AppLayout() {
     };
   }, [pipCamera]);
 
+  const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
+
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
-        <ControlPanel />
-        <DisplayDashboard />
+        <header className="absolute top-4 left-7 z-50">
+          <h1 className="text-xl font-bold">{machineName}</h1>
+        </header>
+        <Toolbar
+          onOpenControlPanel={() => setIsControlPanelOpen(true)}
+          showDOM3D={showDOM3D}
+          setShowDOM3D={setShowDOM3D}
+        />
+        <ControlPanel
+          isOpen={isControlPanelOpen}
+          onClose={() => setIsControlPanelOpen(false)}
+        />
+        {/* <DisplayDashboard /> */}
       </EntityProvider>
 
       <CameraEventListener />
 
-      <div className="absolute bottom-[5%] right-[1.15%] z-50">
-        <button
-          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
+      <div className="absolute bottom-4 right-4 z-50">
+        <Button
+          variant="overlay-outline"
+          className="before:opacity-100 before:backdrop-blur-xl"
           onClick={() => setShowPipCamera((prev) => !prev)}
         >
-          {showPipCamera ? "Minimize" : "Alt. Camera"}
-        </button>
-      </div>
-
-      <div className="absolute bottom-[3%] left-[3%] z-50">
-        <button
-          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowDOM3D((prev) => !prev)}
-        >
-          {showDOM3D ? "Hide infos" : "Show infos"}
-        </button>
+          Alt. Camera
+          <Icon className="fas fa-video text-2xs" />
+        </Button>
       </div>
 
       <Canvas className="w-full h-screen">
@@ -313,10 +322,18 @@ function AppLayout() {
           {showDOM3D && <Dom3DInfos />}
 
           {showPipCamera && (
-            <div className="absolute bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
+            <div className="absolute bottom-3 right-3 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
               <Viewport cameraEntity={pipCamera} className="w-full h-full">
                 <CameraController />
               </Viewport>
+              <Button
+                variant="overlay"
+                size="icon-xs"
+                className="absolute top-1 left-1"
+                onClick={() => setShowPipCamera(false)}
+              >
+                <Icon className="fas fa-angles-down -rotate-45" />
+              </Button>
             </div>
           )}
         </Viewport>
