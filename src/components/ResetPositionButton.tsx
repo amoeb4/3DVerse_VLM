@@ -3,7 +3,7 @@ import {
   useSceneSettings,
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
-import { Button, Icon, cn } from "@3dverse/ui-lib";
+import { Button, cn } from "@3dverse/ui-lib";
 
 // Same behavior as the mobile viewer's "Reset position": travel back to the scene's default camera
 // transform, and dim the button while the camera is already there.

@@ -1,5 +1,5 @@
 import { DOM3DOverlay, DOMEntity, useEntity } from "@3dverse/livelink-react";
-import type { EntityWithParentId } from "./partEntitiesContext";
+import type { EntityWithParentId } from "../partEntitiesContext";
 
 interface Dom3DInfosProps {
   entitiesMap?: Map<string, EntityWithParentId>;

@@ -64,27 +64,6 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ---------------------- Utils ----------------------
-export function eulerToQuat(
-  x: number,
-  y: number,
-  z: number,
-): [number, number, number, number] {
-  const rad = (deg: number) => (deg * Math.PI) / 180;
-  const c1 = Math.cos(rad(y) / 2),
-    s1 = Math.sin(rad(y) / 2);
-  const c2 = Math.cos(rad(z) / 2),
-    s2 = Math.sin(rad(z) / 2);
-  const c3 = Math.cos(rad(x) / 2),
-    s3 = Math.sin(rad(x) / 2);
-  return [
-    c1 * c2 * s3 - s1 * s2 * c3,
-    c1 * s2 * c3 + s1 * c2 * s3,
-    s1 * c2 * c3 - c1 * s2 * s3,
-    c1 * c2 * c3 + s1 * s2 * s3,
-  ];
-}
-
 export default function ControlPanel({
   isOpen,
   onClose,
@@ -289,12 +268,9 @@ export function EntityDropdown() {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-sm border border-tertiary hover:bg-primary/10">
+        <MenuButton className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-sm border border-tertiary hover:bg-primary/10">
           {selectedEntity?.name || "Entities"}
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="-mr-1 size-5 text-tertiary"
-          />
+          <Icon className="fas fa-angle-down text-5xs opacity-60" />
         </MenuButton>
       </div>
       <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-overground shadow-lg border border-tertiary focus:outline-hidden">

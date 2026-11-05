@@ -1,9 +1,5 @@
-// import { setOrientation } from "./keyBindings";
-import { getDescendants, PartEntitiesContext } from "./partEntitiesContext";
-import { Entity } from "@3dverse/livelink";
-import { posKey, oriKey } from "./keyBindings.tsx";
-import type { EntityWithParentId } from "./partEntitiesContext.tsx";
-import { eulerToQuat } from "./Interface.tsx";
+import { posKey } from "./keyBindings";
+import type { EntityWithParentId } from "./partEntitiesContext";
 
 export async function moveEntityAndChildren(
   rootName: string,

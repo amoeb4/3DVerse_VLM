@@ -1,6 +1,4 @@
-//------------------------------------------------------------------------------
 import { useState, useContext, useEffect } from "react";
-//------------------------------------------------------------------------------
 import {
   Livelink,
   Canvas,
@@ -13,33 +11,23 @@ import {
 
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import KeyboardHandler from "./keyBindings.tsx";
-import CameraEventListener from "./CameraEventListener.jsx";
-import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
-import { CameraEntityContext } from "./cameraControl.tsx";
-import { WebSocketProvider } from "./webSockets.tsx";
-import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
-import Dtext from "../frontend/text_display.tsx";
-import { Avatars } from "./Avatars.tsx";
-import Dom3DInfos from "./DOM3Dinfos.tsx";
-import { EntityCreator, createEntity } from "./weldBead.tsx";
-import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";
-import { DisplayDashboard } from "./Dashboard.tsx";
-import { XRButton } from "./webXR.tsx";
+import KeyboardHandler from "./keyBindings";
+import CameraEventListener from "./camera/CameraEventListener";
+import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface";
+import { CameraEntityContext } from "./camera/cameraControl";
+import { WebSocketProvider } from "./webSockets";
+import { PartEntitiesProvider } from "./partEntitiesContext";
+import { Avatars } from "./invite/Avatars";
+import Dom3DInfos from "./components/DOM3Dinfos";
+import { EntityCreator } from "./weldBead";
+import { EntityStatusPanel } from "./components/EntityPicking";
+import { XRButton } from "./webXR";
 import type { Entity } from "@3dverse/livelink";
-import { Toolbar } from "./widgets/Toolbar";
+import { PUBLIC_TOKEN, MACHINES } from "./config";
+import { Toolbar } from "./components/Toolbar";
 import { SCENE_ID_PARAM, SESSION_ID_PARAM } from "./invite/InvitePanel";
-import { ResetPositionButton } from "./widgets/ResetPositionButton";
-
-const MACHINES = [
-  { name: "NJ130 2.05", sceneId: "759ed8c4-fb60-432c-a41e-cf0f39f92d6f" },
-  { name: "NJ40", sceneId: "a1d7bb38-1a12-46fb-8485-36b29460cd2c" },
-  { name: "Comau racer 3", sceneId: "516d270a-5a6b-44e6-99c6-44df631bf475" },
-  {
-    name: "Test_primitive [deprecated]",
-    sceneId: "ec33e19d-da9f-4593-8412-a9c0c32cc5ba",
-  },
-];
+import { ResetPositionButton } from "./components/ResetPositionButton";
+import { StartupPanel } from "./components/StartupPanel";
 
 type SceneSelection = { sceneId: string; name: string; sessionId?: string };
 
@@ -61,155 +49,84 @@ export function App() {
   );
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
+  if (!credentials) {
+    return <StartupPanel onSubmit={setCredentials} />;
+  }
   return (
-    <>
-      {!credentials ? (
-        <StartupModal onSubmit={setCredentials} />
-      ) : (
-        <Livelink
-          {...(credentials.sessionId
-            ? { sessionId: credentials.sessionId }
-            : { sceneId: credentials.sceneId, isTransient: false })}
-          token="public_ml59vXKlgs9fTJlx"
-          LoadingPanel={LoadingOverlay}
-        >
-          <EntityProvider>
-            <PartEntitiesProvider>
-              <SpeedProvider>
-                <WebSocketProvider>
-                  <KeyboardHandler />
+    <Livelink
+      {...(credentials.sessionId
+        ? { sessionId: credentials.sessionId }
+        : { sceneId: credentials.sceneId, isTransient: false })}
+      token={PUBLIC_TOKEN}
+      LoadingPanel={LoadingOverlay}
+    >
+      <EntityProvider>
+        <PartEntitiesProvider>
+          <SpeedProvider>
+            <WebSocketProvider>
+              <KeyboardHandler />
 
-                  {xrMode ? (
-                    /* --- MODE CASQUE / IMMERSIF ACTIF --- */
-                    <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
-                      <AppLayout machineName={credentials.name} />
-                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
-                        <Button
-                          variant="overlay-outline"
-                          className="before:opacity-100 before:backdrop-blur-xl"
-                          onClick={() => setXRMode(null)}
-                        >
-                          Exit XR
-                        </Button>
+              {xrMode ? (
+                /* --- MODE CASQUE / IMMERSIF ACTIF --- */
+                <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
+                  <AppLayout
+                    machineName={credentials.name}
+                    setXRMode={setXRMode}
+                  />
+                  <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
+                    <Button
+                      variant="overlay-outline"
+                      className="before:opacity-100 before:backdrop-blur-xl"
+                      onClick={() => setXRMode(null)}
+                    >
+                      Exit XR
+                    </Button>
 
-                        {xrMode !== "immersive-ar" && (
-                          <XRButton
-                            mode="immersive-ar"
-                            text="Switch to"
-                            setXRMode={setXRMode}
-                          />
-                        )}
+                    {xrMode !== "immersive-ar" && (
+                      <XRButton
+                        mode="immersive-ar"
+                        text="Switch to"
+                        setXRMode={setXRMode}
+                      />
+                    )}
 
-                        {xrMode !== "immersive-vr" && (
-                          <XRButton
-                            mode="immersive-vr"
-                            text="Switch to"
-                            setXRMode={setXRMode}
-                          />
-                        )}
-                      </div>
-                    </WebXR>
-                  ) : (
-                    /* --- MODE NORMAL (Navigateur Classique) --- */
-                    <>
-                      <AppLayout machineName={credentials.name} />
-
-                      {/* Interface d'entrée WebXR fixe sur l'écran classique */}
-                      <div className="absolute bottom-4 left-4 flex *:first:rounded-r-none *:last:rounded-l-none z-99999 pointer-events-auto">
-                        <XRButton
-                          mode="immersive-vr"
-                          text="Enter"
-                          setXRMode={setXRMode}
-                        />
-                        <XRButton
-                          mode="immersive-ar"
-                          text="Enter"
-                          setXRMode={setXRMode}
-                        />
-                      </div>
-                    </>
-                  )}
-                </WebSocketProvider>
-              </SpeedProvider>
-            </PartEntitiesProvider>
-          </EntityProvider>
-        </Livelink>
-      )}
-    </>
-  );
-}
-
-function StartupModal({
-  onSubmit,
-}: {
-  onSubmit: (selection: SceneSelection) => void;
-}) {
-  const [customSceneId, setCustomSceneId] = useState("");
-
-  return (
-    <div className="h-screen w-screen flex items-center justify-center">
-      <div className="w-full max-w-md mx-2 px-4 md:px-10 py-4 md:py-6 border border-tertiary bg-ground rounded-3xl [corner-shape:squircle]">
-        <Dtext />
-
-        <nav className="flex flex-col mt-6 *:rounded-none *:first:rounded-t-xl! *:last:rounded-b-xl!">
-          {MACHINES.map(({ name, sceneId }) => (
-            <Button
-              key={sceneId}
-              variant="outline"
-              size="lg"
-              className="group w-full justify-between -mt-px py-2 border-secondary hover:border-accent/40 hover:text-accent hover:z-1 transition-all duration-500"
-              onClick={() => onSubmit({ sceneId, name })}
-            >
-              {name}
-              <Icon className="fas fa-angle-right text-3xs opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-            </Button>
-          ))}
-        </nav>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault(); // keep the browser from reloading the page
-            onSubmit({ sceneId: customSceneId, name: "Custom scene" });
-          }}
-          className="mt-6 w-full max-w-2xl border-t border-tertiary pt-6"
-        >
-          <div className="relative flex">
-            <input
-              type="text"
-              name="customSceneId"
-              className="w-full px-3 py-1 border border-secondary bg-ground text-xs text-tertiary rounded-xl [corner-shape:squircle] focus:outline-hidden focus:ring-2 focus:ring-accent"
-              value={customSceneId}
-              placeholder="Custom scene "
-              onChange={(e) => setCustomSceneId(e.target.value)}
-              required
-            />
-
-            <Button
-              type="submit"
-              variant={customSceneId ? "accent" : "ghost"}
-              size="icon-sm"
-              className={cn(
-                "absolute right-0 top-0 h-full px-4 rounded-l-none",
-                customSceneId ? "text-white!" : "",
+                    {xrMode !== "immersive-vr" && (
+                      <XRButton
+                        mode="immersive-vr"
+                        text="Switch to"
+                        setXRMode={setXRMode}
+                      />
+                    )}
+                  </div>
+                </WebXR>
+              ) : (
+                /* --- MODE NORMAL (Navigateur Classique) --- */
+                <AppLayout
+                  machineName={credentials.name}
+                  setXRMode={setXRMode}
+                />
               )}
-            >
-              <Icon className="fas fa-angle-right text-3xs" />
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </WebSocketProvider>
+          </SpeedProvider>
+        </PartEntitiesProvider>
+      </EntityProvider>
+    </Livelink>
   );
 }
 
-function AppLayout({ machineName }: { machineName: string }) {
+function AppLayout({
+  machineName,
+  setXRMode,
+}: {
+  machineName: string;
+  setXRMode: (mode: XRSessionMode) => void;
+}) {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
-  const { isConnecting } = useContext(LivelinkContext);
   // State rather than a ref, so the toolbar and avatars re-render once the controller exists.
   const [cameraController, setCameraController] =
     useState<DefaultCameraController | null>(null);
-  const [showPipCamera, setShowPipCamera] = useState(true);
+  const [showPipCamera, setShowPipCamera] = useState(false);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
   const { instance } = useContext(LivelinkContext);
@@ -318,21 +235,6 @@ function AppLayout({ machineName }: { machineName: string }) {
 
       <CameraEventListener />
 
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50">
-        <ResetPositionButton cameraController={cameraController} />
-      </div>
-
-      <div className="absolute bottom-4 right-4 z-50">
-        <Button
-          variant="overlay-outline"
-          className="before:opacity-100 before:backdrop-blur-xl"
-          onClick={() => setShowPipCamera((prev) => !prev)}
-        >
-          Alt. Camera
-          <Icon className="fas fa-video text-2xs" />
-        </Button>
-      </div>
-
       <Canvas className="w-full h-screen">
         <Viewport
           cameraEntity={cameraEntity}
@@ -340,15 +242,6 @@ function AppLayout({ machineName }: { machineName: string }) {
           setHoveredEntity={setHoveredEntity}
           setPickedEntity={setPickedEntity}
         >
-          {!isConnecting && (
-            <a
-              href="https://docs.3dverse.com/livelink.react/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden"
-            />
-          )}
-
           <CameraController
             ref={(controller) => setCameraController(controller ?? null)}
           />
@@ -368,7 +261,7 @@ function AppLayout({ machineName }: { machineName: string }) {
                 className="absolute top-1 left-1"
                 onClick={() => setShowPipCamera(false)}
               >
-                <Icon className="fas fa-angles-down -rotate-45" />
+                <Icon className="fas fa-angles-down -rotate-45 opacity-60" />
               </Button>
             </div>
           )}
@@ -381,6 +274,32 @@ function AppLayout({ machineName }: { machineName: string }) {
           pickedEntity={pickedEntity?.entity ?? null}
         />
       </Canvas>
+
+      <footer
+        className={cn(
+          "absolute bottom-0 left-0 right-0 flex justify-between items-end gap-4 p-4 pointer-events-none z-50",
+          "starting:opacity-0 starting:translate-y-8 transition-all duration-500",
+        )}
+      >
+        <div className="flex *:-ml-px *:first:rounded-r-none *:last:rounded-l-none pointer-events-auto">
+          <XRButton mode="immersive-vr" text="Enter" setXRMode={setXRMode} />
+          <XRButton mode="immersive-ar" text="Enter" setXRMode={setXRMode} />
+        </div>
+        <div className="mb-16 pointer-events-auto">
+          <ResetPositionButton cameraController={cameraController} />
+        </div>
+
+        <div className="pointer-events-auto">
+          <Button
+            variant="overlay-outline"
+            className="before:opacity-100 before:backdrop-blur-xl"
+            onClick={() => setShowPipCamera((prev) => !prev)}
+          >
+            Alt. Camera
+            <Icon className="fas fa-video text-2xs" />
+          </Button>
+        </div>
+      </footer>
     </CameraEntityContext.Provider>
   );
 }

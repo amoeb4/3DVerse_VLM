@@ -1,7 +1,7 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import { InvitePanel } from "../invite/InvitePanel";
-import { AvatarList } from "../Avatars";
+import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 
 export function Toolbar({
@@ -16,7 +16,12 @@ export function Toolbar({
   cameraController: DefaultCameraController | null;
 }) {
   return (
-    <div className="absolute top-4 right-4 flex gap-1 z-50">
+    <div
+      className={cn(
+        "absolute top-4 right-4 flex gap-1 z-50",
+        "starting:opacity-0 starting:-translate-y-4 transition-all duration-500",
+      )}
+    >
       <AvatarList cameraController={cameraController} />
       <InvitePanel />
       <Button

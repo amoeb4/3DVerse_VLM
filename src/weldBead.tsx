@@ -1,8 +1,7 @@
 "use client";
 import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
-import { Button, Panel, Slider } from "@3dverse/ui-lib";
-import { eulerToQuat } from "./Interface";
+import { Button, cn, Panel, Slider } from "@3dverse/ui-lib";
 
 const MATERIAL_REFS = [
   "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
@@ -160,7 +159,12 @@ export function EntityCreator() {
   };
 
   return (
-    <Panel className="absolute top-14 left-5 min-w-68 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+    <Panel
+      className={cn(
+        "absolute top-14 left-5 min-w-68 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+        "starting:opacity-0 starting:-translate-y-8 transition-all duration-500",
+      )}
+    >
       <div className="flex flex-col gap-2 px-4 py-3 text-3xs">
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
@@ -173,6 +177,7 @@ export function EntityCreator() {
             value={temperature}
             onValueChange={(value) => setTemperature(value)}
             size="2xs"
+            className="[&_output]:text-white"
           />
         </div>
         <div className="flex justify-between">

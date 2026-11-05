@@ -8,7 +8,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@3dverse/ui-lib/styles/index.css";
 import "@3dverse/design-tokens/css/design-tokens.css";
 import "@3dverse/design-tokens/css/axis-colors.css";
-import "./index.css";
+import "./styles/index.css";
 
 if (!(window as any).Buffer) {
   (window as any).Buffer = NodeBuffer;
