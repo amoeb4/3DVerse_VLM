@@ -50,7 +50,8 @@ const EntityContext = createContext<EntityContextType | undefined>(undefined);
 
 export const useEntitySimple = () => {
   const context = useContext(EntityContext);
-  if (!context) throw new Error("useEntity must be used within an EntityProvider");
+  if (!context)
+    throw new Error("useEntity must be used within an EntityProvider");
   return context;
 };
 
@@ -67,7 +68,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
 export function eulerToQuat(
   x: number,
   y: number,
-  z: number
+  z: number,
 ): [number, number, number, number] {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const c1 = Math.cos(rad(y) / 2),
@@ -93,7 +94,7 @@ export default function ControlPanel({
 }) {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
-    ["material"]
+    ["material"],
   );
   const { selectedEntity } = useEntitySimple();
   const { instance } = useContext(LivelinkContext);
@@ -266,9 +267,11 @@ export function EntityDropdown() {
 
   useEffect(() => {
     if (partEntities.length === 0) return;
-    
-    console.log(`🔍 EntityDropdown: ${partEntities.length} entités récupérées depuis PartEntitiesContext`);
-    
+
+    console.log(
+      `🔍 EntityDropdown: ${partEntities.length} entités récupérées depuis PartEntitiesContext`,
+    );
+
     const entitiesWithNames = partEntities
       .filter((e) => /^part_\d+$/.test(e.name ?? ""))
       .map((e) => {
@@ -277,9 +280,9 @@ export function EntityDropdown() {
       .sort(
         (a, b) =>
           parseInt(a.name!.split("_")[1], 10) -
-          parseInt(b.name!.split("_")[1], 10)
+          parseInt(b.name!.split("_")[1], 10),
       );
-    
+
     setEntities(entitiesWithNames);
   }, [partEntities]);
 

@@ -41,8 +41,16 @@ export function QrCodeModal({
 
   if (isLargeScreen) {
     return (
-      <Popover open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-        <PopoverContent data-theme="light" shadow="lg" anchor={anchorRef} className="bg-white">
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
+      >
+        <PopoverContent
+          data-theme="light"
+          shadow="lg"
+          anchor={anchorRef}
+          className="bg-white"
+        >
           {content}
         </PopoverContent>
       </Popover>
@@ -50,8 +58,15 @@ export function QrCodeModal({
   }
 
   return (
-    <BottomSheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <BottomSheetContent data-theme="light" showOverlay={false} className="bg-white">
+    <BottomSheet
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && onClose?.()}
+    >
+      <BottomSheetContent
+        data-theme="light"
+        showOverlay={false}
+        className="bg-white"
+      >
         {content}
       </BottomSheetContent>
     </BottomSheet>

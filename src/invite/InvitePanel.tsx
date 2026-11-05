@@ -75,9 +75,19 @@ export const InvitePanel = () => {
   const actions = [
     { label: "Copy link", onClick: copyGuestLink, icon: "fas fa-link" },
     ...(canShare
-      ? [{ label: "Share link", onClick: shareGuestLink, icon: "fas fa-arrow-up-from-bracket" }]
+      ? [
+          {
+            label: "Share link",
+            onClick: shareGuestLink,
+            icon: "fas fa-arrow-up-from-bracket",
+          },
+        ]
       : []),
-    { label: "QR code", onClick: () => setIsQrCodeModalOpen(true), icon: "fas fa-qrcode" },
+    {
+      label: "QR code",
+      onClick: () => setIsQrCodeModalOpen(true),
+      icon: "fas fa-qrcode",
+    },
   ];
 
   const triggerContent = (
@@ -88,7 +98,9 @@ export const InvitePanel = () => {
           isTextCopied && "invisible",
         )}
       />
-      <span className={cn("hidden lg:block", isTextCopied && "invisible")}>Invite</span>
+      <span className={cn("hidden lg:block", isTextCopied && "invisible")}>
+        Invite
+      </span>
       {isTextCopied && (
         <span className="absolute inset-0 bg-accent/60 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
           <Icon

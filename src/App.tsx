@@ -1,4 +1,4 @@
-  //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 import { useState, useContext, useEffect } from "react";
 //------------------------------------------------------------------------------
 import {
@@ -84,7 +84,13 @@ export function App() {
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
                       <AppLayout machineName={credentials.name} />
                       <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
-                        <Button variant="overlay-outline" className="before:opacity-100 before:backdrop-blur-xl" onClick={() => setXRMode(null)}>Exit XR</Button>
+                        <Button
+                          variant="overlay-outline"
+                          className="before:opacity-100 before:backdrop-blur-xl"
+                          onClick={() => setXRMode(null)}
+                        >
+                          Exit XR
+                        </Button>
 
                         {xrMode !== "immersive-ar" && (
                           <XRButton
@@ -107,7 +113,7 @@ export function App() {
                     /* --- MODE NORMAL (Navigateur Classique) --- */
                     <>
                       <AppLayout machineName={credentials.name} />
-                      
+
                       {/* Interface d'entrée WebXR fixe sur l'écran classique */}
                       <div className="absolute bottom-4 left-4 flex *:first:rounded-r-none *:last:rounded-l-none z-99999 pointer-events-auto">
                         <XRButton

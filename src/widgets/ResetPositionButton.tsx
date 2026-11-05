@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSceneSettings, type DefaultCameraController } from "@3dverse/livelink-react";
+import {
+  useSceneSettings,
+  type DefaultCameraController,
+} from "@3dverse/livelink-react";
 import { Button, Icon, cn } from "@3dverse/ui-lib";
 
 // Same behavior as the mobile viewer's "Reset position": travel back to the scene's default camera
@@ -19,14 +22,16 @@ export function ResetPositionButton({
     }
     const onUserTookControl = () => setIsAtDefaultPosition(false);
     cameraController.addEventListener("control", onUserTookControl);
-    return () => cameraController.removeEventListener("control", onUserTookControl);
+    return () =>
+      cameraController.removeEventListener("control", onUserTookControl);
   }, [cameraController]);
 
   const resetPosition = useCallback(async () => {
     if (!cameraController) {
       return;
     }
-    const { position, orientation } = (!isPending && sceneSettings?.default_camera_transform) || {
+    const { position, orientation } = (!isPending &&
+      sceneSettings?.default_camera_transform) || {
       position: [0, 1, 5] as [number, number, number],
       orientation: [0, 0, 0, 1] as [number, number, number, number],
     };
