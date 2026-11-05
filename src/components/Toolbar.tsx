@@ -6,6 +6,7 @@ import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import type { SceneTheme } from "../hooks/useSceneTheme";
+import { ButtonGroup } from "./common/ButtonGroup";
 
 const SHOW_KBD_SHORTCUTS = false;
 
@@ -52,28 +53,32 @@ export function Toolbar({
           </Kbd>
         )}
       </Button>
-      <Button
-        variant="overlay-outline"
-        className="py-2 before:opacity-100 before:backdrop-blur-xl"
-        title={`${theme === "dark" ? "Light" : "Dark"} theme (${SHORTCUTS.theme.toUpperCase()})`}
-        onClick={onToggleTheme}
-        disabled={!theme}
-      >
-        <Icon className={cn("fas", theme === "dark" ? "fa-sun" : "fa-moon")} />
-      </Button>
-      <Button
-        variant="overlay-outline"
-        className="py-2 before:opacity-100 before:backdrop-blur-xl"
-        title={showDOM3D ? "Hide infos" : "Show infos"}
-        onClick={() => setShowDOM3D(!showDOM3D)}
-      >
-        <Icon
-          className={cn(
-            "fas",
-            showDOM3D ? "fa-eye" : "fa-eye-slash opacity-50",
-          )}
-        />
-      </Button>
+      <ButtonGroup>
+        <Button
+          variant="overlay-outline"
+          className="py-2 before:opacity-100 before:backdrop-blur-xl"
+          title={showDOM3D ? "Hide infos" : "Show infos"}
+          onClick={() => setShowDOM3D(!showDOM3D)}
+        >
+          <Icon
+            className={cn(
+              "fas",
+              showDOM3D ? "fa-eye" : "fa-eye-slash opacity-50",
+            )}
+          />
+        </Button>
+        <Button
+          variant="overlay-outline"
+          className="py-2 before:opacity-100 before:backdrop-blur-xl"
+          title={`${theme === "dark" ? "Light" : "Dark"} theme (${SHORTCUTS.theme.toUpperCase()})`}
+          onClick={onToggleTheme}
+          disabled={!theme}
+        >
+          <Icon
+            className={cn("fas", theme === "dark" ? "fa-sun" : "fa-moon")}
+          />
+        </Button>
+      </ButtonGroup>
     </div>
   );
 }

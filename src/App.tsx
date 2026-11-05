@@ -31,6 +31,7 @@ import { StartupPanel } from "./components/StartupPanel";
 import { useResetCamera } from "./hooks/useResetCamera";
 import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
 import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
+import { ButtonGroup } from "./components/common/ButtonGroup";
 
 type SceneSelection = { sceneId: string; name: string; sessionId?: string };
 
@@ -297,9 +298,11 @@ function AppLayout({
           "starting:opacity-0 starting:translate-y-8 transition-all duration-500",
         )}
       >
-        <div className="place-self-start [align-self:end] flex *:-ml-px *:first:rounded-r-none *:last:rounded-l-none pointer-events-auto">
-          <XRButton mode="immersive-vr" text="" setXRMode={setXRMode} />
-          <XRButton mode="immersive-ar" text="" setXRMode={setXRMode} />
+        <div className="place-self-start [align-self:end] pointer-events-auto">
+          <ButtonGroup>
+            <XRButton mode="immersive-vr" text="" setXRMode={setXRMode} />
+            <XRButton mode="immersive-ar" text="" setXRMode={setXRMode} />
+          </ButtonGroup>
         </div>
         <div className="place-self-center mb-16 pointer-events-auto">
           <ResetPositionButton
