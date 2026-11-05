@@ -1,5 +1,5 @@
-//------------------------------------------------------------------------------
-import { useState, useContext, useRef, useEffect } from "react";
+  //------------------------------------------------------------------------------
+import { useState, useContext, useEffect } from "react";
 //------------------------------------------------------------------------------
 import {
   Livelink,
@@ -27,7 +27,9 @@ import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";
 import { DisplayDashboard } from "./Dashboard.tsx";
 import { XRButton } from "./webXR.tsx";
 import type { Entity } from "@3dverse/livelink";
-import { Toolbar } from "./widgets/Toolbar.tsx";
+import { Toolbar } from "./widgets/Toolbar";
+import { SCENE_ID_PARAM, SESSION_ID_PARAM } from "./invite/InvitePanel";
+import { ResetPositionButton } from "./widgets/ResetPositionButton";
 
 const MACHINES = [
   { name: "NJ130 2.05", sceneId: "759ed8c4-fb60-432c-a41e-cf0f39f92d6f" },
@@ -39,10 +41,24 @@ const MACHINES = [
   },
 ];
 
-type SceneSelection = { sceneId: string; name: string };
+type SceneSelection = { sceneId: string; name: string; sessionId?: string };
+
+// An invite link (see `InvitePanel`) names the session to join, so it skips the scene picker.
+function selectionFromInviteLink(): SceneSelection | null {
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get(SESSION_ID_PARAM);
+  if (!sessionId) {
+    return null;
+  }
+  const sceneId = params.get(SCENE_ID_PARAM) ?? "";
+  const machine = MACHINES.find((m) => m.sceneId === sceneId);
+  return { sceneId, sessionId, name: machine?.name ?? "Shared session" };
+}
 
 export function App() {
-  const [credentials, setCredentials] = useState<SceneSelection | null>(null);
+  const [credentials, setCredentials] = useState<SceneSelection | null>(
+    selectionFromInviteLink,
+  );
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
   return (
@@ -51,8 +67,9 @@ export function App() {
         <StartupModal onSubmit={setCredentials} />
       ) : (
         <Livelink
-          isTransient={false}
-          sceneId={credentials.sceneId}
+          {...(credentials.sessionId
+            ? { sessionId: credentials.sessionId }
+            : { sceneId: credentials.sceneId, isTransient: false })}
           token="public_ml59vXKlgs9fTJlx"
           LoadingPanel={LoadingOverlay}
         >
@@ -183,7 +200,9 @@ function AppLayout({ machineName }: { machineName: string }) {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
-  const cameraControllerRef = useRef<DefaultCameraController>(null);
+  // State rather than a ref, so the toolbar and avatars re-render once the controller exists.
+  const [cameraController, setCameraController] =
+    useState<DefaultCameraController | null>(null);
   const [showPipCamera, setShowPipCamera] = useState(true);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
@@ -268,6 +287,10 @@ function AppLayout({ machineName }: { machineName: string }) {
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
+  const onToggleControlPanel = () => {
+    setIsControlPanelOpen((prev) => !prev);
+  };
+
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
@@ -275,7 +298,8 @@ function AppLayout({ machineName }: { machineName: string }) {
           <h1 className="text-xl font-bold">{machineName}</h1>
         </header>
         <Toolbar
-          onOpenControlPanel={() => setIsControlPanelOpen(true)}
+          cameraController={cameraController}
+          onToggleControlPanel={onToggleControlPanel}
           showDOM3D={showDOM3D}
           setShowDOM3D={setShowDOM3D}
         />
@@ -287,6 +311,10 @@ function AppLayout({ machineName }: { machineName: string }) {
       </EntityProvider>
 
       <CameraEventListener />
+
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50">
+        <ResetPositionButton cameraController={cameraController} />
+      </div>
 
       <div className="absolute bottom-4 right-4 z-50">
         <Button
@@ -315,14 +343,16 @@ function AppLayout({ machineName }: { machineName: string }) {
             />
           )}
 
-          <CameraController ref={cameraControllerRef} />
+          <CameraController
+            ref={(controller) => setCameraController(controller ?? null)}
+          />
 
-          <Avatars />
+          <Avatars cameraController={cameraController} />
 
           {showDOM3D && <Dom3DInfos />}
 
           {showPipCamera && (
-            <div className="absolute bottom-3 right-3 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+            <div className="absolute bottom-3 right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
               <Viewport cameraEntity={pipCamera} className="w-full h-full">
                 <CameraController />
               </Viewport>

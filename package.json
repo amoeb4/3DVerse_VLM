@@ -37,6 +37,7 @@
     "framer-motion": "^12.23.12",
     "gl-matrix": "^3.4.3",
     "node-opcua": "^2.156.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "three": "^0.178.0",

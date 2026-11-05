@@ -1,25 +1,32 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
+import { InvitePanel } from "../invite/InvitePanel";
+import { AvatarList } from "../Avatars";
+import type { DefaultCameraController } from "@3dverse/livelink-react";
+
 export function Toolbar({
-  onOpenControlPanel,
+  onToggleControlPanel,
   showDOM3D,
   setShowDOM3D,
+  cameraController,
 }: {
-  onOpenControlPanel: () => void;
+  onToggleControlPanel: () => void;
   showDOM3D: boolean;
   setShowDOM3D: (show: boolean) => void;
+  cameraController: DefaultCameraController | null;
 }) {
   return (
     <div className="absolute top-4 right-4 flex gap-1 z-50">
+      <AvatarList cameraController={cameraController} />
+      <InvitePanel />
       <Button
         variant="overlay-outline"
         className="py-2 before:opacity-100 before:backdrop-blur-xl"
-        onClick={onOpenControlPanel}
+        onClick={onToggleControlPanel}
       >
         Control Panel
         <Icon className="fas fa-sliders text-2xs" />
       </Button>
-
       <Button
         variant="overlay-outline"
         className="py-2 before:opacity-100 before:backdrop-blur-xl"
