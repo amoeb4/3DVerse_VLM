@@ -1,8 +1,12 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Kbd } from "./Kbd";
 
 import { InvitePanel } from "../invite/InvitePanel";
+import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
+
+const SHOW_KBD_SHORTCUTS = false;
 
 export function Toolbar({
   onToggleControlPanel,
@@ -27,10 +31,21 @@ export function Toolbar({
       <Button
         variant="overlay-outline"
         className="py-2 before:opacity-100 before:backdrop-blur-xl"
+        title={`Control Panel (${SHORTCUTS.controlPanel.toUpperCase()})`}
         onClick={onToggleControlPanel}
       >
-        Control Panel
+        <p>
+          <span className="underline underline-offset-2 decoration-current/40">
+            C
+          </span>
+          ontrol Panel
+        </p>
         <Icon className="fas fa-sliders text-2xs" />
+        {SHOW_KBD_SHORTCUTS && (
+          <Kbd className="hidden lg:inline-flex py-px">
+            {SHORTCUTS.controlPanel.toUpperCase()}
+          </Kbd>
+        )}
       </Button>
       <Button
         variant="overlay-outline"

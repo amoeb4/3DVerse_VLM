@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useCallback } from "react";
 import {
   Livelink,
   Canvas,
@@ -28,6 +28,8 @@ import { Toolbar } from "./components/Toolbar";
 import { SCENE_ID_PARAM, SESSION_ID_PARAM } from "./invite/InvitePanel";
 import { ResetPositionButton } from "./components/ResetPositionButton";
 import { StartupPanel } from "./components/StartupPanel";
+import { useResetCamera } from "./hooks/useResetCamera";
+import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
 
 type SceneSelection = { sceneId: string; name: string; sessionId?: string };
 
@@ -210,9 +212,13 @@ function AppLayout({
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
-  const onToggleControlPanel = () => {
+  const onToggleControlPanel = useCallback(() => {
     setIsControlPanelOpen((prev) => !prev);
-  };
+  }, []);
+
+  const { resetCamera, isAtDefaultPosition } = useResetCamera(cameraController);
+
+  useKeyboardShortcuts({ onReset: resetCamera, onToggleControlPanel });
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -277,19 +283,23 @@ function AppLayout({
 
       <footer
         className={cn(
-          "absolute bottom-0 left-0 right-0 flex justify-between items-end gap-4 p-4 pointer-events-none z-50",
+          "absolute bottom-0 left-0 right-0 grid grid-cols-3 gap-4 p-4 pointer-events-none z-50",
           "starting:opacity-0 starting:translate-y-8 transition-all duration-500",
         )}
       >
-        <div className="flex *:-ml-px *:first:rounded-r-none *:last:rounded-l-none pointer-events-auto">
+        <div className="place-self-start [align-self:end] flex *:-ml-px *:first:rounded-r-none *:last:rounded-l-none pointer-events-auto">
           <XRButton mode="immersive-vr" text="Enter" setXRMode={setXRMode} />
           <XRButton mode="immersive-ar" text="Enter" setXRMode={setXRMode} />
         </div>
-        <div className="mb-16 pointer-events-auto">
-          <ResetPositionButton cameraController={cameraController} />
+        <div className="place-self-center mb-16 pointer-events-auto">
+          <ResetPositionButton
+            onReset={resetCamera}
+            isAtDefaultPosition={isAtDefaultPosition}
+            disabled={!cameraController}
+          />
         </div>
 
-        <div className="pointer-events-auto">
+        <div className="place-self-end pointer-events-auto">
           <Button
             variant="overlay-outline"
             className="before:opacity-100 before:backdrop-blur-xl"

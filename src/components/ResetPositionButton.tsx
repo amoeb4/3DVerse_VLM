@@ -1,57 +1,42 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  useSceneSettings,
-  type DefaultCameraController,
-} from "@3dverse/livelink-react";
 import { Button, cn } from "@3dverse/ui-lib";
+import { Kbd } from "./Kbd";
+import { SHORTCUTS } from "../shortcuts/shortcuts";
 
-// Same behavior as the mobile viewer's "Reset position": travel back to the scene's default camera
-// transform, and dim the button while the camera is already there.
+const SHOW_KBD_SHORTCUTS = false;
+
 export function ResetPositionButton({
-  cameraController,
+  onReset,
+  isAtDefaultPosition,
+  disabled,
 }: {
-  cameraController: DefaultCameraController | null;
+  onReset: () => void;
+  isAtDefaultPosition: boolean;
+  disabled?: boolean;
 }) {
-  const { sceneSettings, isPending } = useSceneSettings();
-  const [isAtDefaultPosition, setIsAtDefaultPosition] = useState(true);
-
-  // The camera sits at the default transform from mount until the user grabs it.
-  useEffect(() => {
-    if (!cameraController) {
-      return;
-    }
-    const onUserTookControl = () => setIsAtDefaultPosition(false);
-    cameraController.addEventListener("control", onUserTookControl);
-    return () =>
-      cameraController.removeEventListener("control", onUserTookControl);
-  }, [cameraController]);
-
-  const resetPosition = useCallback(async () => {
-    if (!cameraController) {
-      return;
-    }
-    const { position, orientation } = (!isPending &&
-      sceneSettings?.default_camera_transform) || {
-      position: [0, 1, 5] as [number, number, number],
-      orientation: [0, 0, 0, 1] as [number, number, number, number],
-    };
-    setIsAtDefaultPosition(true);
-    await cameraController.travelToPointOfView({ position, orientation });
-  }, [cameraController, sceneSettings, isPending]);
-
   return (
     <Button
       variant="overlay-outline"
       className={cn(
-        "px-4 py-2 before:opacity-100 before:backdrop-blur-xl",
+        "px-4 py-2 gap-2 before:opacity-100 before:backdrop-blur-xl",
         isAtDefaultPosition && "text-primary/50",
       )}
       round
-      title="Reset position"
-      onClick={resetPosition}
-      disabled={!cameraController}
+      title={`Reset position (${SHORTCUTS.reset.toUpperCase()})`}
+      onClick={onReset}
+      disabled={disabled}
     >
-      Reset position
+      <p>
+        Reset{" "}
+        <span className="underline underline-offset-2 decoration-current/40">
+          p
+        </span>
+        osition
+      </p>
+      {SHOW_KBD_SHORTCUTS && (
+        <Kbd className="hidden lg:inline-flex">
+          {SHORTCUTS.reset.toUpperCase()}
+        </Kbd>
+      )}
     </Button>
   );
 }
