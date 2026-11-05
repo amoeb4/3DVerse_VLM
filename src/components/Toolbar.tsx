@@ -28,7 +28,7 @@ export function Toolbar({
   return (
     <div
       className={cn(
-        "absolute top-4 right-4 flex gap-1 z-50",
+        "absolute top-4 right-4 flex gap-3 z-50",
         "starting:opacity-0 starting:-translate-y-4 transition-all duration-500",
       )}
     >

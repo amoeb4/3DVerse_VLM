@@ -118,13 +118,13 @@ export default function ControlPanel({
 
       <div className="flex flex-wrap gap-2 px-3 py-2">
         <EntityDropdown />
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="border-secondary">
           Mount Fronius torch
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="border-secondary">
           Mount Spindle motor
         </Button>
-        <Button variant="destructive" size="sm">
+        <Button variant="destructive" size="sm" className="border-secondary">
           Back to start
         </Button>
       </div>
@@ -182,7 +182,7 @@ export default function ControlPanel({
           color="axis-z"
         />
       </div>
-      <div className="px-4 py-2">
+      <div className="flex justify-end px-4 py-3">
         <TorchExample />
       </div>
     </Panel>

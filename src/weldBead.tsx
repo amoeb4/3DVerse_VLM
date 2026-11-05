@@ -63,9 +63,10 @@ export function EntityCreator() {
   const [temperature, setTemperature] = useState<number>(50);
   const [latency, setLatency] = useState(0);
   const [autoWeld, setAutoWeld] = useState(false);
-  const { entity: torch } = useEntity({
+  const { entity: torch, isPending: isTorchPending } = useEntity({
     euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
   });
+  const isTorchMissing = !isTorchPending && !torch;
   const { entity: plateau } = useEntity({
     euid: "19a0b434-94d5-4546-8e8a-7b894148c504",
   });
@@ -190,7 +191,8 @@ export function EntityCreator() {
           variant="outline"
           size="sm"
           onClick={handleCreate}
-          disabled={!instance}
+          disabled={!instance || isTorchMissing}
+          className="border-secondary"
         >
           Create Entity
         </Button>
@@ -198,8 +200,8 @@ export function EntityCreator() {
           variant="accent"
           size="sm"
           onClick={() => setAutoWeld((v) => !v)}
-          disabled={!instance}
-          className="text-white! grow"
+          disabled={!instance || isTorchMissing}
+          className="text-white! grow border-secondary"
         >
           {autoWeld ? "Stop Weld" : "Start Weld"}
         </Button>

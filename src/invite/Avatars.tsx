@@ -135,7 +135,7 @@ export const AvatarList = ({
     return null;
   }
   return (
-    <div className="flex items-center mr-2" role="none">
+    <div className="flex items-center" role="none">
       {[...clients].reverse().map((client) => (
         <AvatarBubble key={client.id} client={client} onTravel={handleTravel} />
       ))}

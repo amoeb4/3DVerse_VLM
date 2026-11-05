@@ -1,6 +1,8 @@
 import { Entity } from "@3dverse/livelink";
 import { useEntity } from "@3dverse/livelink-react";
-import { Button } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { ButtonGroup } from "./components/common/ButtonGroup";
+import { IconSlashed } from "./components/common/IconSlashed";
 
 function toggleEntity(entity?: Entity | null, entity2?: Entity | null) {
   if (entity && entity == entity2) {
@@ -24,18 +26,28 @@ export default function TorchExample() {
   });
 
   return (
-    <div className="flex gap-2">
+    <ButtonGroup>
       <Button
         variant="outline"
-        size="sm"
+        size="icon-sm"
         onClick={() => toggleEntity(flame, flame)}
+        className={cn(
+          "border-secondary",
+          !flame?.is_visible && "text-tertiary/50",
+        )}
       >
-        Toggle flame
+        <IconSlashed slashed={!flame?.is_visible}>
+          <Icon className="fas fa-fire" />
+        </IconSlashed>
       </Button>
       <Button
         variant="outline"
         size="sm"
         onClick={() => toggleEntity(fronius, effecteur)}
+        className={cn(
+          "border-secondary",
+          !fronius?.is_visible && "text-tertiary/50",
+        )}
       >
         Fronius torch
       </Button>
@@ -43,9 +55,13 @@ export default function TorchExample() {
         variant="outline"
         size="sm"
         onClick={() => toggleEntity(effecteur, fronius)}
+        className={cn(
+          "border-secondary",
+          !effecteur?.is_visible && "text-tertiary/50",
+        )}
       >
         Milling spindle
       </Button>
-    </div>
+    </ButtonGroup>
   );
 }
