@@ -11,7 +11,6 @@ import { PartEntitiesContext } from "./partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "./movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
 
 type SpeedContextType = {

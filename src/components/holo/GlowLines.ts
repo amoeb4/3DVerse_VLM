@@ -139,6 +139,9 @@ export class GlowLines extends THREE.Mesh<
       transparent: true,
       depthWrite: false,
       depthTest: true,
+      // The quads are built on screen, and which way round they wind depends on the segment's
+      // direction there: culling would drop half of them, or all.
+      side: THREE.DoubleSide,
     });
 
     super(geometry, material);

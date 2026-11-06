@@ -13,7 +13,9 @@ import {
 import {
   HOLO_ACCENT,
   RENDER_ORDER,
+  HOLO_COLOR,
   createGaugeMaterial,
+  createMeshShellMaterial,
   createOccluderMaterial,
   createShellMaterial,
 } from "./holoMaterials";
@@ -76,6 +78,9 @@ const REVEAL_DURATION = 1.1;
 const REVEAL_STAGGER = 0.12;
 const REVEAL_DELAY = 0.2;
 
+/** The real geometry scanning in over the box once it has arrived, part after part. In seconds. */
+const MESH_REVEAL_DURATION = 1.6;
+
 //------------------------------------------------------------------------------
 // Scratch, reused every frame by every entity.
 //------------------------------------------------------------------------------
@@ -102,6 +107,23 @@ const flicker = (time: number, seed: number) =>
     ? 1
     : 0.35;
 
+/** A part's real geometry, in its own space, and its feature edges: six numbers per segment. */
+export type PartMesh = {
+  geometry: THREE.BufferGeometry;
+  edges: ArrayLike<number>;
+};
+
+/** What is drawn on a part's real geometry, once it has arrived. */
+type MeshShell = {
+  group: THREE.Group;
+  geometry: THREE.BufferGeometry;
+  occluderMaterial: THREE.Material;
+  material: THREE.ShaderMaterial;
+  edges: GlowLines;
+  /** When it started scanning in, in `introTime`; `null` until its first frame. */
+  since: number | null;
+};
+
 export type FrameContext = {
   time: number;
   /** Seconds since the HUD appeared; `Infinity` skips the intro. */
@@ -120,6 +142,10 @@ export type FrameContext = {
  *
  * The shell is fitted to the entity's `local_aabb` merged with its children's (`localBox`), so it
  * turns with the joint. Without one, only the gauge is drawn.
+ *
+ * Once the part's real geometry is at hand (`attachMesh`), it takes over: it hides the HUD behind
+ * the part exactly rather than by its bounds, scans in with glowing feature edges, and the box
+ * fades away, all but its corner brackets.
  */
 export class HoloEntity {
   readonly root = new THREE.Group();
@@ -142,6 +168,8 @@ export class HoloEntity {
 
   #occludes = true;
   #gaugeRadius = 0;
+  #mesh: MeshShell | null = null;
+  #disposed = false;
 
   constructor({
     entity,
@@ -227,10 +255,54 @@ export class HoloEntity {
     this.root.add(this.#gauge);
   }
 
-  /** Whether the shell stands in for the mesh in the depth buffer. */
+  /** Whether the box stands in for the mesh in the depth buffer, until the real one is here. */
   set occludes(value: boolean) {
     this.#occludes = value;
-    this.#occluder.visible = value;
+    this.#occluder.visible = value && !this.#mesh;
+  }
+
+  /** Takes over from the box with the part's real geometry; the hologram owns it from now on. */
+  attachMesh({ geometry, edges }: PartMesh) {
+    if (this.#disposed || this.#mesh) {
+      geometry.dispose();
+      return;
+    }
+    if (!geometry.boundingBox) {
+      geometry.computeBoundingBox();
+    }
+
+    const group = new THREE.Group();
+    group.matrixAutoUpdate = false;
+
+    const occluderMaterial = createOccluderMaterial({ doubleSided: true });
+    const occluder = new THREE.Mesh(geometry, occluderMaterial);
+    occluder.renderOrder = RENDER_ORDER.occluder;
+
+    const material = createMeshShellMaterial(geometry.boundingBox!);
+    const surface = new THREE.Mesh(geometry, material);
+    surface.renderOrder = RENDER_ORDER.box;
+
+    // Thinner than the box's outline, so the many edges of a CAD part read as lines, not a blur.
+    const lines = new GlowLines(edges, {
+      color: HOLO_COLOR,
+      width: 3.5,
+      core: 0.38,
+      glow: 0.6,
+      opacity: 0,
+    });
+
+    group.add(occluder, surface, lines);
+    this.root.add(group);
+    this.#mesh = {
+      group,
+      geometry,
+      occluderMaterial,
+      material,
+      edges: lines,
+      since: null,
+    };
+    // The real geometry hides what is behind the part; the box no longer has to.
+    this.#occluder.visible = false;
   }
 
   /** Whether a world-space point lies within this entity's box, as it currently stands. */
@@ -287,6 +359,10 @@ export class HoloEntity {
     const blink = revealing ? flicker(frame.time, this.#index) : 1;
     const dim = this.#occludes ? 1 : 0.3;
 
+    // The real geometry, once here: scans in after the part's own intro, the box fading out.
+    const meshReveal = this.#updateMesh(frame, reveal);
+    const boxFade = 1 - smoothstep(0, 0.6, meshReveal);
+
     // Shell.
     if (this.#localBox) {
       this.#localBox.getCenter(shellCenter);
@@ -314,9 +390,10 @@ export class HoloEntity {
       uniforms.uGrid.value = frame.machineSize / 40;
       uniforms.uScanPeriod.value = frame.machineSize / 3;
       uniforms.uReveal.value = 1 - Math.pow(1 - reveal, 3);
-      uniforms.uOpacity.value = dim;
+      uniforms.uOpacity.value = dim * boxFade;
 
-      this.#edges.opacity = 0.75 * dim * smoothstep(0, 0.3, reveal) * blink;
+      this.#edges.opacity =
+        0.75 * dim * boxFade * smoothstep(0, 0.3, reveal) * blink;
       this.#brackets.opacity = dim * smoothstep(0.1, 0.4, reveal) * blink;
     }
 
@@ -348,12 +425,57 @@ export class HoloEntity {
   }
 
   dispose() {
+    this.#disposed = true;
+    if (this.#mesh) {
+      this.#mesh.geometry.dispose();
+      this.#mesh.occluderMaterial.dispose();
+      this.#mesh.material.dispose();
+      this.#mesh.edges.dispose();
+      this.#mesh = null;
+    }
     this.#edges.dispose();
     this.#brackets.dispose();
     (this.#occluder.material as THREE.Material).dispose();
     this.#shellMaterial.dispose();
     this.#gaugeMaterial.dispose();
     this.root.removeFromParent();
+  }
+
+  /**
+   * Follows the entity with the real geometry, if it is here, and advances its scan-in. Returns how
+   * far the scan-in has got, 0 .. 1 (0 without geometry). Expects `world`, `worldScale` to be set.
+   */
+  #updateMesh(frame: FrameContext, reveal: number) {
+    const mesh = this.#mesh;
+    if (!mesh) {
+      return 0;
+    }
+    if (mesh.since === null) {
+      // Each part after the other, as in the intro.
+      mesh.since = frame.introTime + this.#index * REVEAL_STAGGER;
+    }
+    const progress = Number.isFinite(frame.introTime)
+      ? THREE.MathUtils.clamp(
+          (frame.introTime - mesh.since) / MESH_REVEAL_DURATION,
+          0,
+          1,
+        )
+      : 1;
+    // Never ahead of the part's own intro.
+    const meshReveal = Math.min(progress, reveal);
+
+    mesh.group.matrix.copy(world);
+    mesh.group.matrixWorldNeedsUpdate = true;
+
+    const uniforms = mesh.material.uniforms;
+    (uniforms.uScale.value as THREE.Vector3).copy(worldScale);
+    uniforms.uTime.value = frame.time;
+    uniforms.uGrid.value = frame.machineSize / 40;
+    uniforms.uScanPeriod.value = frame.machineSize / 3;
+    uniforms.uReveal.value = 1 - Math.pow(1 - meshReveal, 3);
+    mesh.edges.opacity = 0.95 * smoothstep(0.15, 0.7, meshReveal);
+
+    return meshReveal;
   }
 
   /**

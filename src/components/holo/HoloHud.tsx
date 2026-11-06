@@ -13,7 +13,8 @@ const byNaturalName = (a: { entity: Entity }, b: { entity: Entity }) =>
 
 /**
  * A holographic HUD around every entity tagged `main` (or `main:cylinder:<axis>`, see `holoTags`):
- * glowing shells and joint gauges. Drawn with Three.js in an
+ * glowing shells — boxes first, then the parts' real meshes from the 3dverse API — and joint
+ * gauges. Drawn with Three.js in an
  * overlay that Livelink composites onto each streamed frame, so it stays locked to the picture.
  *
  * The server renders the machine, so the browser has no depth for it: each part's shell is drawn
@@ -71,6 +72,14 @@ export function HoloHud() {
           });
         };
         viewport.addOverlay({ overlay });
+
+        // The boxes are up at once; the parts' real meshes follow from the API and scan in over
+        // them. Each hologram ignores its mesh if the HUD is gone by the time it arrives.
+        void created.loadGeometry().then(() => {
+          if (!disposed && reducedMotion) {
+            overlay?.redraw();
+          }
+        });
 
         // The server only sends a frame when the scene changes; redraw the last one so the HUD
         // keeps moving while the machine is still. Under reduced motion it is static.

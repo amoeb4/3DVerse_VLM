@@ -27,14 +27,16 @@ export const RENDER_ORDER = {
 /**
  * Writes depth only. Stands in for the mesh the server renders, which the browser has no depth for,
  * so whatever is behind it is hidden pixel by pixel. Pushed back a little so the hologram drawn on
- * the very same box surface is not z-fought away.
+ * the very same surface is not z-fought away.
+ *
+ * `doubleSided` for real meshes, whose faces are not all wound the same way.
  */
-export function createOccluderMaterial() {
+export function createOccluderMaterial({ doubleSided = false } = {}) {
   return new THREE.MeshBasicMaterial({
     colorWrite: false,
     depthWrite: true,
     depthTest: true,
-    side: THREE.FrontSide,
+    side: doubleSided ? THREE.DoubleSide : THREE.FrontSide,
     polygonOffset: true,
     polygonOffsetFactor: 2,
     polygonOffsetUnits: 4,
@@ -172,6 +174,94 @@ export function createShellMaterial({ cylinder = false } = {}) {
     depthWrite: false,
     depthTest: true,
     side: THREE.FrontSide,
+  });
+}
+
+//------------------------------------------------------------------------------
+const MESH_SHELL_FRAGMENT = /* glsl */ `
+  uniform vec3 uColor;
+  uniform vec3 uAccent;
+  uniform vec3 uScale;       // the part's world scale: its own units to scene units, per axis
+  uniform vec3 uBoxMin;      // the mesh's bounds, in the part's own space
+  uniform vec3 uBoxMax;
+  uniform float uTime;
+  uniform float uOpacity;
+  uniform float uGrid;
+  uniform float uScanPeriod;
+  uniform float uReveal;     // 0 .. 1, the mesh scanned in along the part's own y
+
+  varying vec3 vLocal;
+  varying vec3 vLocalNormal;
+  varying vec3 vWorld;
+  varying vec3 vViewNormal;
+  varying vec3 vViewPosition;
+
+  float gridLine(float coord, float spacing) {
+    float c = coord / spacing;
+    float d = abs(fract(c - 0.5) - 0.5) / fwidth(c);
+    return 1.0 - min(d, 1.0);
+  }
+
+  void main() {
+    // Scan-in: nothing above the front, a bright band on it.
+    float height = (vLocal.y - uBoxMin.y) / max(uBoxMax.y - uBoxMin.y, 1e-6);
+    if (height > uReveal + 0.001) discard;
+    float front = uReveal < 1.0 ? 1.0 - smoothstep(0.0, 0.035, uReveal - height) : 0.0;
+
+    // Blueprint grid on the part, projected along the face's main axis: it turns with the part.
+    vec3 metric = vLocal * uScale;
+    vec3 n = abs(vLocalNormal);
+    vec2 inPlane = n.x > n.y && n.x > n.z ? metric.yz : (n.y > n.z ? metric.xz : metric.xy);
+    float grid = max(gridLine(inPlane.x, uGrid), gridLine(inPlane.y, uGrid));
+
+    // Scanlines sweeping up through the world, and a faint fine raster.
+    float scanPhase = fract((vWorld.y - uTime * uScanPeriod * 0.35) / uScanPeriod);
+    float scan = smoothstep(0.0, 0.04, scanPhase) * (1.0 - smoothstep(0.04, 0.22, scanPhase));
+    float raster = 0.5 + 0.5 * sin(gl_FragCoord.y * 1.6);
+
+    // The silhouette glows: brighter where the surface turns away from the viewer.
+    vec3 viewDir = normalize(-vViewPosition);
+    float facing = abs(dot(normalize(vViewNormal), viewDir));
+    float fresnel = pow(1.0 - facing, 2.0);
+
+    float alpha = 0.06
+      + 0.6 * fresnel
+      + 0.06 * grid
+      + 0.2 * scan
+      + 0.025 * raster
+      + 0.85 * front;
+    vec3 color = mix(uAccent, uColor, clamp(0.35 + fresnel * 1.5 + scan + front, 0.0, 1.0));
+    color = mix(color, vec3(1.0), front * 0.6);
+
+    gl_FragColor = vec4(color, clamp(alpha, 0.0, 1.0) * uOpacity);
+  }
+`;
+
+/**
+ * The hologram drawn on a part's real mesh, in the part's own space. `uBoxMin` / `uBoxMax` are the
+ * mesh's bounds there, which the scan-in runs across; its feature edges are drawn by `GlowLines`.
+ */
+export function createMeshShellMaterial(bounds: THREE.Box3) {
+  return new THREE.ShaderMaterial({
+    vertexShader: SHELL_VERTEX,
+    fragmentShader: MESH_SHELL_FRAGMENT,
+    uniforms: {
+      uColor: { value: HOLO_COLOR.clone() },
+      uAccent: { value: HOLO_ACCENT.clone() },
+      uScale: { value: new THREE.Vector3(1, 1, 1) },
+      uBoxMin: { value: bounds.min.clone() },
+      uBoxMax: { value: bounds.max.clone() },
+      uTime: { value: 0 },
+      uOpacity: { value: 1 },
+      uGrid: { value: 0.05 },
+      uScanPeriod: { value: 0.6 },
+      uReveal: { value: 0 },
+    },
+    transparent: true,
+    depthWrite: false,
+    depthTest: true,
+    // Faces are not all wound the same way; the double-sided occluder hides the far ones.
+    side: THREE.DoubleSide,
   });
 }
 
