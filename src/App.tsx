@@ -18,7 +18,8 @@ import { CameraEntityContext } from "./camera/cameraControl";
 import { WebSocketProvider } from "./webSockets";
 import { PartEntitiesProvider } from "./partEntitiesContext";
 import { Avatars } from "./invite/Avatars";
-import Dom3DInfos from "./components/DOM3Dinfos";
+import { JointAnglesOverlay } from "./components/joints/JointAnglesOverlay";
+import { HoloHud } from "./components/holo/HoloHud";
 import { EntityCreator } from "./weldBead";
 import { EntityStatusPanel } from "./components/EntityPicking";
 import { XRButton } from "./webXR";
@@ -131,7 +132,9 @@ function AppLayout({
   const [cameraController, setCameraController] =
     useState<DefaultCameraController | null>(null);
   const [showPipCamera, setShowPipCamera] = useState(false);
-  const [showDOM3D, setShowDOM3D] = useState(true);
+  // The hologram HUD has its own joint gauges; the DOM ones stay available from the toolbar.
+  const [showDOM3D, setShowDOM3D] = useState(false);
+  const [showHolo, setShowHolo] = useState(false);
 
   const { instance } = useContext(LivelinkContext);
 
@@ -161,12 +164,11 @@ function AppLayout({
           await new Promise((r) => setTimeout(r, 100));
           continue;
         }
-
         try {
+          /* empty */
         } catch (e) {
           console.error("createEntity error:", e);
         }
-
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
@@ -240,6 +242,8 @@ function AppLayout({
           onToggleControlPanel={onToggleControlPanel}
           showDOM3D={showDOM3D}
           setShowDOM3D={setShowDOM3D}
+          showHolo={showHolo}
+          setShowHolo={setShowHolo}
           theme={theme}
           onToggleTheme={toggleTheme}
         />
@@ -265,7 +269,9 @@ function AppLayout({
 
           <Avatars cameraController={cameraController} />
 
-          {showDOM3D && <Dom3DInfos />}
+          {showHolo && <HoloHud />}
+
+          {showDOM3D && <JointAnglesOverlay />}
 
           {showPipCamera && (
             <div className="absolute bottom-3 right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">

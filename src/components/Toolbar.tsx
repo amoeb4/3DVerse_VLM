@@ -7,6 +7,7 @@ import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import type { SceneTheme } from "../hooks/useSceneTheme";
 import { ButtonGroup } from "./common/ButtonGroup";
+import { IconSlashed } from "./common/IconSlashed";
 
 const SHOW_KBD_SHORTCUTS = false;
 
@@ -14,6 +15,8 @@ export function Toolbar({
   onToggleControlPanel,
   showDOM3D,
   setShowDOM3D,
+  showHolo,
+  setShowHolo,
   theme,
   onToggleTheme,
   cameraController,
@@ -21,6 +24,8 @@ export function Toolbar({
   onToggleControlPanel: () => void;
   showDOM3D: boolean;
   setShowDOM3D: (show: boolean) => void;
+  showHolo: boolean;
+  setShowHolo: (show: boolean) => void;
   theme: SceneTheme | null;
   onToggleTheme: () => void;
   cameraController: DefaultCameraController | null;
@@ -54,6 +59,16 @@ export function Toolbar({
         )}
       </Button>
       <ButtonGroup>
+        <Button
+          variant="overlay-outline"
+          className="py-2 before:opacity-100 before:backdrop-blur-xl"
+          title={showHolo ? "Hide hologram HUD" : "Show hologram HUD"}
+          onClick={() => setShowHolo(!showHolo)}
+        >
+          <IconSlashed slashed={!showHolo} className="opacity-50">
+            <Icon className="fas fa-atom" />
+          </IconSlashed>
+        </Button>
         <Button
           variant="overlay-outline"
           className="py-2 before:opacity-100 before:backdrop-blur-xl"
