@@ -1,6 +1,5 @@
-//------------------------------------------------------------------------------
 import { useState, useContext, useRef, useEffect } from "react";
-//------------------------------------------------------------------------------
+
 import {
   Livelink,
   Canvas,
@@ -50,12 +49,10 @@ export function App() {
               <SpeedProvider>
                 <WebSocketProvider>
                   <KeyboardHandler />
-
                   {xrMode ? (
-                    /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
                       <AppLayout />
-                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-[99999]">
+                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4">
                         <button
                           className="button button-danger"
                           onClick={() => setXRMode(null)}
@@ -81,7 +78,6 @@ export function App() {
                       </div>
                     </WebXR>
                   ) : (
-                    /* --- MODE NORMAL (Navigateur Classique) --- */
                     <>
                       <AppLayout />
 
@@ -307,11 +303,8 @@ function AppLayout() {
           )}
 
           <CameraController ref={cameraControllerRef} />
-
           <Avatars />
-
           {showDOM3D && <Dom3DInfos />}
-
           {showPipCamera && (
             <div className="absolute bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
               <Viewport cameraEntity={pipCamera} className="w-full h-full">
@@ -320,9 +313,7 @@ function AppLayout() {
             </div>
           )}
         </Viewport>
-
         <EntityCreator />
-
         <EntityStatusPanel
           hoveredEntity={hoveredEntity?.entity ?? null}
           pickedEntity={pickedEntity?.entity ?? null}

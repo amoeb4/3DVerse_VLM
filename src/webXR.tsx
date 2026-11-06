@@ -23,11 +23,9 @@ export function XRButton({
       return;
     }
 
-    // FIX: The package exposes an underlying webxr implementation check natively or via WebXR
-    // Since WebXR is exported, check if it contains the check or fallback to native browser checking
-    const checkSupport = navigator.xr?.isSessionSupported
-      ? navigator.xr.isSessionSupported(mode)
-      : Promise.resolve(false);
+        const checkSupport = navigator.xr?.isSessionSupported 
+            ? navigator.xr.isSessionSupported(mode)
+            : Promise.resolve(false);
 
     checkSupport.then((supported) => {
       if (!supported) {
