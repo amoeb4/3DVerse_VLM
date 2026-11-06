@@ -192,7 +192,6 @@ export function EntityCreator() {
           size="sm"
           onClick={handleCreate}
           disabled={!instance || isTorchMissing}
-          
         >
           Create Entity
         </Button>

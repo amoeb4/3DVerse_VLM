@@ -10,7 +10,7 @@ export const ButtonGroup = ({
   return (
     <div
       className={cn(
-        "flex *:-ml-px *:not-last:border-r-0 *:hover:border-r! *:hover:z-1 *:rounded-none *:first:rounded-l-xl *:last:rounded-r-xl pointer-events-auto",
+        "flex *:not-last:border-r-0! *:hover:z-1 *:rounded-none *:first:rounded-l-xl *:last:rounded-r-xl pointer-events-auto",
         className,
       )}
     >

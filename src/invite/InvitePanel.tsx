@@ -94,25 +94,30 @@ export const InvitePanel = () => {
     <>
       <Icon
         className={cn(
-          "fas fa-user-plus text-2xs translate-x-px lg:translate-x-0",
+          "fas fa-user-plus text-2xs text-primary translate-x-px lg:translate-x-0",
           isTextCopied && "invisible",
         )}
       />
-      <span className={cn("hidden lg:block", isTextCopied && "invisible")}>
+      <span
+        className={cn(
+          "hidden lg:block pr-2 text-sm text-primary",
+          isTextCopied && "invisible",
+        )}
+      >
         Invite
       </span>
       {isTextCopied && (
         <span className="absolute inset-0 bg-accent/60 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
           <Icon
             className={cn(
-              "fas fa-check text-white text-sm! lg:text-xs!",
+              "fas fa-check text-white text-sm lg:text-xs",
               "starting:opacity-0 starting:translate-y-2 transition-all duration-400 ease-out",
             )}
           />
           <span
             className={cn(
-              "hidden lg:block text-2xs font-medium",
-              "starting:opacity-0 starting:translate-y-2 transition-all duration-300 delay-100 ease-out",
+              "hidden lg:block text-2xs font-medium text-neutral-1000",
+              "starting:opacity-0 starting:translate-y-2 transition-all duration-300 delay-50 ease-out",
             )}
           >
             Copied
@@ -123,7 +128,7 @@ export const InvitePanel = () => {
   );
 
   const triggerClassName = cn(
-    "relative py-2 gap-2 before:opacity-100 before:backdrop-blur-xl outline-none",
+    "relative px-2 py-1 h-full gap-2 before:opacity-100 before:backdrop-blur-xl outline-none",
     isTextCopied && "border-accent",
   );
 
@@ -132,7 +137,9 @@ export const InvitePanel = () => {
       {!isLargeScreen ? (
         <Button
           ref={triggerRef}
-          variant="overlay-outline"
+          size="sm"
+          variant="secondary"
+          round
           className={triggerClassName}
           onClick={shareGuestLink}
           disabled={guestLink === ""}
@@ -145,7 +152,9 @@ export const InvitePanel = () => {
             render={
               <Button
                 ref={triggerRef}
-                variant="overlay-outline"
+                size="sm"
+                variant="secondary"
+                round
                 className={triggerClassName}
                 active={isOpen}
                 disabled={guestLink === ""}

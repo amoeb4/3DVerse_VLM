@@ -87,7 +87,14 @@ export function decodeLz4Frame(
         out.set(input.subarray(pos, pos + size), written);
         written += size;
       } else {
-        written = decodeBlock(input, pos, pos + size, reserve, () => out, written);
+        written = decodeBlock(
+          input,
+          pos,
+          pos + size,
+          reserve,
+          () => out,
+          written,
+        );
       }
       pos += size + (hasBlockChecksum ? 4 : 0);
     }

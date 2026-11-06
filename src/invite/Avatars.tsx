@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { cn } from "@3dverse/ui-lib";
 
 import type { Client, Entity } from "@3dverse/livelink";
 import {
@@ -7,6 +8,8 @@ import {
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import { DOM3DAvatar } from "@3dverse/livelink-react-ui";
+
+import { displayNameOf, initialsOf } from "../utils/clientName";
 
 //------------------------------------------------------------------------------
 // Deterministic color per client id, so the same person keeps the same avatar color for the whole
@@ -20,9 +23,6 @@ function colorFromClientId(id: string): string {
   const hue = Math.abs(hash) % 360;
   return `hsl(${hue}, 70%, 55%)`;
 }
-
-const initialsOf = (client: Client) =>
-  client.username ? client.username.slice(0, 2) : "G";
 
 //------------------------------------------------------------------------------
 // Must be rendered inside a `Viewport`, since `DOM3DOverlay` projects onto it.
@@ -94,7 +94,7 @@ const Avatar3D = ({
       entity={clientCameraEntity}
       scaleFactor={0.0025}
       color={color}
-      label={client.username || "Guest"}
+      label={displayNameOf(client.username)}
       showOffscreenIndicator
       showViewportRectangle
       onTravel={onTravel}
@@ -107,7 +107,7 @@ const Avatar3D = ({
         background: `color-mix(in srgb, ${color} 90%, transparent)`,
       }}
     >
-      {initialsOf(client)}
+      {initialsOf(client.username)}
     </DOM3DAvatar>
   );
 };
@@ -135,7 +135,7 @@ export const AvatarList = ({
     return null;
   }
   return (
-    <div className="flex items-center" role="none">
+    <div className="flex items-center pl-1" role="none">
       {[...clients].reverse().map((client) => (
         <AvatarBubble key={client.id} client={client} onTravel={handleTravel} />
       ))}
@@ -153,22 +153,27 @@ const AvatarBubble = ({
 }) => {
   const cameraEntity = useClientCameraEntity(client);
   const color = colorFromClientId(client.id);
-  const displayName = client.username || "Guest";
+  const displayName = displayNameOf(client.username);
 
   return (
-    <div className="relative group -ml-2 first:ml-0">
+    <div className="relative group -ml-1 first:ml-0">
       <button
         type="button"
         onClick={() => cameraEntity && onTravel(cameraEntity)}
         disabled={!cameraEntity}
         aria-label={`Travel to ${displayName}`}
-        className="w-7 aspect-square rounded-full border flex items-center justify-center text-[0.6rem] font-medium text-white/90 uppercase tracking-wide select-none cursor-pointer starting:opacity-0 starting:translate-x-2 transition-all duration-300 ease-out disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{
-          borderColor: color,
-          backgroundColor: `color-mix(in srgb, ${color} 85%, black)`,
-        }}
+        className={cn(
+          "w-7 aspect-square rounded-full border flex items-center justify-center text-[0.6rem] font-medium text-white/90 uppercase tracking-wide select-none cursor-pointer starting:opacity-0 starting:translate-x-2 transition-all duration-300 ease-out",
+          "border-(--client-color) bg-[color-mix(in_srgb,var(--client-color)_85%,black)]",
+          "disabled:border-(--client-color)/30 disabled:text-white/50 disabled:bg-[color-mix(in_srgb,var(--client-color)_25%,black)] disabled:cursor-not-allowed",
+        )}
+        style={
+          {
+            "--client-color": color,
+          } as React.CSSProperties
+        }
       >
-        {initialsOf(client)}
+        {initialsOf(client.username)}
       </button>
       <span
         role="tooltip"

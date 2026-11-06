@@ -31,9 +31,7 @@ export default function TorchExample() {
         variant="outline"
         size="icon-sm"
         onClick={() => toggleEntity(flame, flame)}
-        className={cn(
-          !flame?.is_visible && "text-tertiary/50",
-        )}
+        className={cn(!flame?.is_visible && "text-tertiary/50")}
       >
         <IconSlashed slashed={!flame?.is_visible}>
           <Icon className="fas fa-fire" />
@@ -43,9 +41,7 @@ export default function TorchExample() {
         variant="outline"
         size="sm"
         onClick={() => toggleEntity(fronius, effecteur)}
-        className={cn(
-          !fronius?.is_visible && "text-tertiary/50",
-        )}
+        className={cn(!fronius?.is_visible && "text-tertiary/50")}
       >
         Fronius torch
       </Button>
@@ -53,9 +49,7 @@ export default function TorchExample() {
         variant="outline"
         size="sm"
         onClick={() => toggleEntity(effecteur, fronius)}
-        className={cn(
-          !effecteur?.is_visible && "text-tertiary/50",
-        )}
+        className={cn(!effecteur?.is_visible && "text-tertiary/50")}
       >
         Milling spindle
       </Button>

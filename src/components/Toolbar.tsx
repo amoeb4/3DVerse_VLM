@@ -1,4 +1,4 @@
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Button, cn, Icon, IslandBar } from "@3dverse/ui-lib";
 import { Kbd } from "./Kbd";
 
 import { InvitePanel } from "../invite/InvitePanel";
@@ -37,8 +37,10 @@ export function Toolbar({
         "starting:opacity-0 starting:-translate-y-4 transition-all duration-500",
       )}
     >
-      <AvatarList cameraController={cameraController} />
-      <InvitePanel />
+      <IslandBar className="flex items-center gap-2 p-0.5 border border-secondary [corner-shape:round]">
+        <AvatarList cameraController={cameraController} />
+        <InvitePanel />
+      </IslandBar>
       <Button
         variant="overlay-outline"
         className="py-2 before:opacity-100 before:backdrop-blur-xl"
