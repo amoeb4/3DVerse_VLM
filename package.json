@@ -25,7 +25,7 @@
     "@3dverse/livelink-react": "^0.2.49",
     "@3dverse/livelink-react-ui": "^0.3.5",
     "@3dverse/livelink-webxr": "^0.8.4",
-    "@3dverse/ui-lib": "^0.2.5",
+    "@3dverse/ui-lib": "^0.2.7",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@grpc/grpc-js": "^1.14.7",
     "@headlessui/react": "^2.2.4",

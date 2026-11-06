@@ -32,7 +32,6 @@ export default function TorchExample() {
         size="icon-sm"
         onClick={() => toggleEntity(flame, flame)}
         className={cn(
-          "border-secondary",
           !flame?.is_visible && "text-tertiary/50",
         )}
       >
@@ -45,7 +44,6 @@ export default function TorchExample() {
         size="sm"
         onClick={() => toggleEntity(fronius, effecteur)}
         className={cn(
-          "border-secondary",
           !fronius?.is_visible && "text-tertiary/50",
         )}
       >
@@ -56,7 +54,6 @@ export default function TorchExample() {
         size="sm"
         onClick={() => toggleEntity(effecteur, fronius)}
         className={cn(
-          "border-secondary",
           !effecteur?.is_visible && "text-tertiary/50",
         )}
       >

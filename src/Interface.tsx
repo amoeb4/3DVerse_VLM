@@ -117,13 +117,13 @@ export default function ControlPanel({
 
       <div className="flex flex-wrap gap-2 px-3 py-2">
         <EntityDropdown />
-        <Button variant="outline" size="sm" className="border-secondary">
+        <Button variant="outline" size="sm">
           Mount Fronius torch
         </Button>
-        <Button variant="outline" size="sm" className="border-secondary">
+        <Button variant="outline" size="sm">
           Mount Spindle motor
         </Button>
-        <Button variant="destructive" size="sm" className="border-secondary">
+        <Button variant="destructive" size="sm">
           Back to start
         </Button>
       </div>

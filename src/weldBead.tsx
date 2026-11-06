@@ -162,7 +162,7 @@ export function EntityCreator() {
   return (
     <Panel
       className={cn(
-        "absolute top-14 left-5 min-w-68 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+        "absolute top-14 left-5 min-w-68 max-w-80 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
         "starting:opacity-0 starting:-translate-y-8 transition-all duration-500",
       )}
     >
@@ -192,7 +192,7 @@ export function EntityCreator() {
           size="sm"
           onClick={handleCreate}
           disabled={!instance || isTorchMissing}
-          className="border-secondary"
+          
         >
           Create Entity
         </Button>
@@ -201,7 +201,7 @@ export function EntityCreator() {
           size="sm"
           onClick={() => setAutoWeld((v) => !v)}
           disabled={!instance || isTorchMissing}
-          className="text-white! grow border-secondary"
+          className="text-white! grow"
         >
           {autoWeld ? "Stop Weld" : "Start Weld"}
         </Button>
