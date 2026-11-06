@@ -1,5 +1,5 @@
 import { Button, cn } from "@3dverse/ui-lib";
-import { Kbd } from "./Kbd";
+import { Kbd } from "./common/Kbd";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 
 const SHOW_KBD_SHORTCUTS = false;

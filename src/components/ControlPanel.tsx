@@ -6,10 +6,10 @@ import {
   type ReactNode,
   type ChangeEvent,
 } from "react";
-import TorchExample from "./torch";
-import { PartEntitiesContext } from "./partEntitiesContext";
+import TorchExample from "./TorchExample";
+import { PartEntitiesContext } from "../partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
-import { setOrientation } from "./movements";
+import { setOrientation } from "../movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
 
@@ -189,6 +189,7 @@ export default function ControlPanel({
 }
 
 // ---------------------- Slider ----------------------
+
 function Slider({
   label,
   value,

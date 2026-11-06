@@ -1,5 +1,5 @@
 import { Button, cn, Icon, IslandBar } from "@3dverse/ui-lib";
-import { Kbd } from "./Kbd";
+import { Kbd } from "./common/Kbd";
 
 import { InvitePanel } from "../invite/InvitePanel";
 import { SHORTCUTS } from "../shortcuts/shortcuts";

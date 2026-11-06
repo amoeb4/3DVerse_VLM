@@ -1,8 +1,8 @@
 import { Entity } from "@3dverse/livelink";
 import { useEntity } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { ButtonGroup } from "./components/common/ButtonGroup";
-import { IconSlashed } from "./components/common/IconSlashed";
+import { ButtonGroup } from "./common/ButtonGroup";
+import { IconSlashed } from "./common/IconSlashed";
 
 function toggleEntity(entity?: Entity | null, entity2?: Entity | null) {
   if (entity && entity == entity2) {

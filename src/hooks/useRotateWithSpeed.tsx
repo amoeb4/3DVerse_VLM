@@ -1,5 +1,5 @@
 // useRotateWithSpeed.ts
-import { useSpeed } from "../Interface";
+import { useSpeed } from "../components/ControlPanel";
 import { rotateHierarchyProgressive } from "../partEntitiesContext";
 import type { EntityWithParentId } from "../partEntitiesContext";
 

@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
 import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
-import { useSpeed } from "./Interface";
+import { useSpeed } from "./components/ControlPanel";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},

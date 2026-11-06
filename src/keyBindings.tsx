@@ -1,7 +1,7 @@
 import { useEffect, useContext } from "react";
 import { quat, vec3 } from "gl-matrix";
 import { LivelinkContext } from "@3dverse/livelink-react";
-import { useSpeed } from "./Interface";
+import { useSpeed } from "./components/ControlPanel";
 import { eulerToQuat2 } from "./utils/angle";
 
 export default function KeyboardHandler() {

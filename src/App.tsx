@@ -13,7 +13,7 @@ import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import KeyboardHandler from "./keyBindings";
 import CameraEventListener from "./camera/CameraEventListener";
-import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface";
+import ControlPanel, { SpeedProvider, EntityProvider } from "./components/ControlPanel";
 import { CameraEntityContext } from "./camera/cameraControl";
 import { WebSocketProvider } from "./webSockets";
 import { PartEntitiesProvider } from "./partEntitiesContext";
