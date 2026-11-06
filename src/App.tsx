@@ -220,6 +220,10 @@ function AppLayout({
     setIsControlPanelOpen((prev) => !prev);
   }, []);
 
+  const onCloseControlPanel = useCallback(() => {
+    setIsControlPanelOpen(false);
+  }, []);
+
   const { resetCamera, isAtDefaultPosition } = useResetCamera(cameraController);
 
   useSceneThemeWatcher();
@@ -228,6 +232,7 @@ function AppLayout({
   useKeyboardShortcuts({
     onReset: resetCamera,
     onToggleControlPanel,
+    onCloseControlPanel,
     onToggleTheme: toggleTheme,
   });
 
@@ -249,7 +254,7 @@ function AppLayout({
         />
         <ControlPanel
           isOpen={isControlPanelOpen}
-          onClose={() => setIsControlPanelOpen(false)}
+          onClose={onCloseControlPanel}
         />
         {/* <DisplayDashboard /> */}
       </EntityProvider>

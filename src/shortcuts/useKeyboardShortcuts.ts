@@ -16,14 +16,27 @@ function isTypingInField(target: EventTarget | null) {
 export function useKeyboardShortcuts({
   onReset,
   onToggleControlPanel,
+  onCloseControlPanel,
   onToggleTheme,
 }: {
   onReset: () => void;
   onToggleControlPanel: () => void;
+  onCloseControlPanel: () => void;
   onToggleTheme: () => void;
 }) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Escape closes the panel even while a slider/input inside it has focus.
+      if (
+        event.key.toLowerCase() === SHORTCUTS.closeControlPanel &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey
+      ) {
+        onCloseControlPanel();
+        return;
+      }
+
       if (
         event.metaKey ||
         event.ctrlKey ||
@@ -49,5 +62,5 @@ export function useKeyboardShortcuts({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onReset, onToggleControlPanel, onToggleTheme]);
+  }, [onReset, onToggleControlPanel, onCloseControlPanel, onToggleTheme]);
 }
