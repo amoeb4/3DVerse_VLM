@@ -1,7 +1,7 @@
 // useRotateWithSpeed.ts
-import { useSpeed } from "./Interface";
-import { rotateHierarchyProgressive } from "./partEntitiesContext";
-import type { EntityWithParentId } from "./partEntitiesContext";
+import { useSpeed } from "../Interface";
+import { rotateHierarchyProgressive } from "../partEntitiesContext";
+import type { EntityWithParentId } from "../partEntitiesContext";
 
 export const useRotateWithSpeed = (
   entitiesMap: Map<string, EntityWithParentId>,

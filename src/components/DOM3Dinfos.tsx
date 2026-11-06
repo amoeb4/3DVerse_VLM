@@ -1,5 +1,5 @@
 import { DOM3DOverlay, DOMEntity, useEntity } from "@3dverse/livelink-react";
-import type { EntityWithParentId } from "./partEntitiesContext";
+import type { EntityWithParentId } from "../partEntitiesContext";
 
 interface Dom3DInfosProps {
   entitiesMap?: Map<string, EntityWithParentId>;
@@ -34,80 +34,84 @@ export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
     <DOM3DOverlay>
       {
         <DOMEntity entity={part_1} anchor="right-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Base
-            <br />
-            Axe Z
-          </p>
+          <Label>
+            Base<SubLabel>Z axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_2} anchor="left-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Epaule
-            <br />
-            Axe X
-          </p>
+          <Label>
+            Shoulder<SubLabel>X axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_3} anchor="right-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Coude 1<br />
-            Axe Z
-          </p>
+          <Label>
+            Elbow 1<SubLabel>Z axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_4} anchor="left-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Bras
-            <br />
-            Axe Y
-          </p>
+          <Label>
+            Arm<SubLabel>Y axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_5} anchor="right-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Coude 2<br />
-            Axe Z
-          </p>
+          <Label>
+            Elbow 2<SubLabel>Z axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_6} anchor="right-top" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Coude 3<br />
-            Axe X
-          </p>
+          <Label>
+            Elbow 3<SubLabel>X axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_7} anchor="right-top" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Vireur
-            <br />
-            Axe Y
-          </p>
+          <Label>
+            Positioner<SubLabel>Y axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
 
       {
         <DOMEntity entity={part_8} anchor="right-top" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">
-            Plateau
-            <br />
-            Axe Y
-          </p>
+          <Label>
+            Turntable<SubLabel>Y axis</SubLabel>
+          </Label>
         </DOMEntity>
       }
     </DOM3DOverlay>
   );
 }
+
+const Label = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <p
+      data-theme="dark"
+      className="px-4 py-2 rounded-lg bg-underground/80 text-2xl text-primary font-medium backdrop-blur-md border border-tertiary"
+    >
+      {children}
+    </p>
+  );
+};
+
+const SubLabel = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <span className="block text-[80%] font-normal opacity-80">{children}</span>
+  );
+};

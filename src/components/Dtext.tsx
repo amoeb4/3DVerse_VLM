@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import DecryptedText from "./DecryptedText";
-import "../src/index.css";
 
 export default function Dtext() {
   const [showSecondLine, setShowSecondLine] = useState(false);
@@ -14,14 +13,14 @@ export default function Dtext() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center text-center">
+    <div className="flex flex-col min-h-16 font-orbitron font-bold text-2xl text-accent/80">
       <DecryptedText
         text="Welcome to"
         speed={40}
         maxIterations={18}
         characters="ABCD1234!?XMPLSZQK"
-        className="font-orbitron font-bold text-2xl text-gray-700"
-        encryptedClassName="font-orbitron font-bold text-2xl text-gray-400 opacity-70 animate-jitter"
+        className="font-normal"
+        encryptedClassName="font-orbitron font-normal text-2xl text-accent/25 opacity-70 animate-jitter"
         animateOn="view"
       />
       {showSecondLine && (
@@ -30,8 +29,7 @@ export default function Dtext() {
           speed={40}
           maxIterations={18}
           characters="ABCD1234!?XMPLSZQK"
-          className="font-orbitron font-bold text-2xl text-gray-700"
-          encryptedClassName="font-orbitron font-bold text-2xl text-gray-400 opacity-70 animate-jitter"
+          encryptedClassName="font-orbitron font-bold text-2xl text-accent/25 opacity-70 animate-jitter"
           animateOn="view"
         />
       )}

@@ -66,6 +66,7 @@ ws.on("error", (e) => console.error("❌ WebSocket error:", e));
 //   6: (val) => [-val + 180, 0, 180],
 //   7: (val) => [0, 0, -val],
 //   8: (val) => [-val, 0, 0],
+
 const orientationMap: Record<number, (val: number) => [number, number, number]> = {
   // robot
   1: (val) => [90, 0, val],

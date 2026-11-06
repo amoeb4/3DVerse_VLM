@@ -12,6 +12,7 @@ import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "./movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
 
 type SpeedContextType = {
   delayMs: number;
@@ -63,28 +64,13 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ---------------------- Utils ----------------------
-export function eulerToQuat(
-  x: number,
-  y: number,
-  z: number,
-): [number, number, number, number] {
-  const rad = (deg: number) => (deg * Math.PI) / 180;
-  const c1 = Math.cos(rad(y) / 2),
-    s1 = Math.sin(rad(y) / 2);
-  const c2 = Math.cos(rad(z) / 2),
-    s2 = Math.sin(rad(z) / 2);
-  const c3 = Math.cos(rad(x) / 2),
-    s3 = Math.sin(rad(x) / 2);
-  return [
-    c1 * c2 * s3 - s1 * s2 * c3,
-    c1 * s2 * c3 + s1 * c2 * s3,
-    s1 * c2 * c3 - c1 * s2 * s3,
-    c1 * c2 * c3 + s1 * s2 * s3,
-  ];
-}
-
-export default function ControlPanel() {
+export default function ControlPanel({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
     ["material"],
@@ -93,7 +79,6 @@ export default function ControlPanel() {
   const { instance } = useContext(LivelinkContext);
 
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const { delayMs, setDelayMs } = useSpeed();
 
@@ -114,94 +99,93 @@ export default function ControlPanel() {
       }
     };
 
-  if (!isExpanded) {
-    return (
-      <button
-        className="fixed top-[3%] right-[3%] z-50 bg-white/10 text-white border border-white/20 backdrop-blur px-3 py-2 rounded-full shadow hover:bg-white/20 transition"
-        onClick={() => setIsExpanded(true)}
-      >
-        Control Panel
-      </button>
-    );
-  }
-
   return (
-    <div className="fixed top-[3%] right-[3%] z-50 p-6 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-6 w-[90vw] max-w-[600px]">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Control Panel</h1>
-        <button
-          className="text-sm bg-white/10 border border-white/30 rounded-md px-2 py-1 hover:bg-white/20 transition"
-          onClick={() => setIsExpanded(false)}
-        >
-          Minimize
-        </button>
-      </div>
+    <Panel
+      className={cn(
+        "fixed top-15 right-4 z-50 divide-y divide-tertiary w-[90vw] max-w-150 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "origin-top-right transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
+        isOpen
+          ? "opacity-100 translate-x-0 scale-100 visible"
+          : "opacity-0 translate-x-4 scale-95 invisible",
+      )}
+    >
+      <header className="flex justify-between items-center px-4 py-2">
+        <h1 className="font-heading text-sm font-bold">Control Panel</h1>
+        <Button variant="ghost" size="icon-xs" onClick={onClose}>
+          <Icon className="fas fa-close" />
+        </Button>
+      </header>
 
-      <div className="flex flex-wrap gap-4 items-center justify-between mt-4">
+      <div className="flex flex-wrap gap-2 px-3 py-2">
         <EntityDropdown />
-        <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+        <Button variant="outline" size="sm" className="border-secondary">
           Mount Fronius torch
-        </button>
-        <button className="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+        </Button>
+        <Button variant="outline" size="sm" className="border-secondary">
           Mount Spindle motor
-        </button>
-        <button className="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+        </Button>
+        <Button variant="destructive" size="sm" className="border-secondary">
           Back to start
-        </button>
+        </Button>
       </div>
 
-      <div className="space-y-4 mt-4">
+      <div className="px-4 py-3 space-y-1">
         <Slider
-          label={`Delay: ${delayMs} ms`}
+          label="Delay"
+          unit="ms"
           value={delayMs}
           min={5}
           max={200}
           step={1}
           onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
-          color="purple"
+          color="accent"
         />
 
         {obj?.material && (
           <Slider
-            label={`Threshold: ${(
-              (obj.material.dataJSON.threshold as number) ?? 0
-            ).toFixed(2)}`}
+            label="Threshold"
+            unit="°"
             value={(obj.material.dataJSON.threshold as number) ?? 0}
             min={-1.8}
             max={10}
             step={0.1}
             onChange={handleThresholdChange}
-            color="white"
+            color="neutral"
           />
         )}
 
         <Slider
-          label={`Rotation X: ${rotation.x}°`}
+          label="Rotation X"
           value={rotation.x}
+          unit="°"
           min={-180}
           max={180}
           onChange={handleSliderChange("x")}
-          color="red"
+          color="axis-x"
         />
         <Slider
-          label={`Rotation Y: ${rotation.y}°`}
+          label="Rotation Y"
+          unit="°"
           value={rotation.y}
           min={-180}
           max={180}
           onChange={handleSliderChange("y")}
-          color="blue"
+          color="axis-y"
         />
         <Slider
-          label={`Rotation Z: ${rotation.z}°`}
+          label="Rotation Z"
+          unit="°"
           value={rotation.z}
           min={-180}
           max={180}
           onChange={handleSliderChange("z")}
-          color="green"
+          color="axis-z"
         />
+      </div>
+      <div className="flex justify-end px-4 py-3">
         <TorchExample />
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -209,6 +193,7 @@ export default function ControlPanel() {
 function Slider({
   label,
   value,
+  unit,
   min,
   max,
   step = 1,
@@ -217,23 +202,29 @@ function Slider({
 }: {
   label: string;
   value: number;
+  unit: string;
   min: number;
   max: number;
   step?: number;
   onChange: (e: any) => void;
-  color: "green" | "blue" | "purple" | "red" | "white";
+  color: "accent" | "neutral" | "axis-x" | "axis-y" | "axis-z";
 }) {
-  const colorClasses: Record<string, string> = {
-    white: "accent-white-500",
-    green: "accent-green-500",
-    blue: "accent-blue-500",
-    purple: "accent-purple-500",
-    red: "accent-red-500",
+  // Design-token colors (`accent-*` sets the range input's CSS accent-color).
+  const colorClasses: Record<typeof color, string> = {
+    accent: "accent-accent",
+    neutral: "accent-neutral-0",
+    "axis-x": "accent-axis-x",
+    "axis-y": "accent-axis-y",
+    "axis-z": "accent-axis-z",
   };
 
   return (
-    <div className="flex flex-col w-full max-w-xl">
-      <label className="mb-1 font-medium text-sm">{label}</label>
+    <div className="flex justify-between gap-2 w-full max-w-xl">
+      <label className="basis-1/3 text-xs">{label}</label>
+      <span className="basis-20 text-right text-2xs tabular-nums">
+        {value}
+        {unit && <span className="opacity-75">{unit}</span>}
+      </span>
       <input
         type="range"
         min={min}
@@ -241,7 +232,7 @@ function Slider({
         step={step}
         value={value}
         onChange={onChange}
-        className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${colorClasses[color]} bg-gray-200`}
+        className={`h-2 w-full rounded-lg appearance-none cursor-pointer ${colorClasses[color]} bg-neutral-900/20 border border-tertiary`}
       />
     </div>
   );
@@ -277,15 +268,12 @@ export function EntityDropdown() {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/90 px-3 py-2 text-sm font-semibold text-gray-900 shadow ring-1 ring-gray-300 hover:bg-gray-100">
-          {selectedEntity?.name || "Entités"}
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="-mr-1 size-5 text-gray-400"
-          />
+        <MenuButton className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-sm border border-tertiary hover:bg-primary/10">
+          {selectedEntity?.name || "Entities"}
+          <Icon className="fas fa-angle-down text-5xs opacity-60" />
         </MenuButton>
       </div>
-      <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+      <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-overground shadow-lg border border-tertiary focus:outline-hidden">
         <div className="py-1">
           {entities.map((entity) => (
             <MenuItem key={entity.id}>
@@ -293,7 +281,7 @@ export function EntityDropdown() {
                 <button
                   onClick={() => setSelectedEntity(entity)}
                   className={`${
-                    active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                    active ? "bg-primary/10 text-primary" : "text-secondary"
                   } block w-full text-left px-4 py-2 text-sm`}
                 >
                   {entity.name}

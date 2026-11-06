@@ -1,7 +1,7 @@
 "use client";
 import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
-import { eulerToQuat } from "./Interface";
+import { Button, cn, Panel, Slider } from "@3dverse/ui-lib";
 
 const MATERIAL_REFS = [
   "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
@@ -60,12 +60,13 @@ const MIN_MOVE_DISTANCE = 0.008;
 export function EntityCreator() {
   const { instance } = useContext(LivelinkContext);
 
-  const [temperature, setTemperature] = useState(50);
+  const [temperature, setTemperature] = useState<number>(50);
   const [latency, setLatency] = useState(0);
   const [autoWeld, setAutoWeld] = useState(false);
-  const { entity: torch } = useEntity({
+  const { entity: torch, isPending: isTorchPending } = useEntity({
     euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
   });
+  const isTorchMissing = !isTorchPending && !torch;
   const { entity: plateau } = useEntity({
     euid: "19a0b434-94d5-4546-8e8a-7b894148c504",
   });
@@ -159,36 +160,52 @@ export function EntityCreator() {
   };
 
   return (
-    <div className="absolute text-white top-32 left-5 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
-      <button
-        className="button button-overlay"
-        onClick={handleCreate}
-        disabled={!instance}
-      >
-        Create Entity
-      </button>
-      <button
-        className="button button-overlay"
-        onClick={() => setAutoWeld((v) => !v)}
-        disabled={!instance}
-      >
-        {autoWeld ? "Stop Weld" : "Start Weld"}
-      </button>
-
-      <label className="flex flex-col text-white text-sm">
-        Température: {temperature}
-        <br />
-        Latency: {`${latency.toFixed(0)}ms`}
-        <br />
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={temperature}
-          onChange={(e) => setTemperature(Number(e.target.value))}
-          className="w-40"
-        />
-      </label>
-    </div>
+    <Panel
+      className={cn(
+        "absolute top-14 left-5 min-w-68 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+        "starting:opacity-0 starting:-translate-y-8 transition-all duration-500",
+      )}
+    >
+      <div className="flex flex-col gap-2 px-4 py-3 text-3xs">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex justify-between">
+            <label>Temperature</label>
+            <p className="text-accent tabular-nums">{temperature}°C</p>
+          </div>
+          <Slider
+            min={0}
+            max={100}
+            value={temperature}
+            onValueChange={(value) => setTemperature(value)}
+            size="2xs"
+            className="[&_output]:text-white"
+          />
+        </div>
+        <div className="flex justify-between">
+          <label>Latency</label>
+          <p className="text-accent tabular-nums">{latency.toFixed(0)} ms</p>
+        </div>
+      </div>
+      <div className="flex gap-2 px-4 py-3 border-t border-tertiary">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCreate}
+          disabled={!instance || isTorchMissing}
+          className="border-secondary"
+        >
+          Create Entity
+        </Button>
+        <Button
+          variant="accent"
+          size="sm"
+          onClick={() => setAutoWeld((v) => !v)}
+          disabled={!instance || isTorchMissing}
+          className="text-white! grow border-secondary"
+        >
+          {autoWeld ? "Stop Weld" : "Start Weld"}
+        </Button>
+      </div>
+    </Panel>
   );
 }

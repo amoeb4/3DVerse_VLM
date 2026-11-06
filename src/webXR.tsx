@@ -1,5 +1,6 @@
-import { WebXR } from "@3dverse/livelink-webxr";
+import { Button, cn } from "@3dverse/ui-lib";
 import { useState, useEffect } from "react";
+import { WebXR } from "@3dverse/livelink-webxr";
 
 // Explicitly type the WebXR mode strings
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
@@ -37,16 +38,17 @@ export function XRButton({
   }, [mode]);
 
   return (
-    <button
-      className={
-        "button button-primary" + (!isSessionSupported ? " opacity-50" : "")
-      }
+    <Button
+      variant="overlay-outline"
+      className={cn(
+        "rounded-full before:opacity-100 before:backdrop-blur-xl",
+        !isSessionSupported && "opacity-50 cursor-not-allowed",
+      )}
       onClick={() => setXRMode(mode)}
       disabled={!isSessionSupported}
-      style={isSessionSupported ? {} : { cursor: "not-allowed" }}
       title={message}
     >
       {text} {xrModeTitle}
-    </button>
+    </Button>
   );
 }
