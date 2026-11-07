@@ -88,6 +88,20 @@ export function useSceneThemeWatcher(): void {
     }
   }, [instance, environment]);
 
+  // Leaving the viewer puts the page back in the theme it had before, so Home looks the same
+  // whether it is opened directly or come back to. Declared first, so it runs before the next one.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.dataset.theme;
+    return () => {
+      if (previous === undefined) {
+        delete root.dataset.theme;
+      } else {
+        root.dataset.theme = previous;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme ?? readPreference();
   }, [theme]);

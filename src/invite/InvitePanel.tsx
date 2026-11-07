@@ -11,21 +11,14 @@ import {
 } from "@3dverse/ui-lib";
 
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { viewerPath } from "../routing";
 import { QrCodeModal } from "./QrCodeModal";
-
-// URL params read by `App` to join the session directly, skipping the scene picker.
-export const SESSION_ID_PARAM = "sessionId";
-export const SCENE_ID_PARAM = "sceneId";
 
 // Unlike the mobile viewer, this app connects with a public token, which cannot mint guest tokens
 // (that needs `manage` scope). The invite link therefore names the session itself, and the guest
-// joins it with the same public token.
-const makeInviteLink = (sessionId: string, sceneId: string) => {
-  const url = new URL(location.origin + location.pathname);
-  url.searchParams.set(SESSION_ID_PARAM, sessionId);
-  url.searchParams.set(SCENE_ID_PARAM, sceneId);
-  return url.toString();
-};
+// joins it with the same public token: the machine's URL, e.g. /nj130-2.05?sessionId=….
+const makeInviteLink = (sessionId: string, sceneId: string) =>
+  new URL(viewerPath(sceneId, sessionId), location.origin).toString();
 
 const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
 

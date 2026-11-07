@@ -1,15 +1,12 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import Dtext from "./Dtext";
 import { MACHINES } from "../config";
+import { viewerPath } from "../routing";
 
-type SceneSelection = { sceneId: string; name: string; sessionId?: string };
-
-export const StartupPanel = ({
-  onSubmit,
-}: {
-  onSubmit: (selection: SceneSelection) => void;
-}) => {
+export const StartupPanel = () => {
+  const navigate = useNavigate();
   const [customSceneId, setCustomSceneId] = useState("");
 
   return (
@@ -18,13 +15,14 @@ export const StartupPanel = ({
         <Dtext />
 
         <nav className="flex flex-col mt-6 *:rounded-none *:first:rounded-t-xl! *:last:rounded-b-xl!">
-          {MACHINES.map(({ name, sceneId }) => (
+          {MACHINES.map(({ name, sceneId, slug }) => (
             <Button
               key={sceneId}
+              as={Link}
+              to={viewerPath(slug)}
               variant="outline"
               size="lg"
               className="group w-full justify-between -mt-px py-2 border-secondary hover:border-accent/40 hover:text-accent hover:z-1 transition-all duration-500"
-              onClick={() => onSubmit({ sceneId, name })}
             >
               {name}
               <Icon className="fas fa-angle-right text-3xs opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
@@ -35,7 +33,7 @@ export const StartupPanel = ({
         <form
           onSubmit={(e) => {
             e.preventDefault(); // keep the browser from reloading the page
-            onSubmit({ sceneId: customSceneId, name: "Custom scene" });
+            navigate(viewerPath(customSceneId.trim()));
           }}
           className="mt-6 w-full max-w-2xl border-t border-tertiary pt-6"
         >

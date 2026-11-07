@@ -8,6 +8,14 @@ import {
   LivelinkContext,
   DefaultCameraController,
 } from "@3dverse/livelink-react";
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useParams,
+  useSearchParams,
+} from "react-router";
 
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
@@ -24,44 +32,94 @@ import { EntityCreator } from "./weldBead";
 import { EntityStatusPanel } from "./components/EntityPicking";
 import { XRButton } from "./webXR";
 import type { Entity } from "@3dverse/livelink";
-import { PUBLIC_TOKEN, MACHINES } from "./config";
+import { PUBLIC_TOKEN } from "./config";
 import { Toolbar } from "./components/Toolbar";
-import { SCENE_ID_PARAM, SESSION_ID_PARAM } from "./invite/InvitePanel";
 import { ResetPositionButton } from "./components/ResetPositionButton";
 import { StartupScreen } from "./components/startup/StartupScreen";
+import { NotFoundScreen } from "./components/startup/NotFoundScreen";
+import {
+  HOME_PATH,
+  LEGACY_SCENE_ID_PARAM,
+  SESSION_ID_PARAM,
+  resolveViewerScene,
+  viewerPath,
+  type ViewerScene,
+} from "./routing";
 import { useResetCamera } from "./hooks/useResetCamera";
 import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
 import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
 import { ButtonGroup } from "./components/common/ButtonGroup";
 
-type SceneSelection = { sceneId: string; name: string; sessionId?: string };
-
-// An invite link (see `InvitePanel`) names the session to join, so it skips the scene picker.
-function selectionFromInviteLink(): SceneSelection | null {
-  const params = new URLSearchParams(location.search);
-  const sessionId = params.get(SESSION_ID_PARAM);
-  if (!sessionId) {
-    return null;
-  }
-  const sceneId = params.get(SCENE_ID_PARAM) ?? "";
-  const machine = MACHINES.find((m) => m.sceneId === sceneId);
-  return { sceneId, sessionId, name: machine?.name ?? "Shared session" };
+// The URLs themselves are described in `routing.ts`.
+export function App() {
+  return (
+    <Routes>
+      <Route index element={<HomeRoute />} />
+      <Route path=":scene" element={<ViewerRoute />} />
+      <Route path="*" element={<NotFoundScreen />} />
+    </Routes>
+  );
 }
 
-export function App() {
-  const [credentials, setCredentials] = useState<SceneSelection | null>(
-    selectionFromInviteLink,
+function HomeRoute() {
+  const [searchParams] = useSearchParams();
+
+  // An invite link from before the app had URLs: on to the machine's URL, same session.
+  const sessionId = searchParams.get(SESSION_ID_PARAM);
+  const sceneId = searchParams.get(LEGACY_SCENE_ID_PARAM);
+  if (sessionId && sceneId) {
+    return <Navigate replace to={viewerPath(sceneId, sessionId)} />;
+  }
+
+  return <StartupScreen />;
+}
+
+function ViewerRoute() {
+  const { scene: segment = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get(SESSION_ID_PARAM) ?? undefined;
+
+  const scene = resolveViewerScene(segment);
+  if (!scene) {
+    return <NotFoundScreen />;
+  }
+  // `/NJ130-2.05` or a machine's scene UUID: shown under the machine's own URL.
+  if (segment !== scene.segment) {
+    return <Navigate replace to={viewerPath(scene.segment, sessionId)} />;
+  }
+  // Keyed, so going to another machine or session starts over with a fresh connection and state.
+  return (
+    <Viewer
+      key={`${scene.sceneId}/${sessionId ?? ""}`}
+      scene={scene}
+      sessionId={sessionId}
+    />
   );
+}
+
+function Viewer({
+  scene,
+  sessionId,
+}: {
+  scene: ViewerScene;
+  sessionId?: string;
+}) {
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
-  if (!credentials) {
-    return <StartupScreen onSubmit={setCredentials} />;
-  }
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = `${scene.name} · VLM Vision`;
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [scene.name]);
+
+  // Unmounting `Livelink` (Back to Home, browser back) disconnects from the session.
   return (
     <Livelink
-      {...(credentials.sessionId
-        ? { sessionId: credentials.sessionId }
-        : { sceneId: credentials.sceneId, isTransient: false })}
+      {...(sessionId
+        ? { sessionId }
+        : { sceneId: scene.sceneId, isTransient: false })}
       token={PUBLIC_TOKEN}
       LoadingPanel={LoadingOverlay}
     >
@@ -74,10 +132,7 @@ export function App() {
               {xrMode ? (
                 /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                 <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
-                  <AppLayout
-                    machineName={credentials.name}
-                    setXRMode={setXRMode}
-                  />
+                  <AppLayout machineName={scene.name} setXRMode={setXRMode} />
                   <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
                     <Button
                       variant="overlay-outline"
@@ -106,10 +161,7 @@ export function App() {
                 </WebXR>
               ) : (
                 /* --- MODE NORMAL (Navigateur Classique) --- */
-                <AppLayout
-                  machineName={credentials.name}
-                  setXRMode={setXRMode}
-                />
+                <AppLayout machineName={scene.name} setXRMode={setXRMode} />
               )}
             </WebSocketProvider>
           </SpeedProvider>
@@ -147,6 +199,10 @@ function AppLayout({
 
   useEffect(() => {
     document.body.style.cursor = hoveredEntity ? "pointer" : "default";
+    // Leaving the viewer while over an entity must not keep the pointer on the gallery.
+    return () => {
+      document.body.style.cursor = "default";
+    };
   }, [hoveredEntity]);
 
   useEffect(() => {
@@ -239,7 +295,23 @@ function AppLayout({
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
-        <header className="absolute top-4 left-7 z-50">
+        <header
+          className={cn(
+            "absolute top-4 left-4 flex items-center gap-1 z-50",
+            "starting:opacity-0 starting:-translate-y-4 transition-all duration-500",
+          )}
+        >
+          <Button
+            as={Link}
+            to={HOME_PATH}
+            variant="ghost"
+            size="icon-lg"
+            className="text-primary"
+            title="Back to Home"
+            aria-label="Back to Home"
+          >
+            <Icon className="fas fa-arrow-left text-2xs" />
+          </Button>
           <h1 className="text-xl font-bold">{machineName}</h1>
         </header>
         <Toolbar

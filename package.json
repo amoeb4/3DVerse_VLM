@@ -40,6 +40,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router": "^8.5.1",
     "three": "^0.178.0",
     "webxr": "^0.0.0",
     "ws": "^8.18.3"

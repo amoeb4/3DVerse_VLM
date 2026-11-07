@@ -4,7 +4,6 @@ import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { StartupPanel } from "../StartupPanel";
 import { MachineGallery } from "./MachineGallery";
 
-type SceneSelection = { sceneId: string; name: string; sessionId?: string };
 type StartupView = "grid" | "list";
 
 const STORAGE_KEY = "vlm.startupView";
@@ -29,11 +28,7 @@ const writeView = (view: StartupView) => {
  * Both startup pages — the machine tiles (default) and the original compact list — with a toggle
  * between them that is remembered for next time.
  */
-export function StartupScreen({
-  onSubmit,
-}: {
-  onSubmit: (selection: SceneSelection) => void;
-}) {
+export function StartupScreen() {
   const [view, setView] = useState<StartupView>(readView);
 
   const select = (next: StartupView) => {
@@ -72,9 +67,9 @@ export function StartupScreen({
       </div>
 
       {view === "grid" ? (
-        <MachineGallery onSubmit={onSubmit} />
+        <MachineGallery />
       ) : (
-        <StartupPanel onSubmit={onSubmit} />
+        <StartupPanel />
       )}
     </div>
   );

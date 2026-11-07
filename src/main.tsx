@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 import { Buffer as NodeBuffer } from "buffer";
 import App from "./App";
 
@@ -16,6 +17,8 @@ if (!(window as any).Buffer) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>,
 );

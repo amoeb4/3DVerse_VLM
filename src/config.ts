@@ -16,6 +16,11 @@ export type Milestone = { label: string; done: boolean };
 
 export type Machine = {
   name: string;
+  /**
+   * The machine's address in the app: `/<slug>`, e.g. localhost:3005/nj130-2.05. Lowercase and
+   * URL-safe. Keep it stable once shared: bookmarks and invite links point at it.
+   */
+  slug: string;
   sceneId: string;
   /** Short line under the name. */
   description?: string;
@@ -34,6 +39,7 @@ export type Machine = {
 export const MACHINES: Machine[] = [
   {
     name: "NJ130 2.05",
+    slug: "nj130-2.05",
     sceneId: "759ed8c4-fb60-432c-a41e-cf0f39f92d6f",
     description: "Welding cell · 6-axis arm on positioner and turntable",
     image: nj130Image,
@@ -48,6 +54,7 @@ export const MACHINES: Machine[] = [
   },
   {
     name: "NJ40",
+    slug: "nj40",
     sceneId: "a1d7bb38-1a12-46fb-8485-36b29460cd2c",
     description: "Welding cell · 6-axis arm with tilting positioner",
     image: nj40Image,
@@ -62,6 +69,7 @@ export const MACHINES: Machine[] = [
   },
   {
     name: "Comau racer 3",
+    slug: "comau-racer-3",
     sceneId: "516d270a-5a6b-44e6-99c6-44df631bf475",
     description: "Compact 6-axis arm",
     status: "in-progress",
@@ -75,6 +83,7 @@ export const MACHINES: Machine[] = [
   },
   {
     name: "Test_primitive [deprecated]",
+    slug: "test-primitive",
     sceneId: "ec33e19d-da9f-4593-8412-a9c0c32cc5ba",
     description: "Primitive test scene",
     status: "deprecated",

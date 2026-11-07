@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import Dtext from "../Dtext";
 import { MACHINES, type Machine, type MachineStatus } from "../../config";
 import { displayNameOf, initialsOf } from "../../utils/clientName";
 import { useLiveSessions, type LiveSession } from "./useLiveSessions";
-
-type SceneSelection = { sceneId: string; name: string; sessionId?: string };
+import { viewerPath } from "../../routing";
 
 const STATUS: Record<MachineStatus, { label: string; className: string }> = {
   operational: {
@@ -27,13 +27,10 @@ const STATUS: Record<MachineStatus, { label: string; className: string }> = {
 /**
  * The second startup page: one tile per machine, with its picture, whether someone is in it right
  * now (LIVE, from the platform's running sessions), how far its digital twin has come, and what it
- * is made of. Opening a live machine joins the session already running on it.
+ * is made of. Each tile links to the machine's URL; a live machine's to the session running on it.
  */
-export function MachineGallery({
-  onSubmit,
-}: {
-  onSubmit: (selection: SceneSelection) => void;
-}) {
+export function MachineGallery() {
+  const navigate = useNavigate();
   const { byScene, available } = useLiveSessions();
   const [customSceneId, setCustomSceneId] = useState("");
 
@@ -79,13 +76,6 @@ export function MachineGallery({
               <MachineTile
                 machine={machine}
                 sessions={byScene.get(machine.sceneId) ?? []}
-                onOpen={(sessionId) =>
-                  onSubmit({
-                    sceneId: machine.sceneId,
-                    name: machine.name,
-                    sessionId,
-                  })
-                }
               />
             </li>
           ))}
@@ -94,7 +84,7 @@ export function MachineGallery({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ sceneId: customSceneId.trim(), name: "Custom scene" });
+            navigate(viewerPath(customSceneId.trim()));
           }}
           className="mt-8 flex max-w-md items-center gap-2"
         >
@@ -165,11 +155,9 @@ function SummaryPill({
 function MachineTile({
   machine,
   sessions,
-  onOpen,
 }: {
   machine: Machine;
   sessions: LiveSession[];
-  onOpen: (sessionId?: string) => void;
 }) {
   const {
     name,
@@ -194,9 +182,8 @@ function MachineTile({
   const next = milestones.find((m) => !m.done);
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(liveSession?.sessionId)}
+    <Link
+      to={viewerPath(machine.slug, liveSession?.sessionId)}
       className={cn(
         "group relative flex h-full w-full flex-col overflow-hidden text-left cursor-pointer",
         "rounded-2xl [corner-shape:squircle] border bg-ground",
@@ -326,7 +313,7 @@ function MachineTile({
           </span>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
 
