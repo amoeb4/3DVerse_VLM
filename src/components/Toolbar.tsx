@@ -47,7 +47,7 @@ export function Toolbar({
         title={`Control Panel (${SHORTCUTS.controlPanel.toUpperCase()})`}
         onClick={onToggleControlPanel}
       >
-        <p>
+        <p className="hidden lg:block">
           <span className="underline underline-offset-2 decoration-current/40">
             C
           </span>

@@ -13,7 +13,7 @@ import { jointInfoFor, ringPlaneInView, twistAngle } from "./joints";
 const ANGLE_EPSILON = 0.05;
 
 /** Distance scaling of the gauges, as `DOM3DEntityAnchor` takes it. */
-const GAUGE_SCALE_FACTOR = 0.0012;
+const GAUGE_SCALE_FACTOR = 0.00225;
 
 /**
  * A ring seen edge-on collapses to a line; it is kept faintly visible rather than vanishing, so the

@@ -28,7 +28,7 @@ import { PUBLIC_TOKEN, MACHINES } from "./config";
 import { Toolbar } from "./components/Toolbar";
 import { SCENE_ID_PARAM, SESSION_ID_PARAM } from "./invite/InvitePanel";
 import { ResetPositionButton } from "./components/ResetPositionButton";
-import { StartupPanel } from "./components/StartupPanel";
+import { StartupScreen } from "./components/startup/StartupScreen";
 import { useResetCamera } from "./hooks/useResetCamera";
 import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
 import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
@@ -55,7 +55,7 @@ export function App() {
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
   if (!credentials) {
-    return <StartupPanel onSubmit={setCredentials} />;
+    return <StartupScreen onSubmit={setCredentials} />;
   }
   return (
     <Livelink

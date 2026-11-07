@@ -74,6 +74,8 @@ body {
 
   font-family: var(--font-family-body);
 
+  overflow-y: auto;
+
   /* background: linear-gradient(160deg, #1b143f, var(--color-accent)); */
 }
 

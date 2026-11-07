@@ -228,7 +228,7 @@ export function JointGauge({
         <span
           className="text-[17px] font-bold tabular-nums text-white"
           style={{
-            fontFamily: "Orbitron, ui-monospace, monospace",
+            fontFamily: "ui-monospace, monospace",
             textShadow: `0 0 8px ${color}`,
           }}
         >
