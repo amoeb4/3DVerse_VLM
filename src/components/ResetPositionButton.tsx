@@ -1,32 +1,45 @@
-import { Button, cn } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { Kbd } from "./common/Kbd";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 
 const SHOW_KBD_SHORTCUTS = false;
 
+/**
+ * Reset camera position (P). `overlay`: a button of its own over the 3D view; `toolbar`: an entry
+ * of the bottom-right toolbar (`TertiaryToolbar`), its label hidden on small screens. Dimmed while
+ * the camera is already there.
+ */
 export function ResetPositionButton({
   onReset,
   isAtDefaultPosition,
   disabled,
+  variant = "overlay",
 }: {
   onReset: () => void;
   isAtDefaultPosition: boolean;
   disabled?: boolean;
+  variant?: "overlay" | "toolbar";
 }) {
+  const isToolbar = variant === "toolbar";
   return (
     <Button
-      variant="overlay-outline"
+      variant={isToolbar ? "ghost" : "overlay-outline"}
+      size={isToolbar ? "sm" : "xs"}
       className={cn(
-        "px-4 py-2 gap-2 before:opacity-100 before:backdrop-blur-xl",
+        isToolbar
+          ? "gap-1.5"
+          : "px-4 py-2 gap-2 before:opacity-100 before:backdrop-blur-xl",
         isAtDefaultPosition && "text-primary/50",
       )}
-      round
-      title={`Reset position (${SHORTCUTS.reset.toUpperCase()})`}
+      round={!isToolbar}
+      title={`Reset camera position (${SHORTCUTS.reset.toUpperCase()})`}
+      aria-label="Reset camera position"
       onClick={onReset}
       disabled={disabled}
     >
-      <p>
-        Reset{" "}
+      {isToolbar && <Icon className="fas fa-arrows-to-dot text-2xs" />}
+      <p className={cn(isToolbar && "hidden sm:block")}>
+        Reset camera{" "}
         <span className="underline underline-offset-2 decoration-current/40">
           p
         </span>

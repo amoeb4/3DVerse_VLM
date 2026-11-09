@@ -1,39 +1,34 @@
 import { useEffect } from "react";
 
-import { SHORTCUTS } from "./shortcuts";
-
-function isTypingInField(target: EventTarget | null) {
-  const el = target as HTMLElement | null;
-  return (
-    !!el &&
-    (el.tagName === "INPUT" ||
-      el.tagName === "TEXTAREA" ||
-      el.tagName === "SELECT" ||
-      el.isContentEditable)
-  );
-}
+import { MODES, VIEW_MODES, type ViewMode } from "../modes/modes";
+import { isTypingInField } from "./isTypingInField";
+import { MODE_SHORTCUTS, SHORTCUTS } from "./shortcuts";
 
 export function useKeyboardShortcuts({
   onReset,
   onToggleControlPanel,
-  onCloseControlPanel,
+  onToggleSupervision,
+  onClosePanel,
   onToggleTheme,
+  onSelectMode,
 }: {
   onReset: () => void;
   onToggleControlPanel: () => void;
-  onCloseControlPanel: () => void;
+  onToggleSupervision: () => void;
+  onClosePanel: () => void;
   onToggleTheme: () => void;
+  onSelectMode: (mode: ViewMode) => void;
 }) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Escape closes the panel even while a slider/input inside it has focus.
+      // Escape closes the panel even while a slider or input inside it has focus.
       if (
-        event.key.toLowerCase() === SHORTCUTS.closeControlPanel &&
+        event.key.toLowerCase() === SHORTCUTS.closePanel &&
         !event.metaKey &&
         !event.ctrlKey &&
         !event.altKey
       ) {
-        onCloseControlPanel();
+        onClosePanel();
         return;
       }
 
@@ -47,12 +42,25 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      const mode = VIEW_MODES.find(
+        (candidate) => MODE_SHORTCUTS[candidate] === event.key,
+      );
+      if (mode) {
+        if (MODES[mode].ready) {
+          onSelectMode(mode);
+        }
+        return;
+      }
+
       switch (event.key.toLowerCase()) {
         case SHORTCUTS.reset:
           onReset();
           break;
         case SHORTCUTS.controlPanel:
           onToggleControlPanel();
+          break;
+        case SHORTCUTS.supervision:
+          onToggleSupervision();
           break;
         case SHORTCUTS.theme:
           onToggleTheme();
@@ -62,5 +70,12 @@ export function useKeyboardShortcuts({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onReset, onToggleControlPanel, onCloseControlPanel, onToggleTheme]);
+  }, [
+    onReset,
+    onToggleControlPanel,
+    onToggleSupervision,
+    onClosePanel,
+    onToggleTheme,
+    onSelectMode,
+  ]);
 }

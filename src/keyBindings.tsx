@@ -3,6 +3,7 @@ import { quat, vec3 } from "gl-matrix";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { useSpeed } from "./components/ControlPanel";
 import { eulerToQuat2 } from "./utils/angle";
+import { isTypingInField } from "./shortcuts/isTypingInField";
 
 export default function KeyboardHandler() {
   const { instance } = useContext(LivelinkContext);
@@ -12,6 +13,8 @@ export default function KeyboardHandler() {
     if (!instance) return;
 
     const handleKeyDown = async (event: KeyboardEvent) => {
+      // Writing a note, say: its letters must not move the scene's entities.
+      if (isTypingInField(event.target)) return;
       const key = event.key.toLowerCase();
       try {
         const entities = await instance.scene.findEntitiesWithComponents({
