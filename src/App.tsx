@@ -40,7 +40,9 @@ import { JointAnglesOverlay } from "./components/joints/JointAnglesOverlay";
 import { HoloHud } from "./components/holo/HoloHud";
 import { Atmosphere } from "./components/Atmosphere";
 import { WeldArc } from "./components/weld/WeldArc";
-import { EntityCreator } from "./weldBead";
+import { AutoWeld } from "./components/weld/AutoWeld";
+import { useFroniusTorchByDefault } from "./components/weld/useFroniusTorchByDefault";
+import { EntityCreator, WeldBeads } from "./weldBead";
 import { EntityStatusPanel } from "./components/EntityPicking";
 import { WebXR } from "@3dverse/livelink-webxr";
 import { XRButton } from "./webXR";
@@ -65,7 +67,6 @@ import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
 import { useViewSettings } from "./hooks/useViewSettings";
 import { cameraRenderSettings } from "./camera/renderSettings";
 import { LiveBadge } from "./components/LiveBadge";
-import { SupervisionPanel } from "./components/supervision/SupervisionPanel";
 import { useViewMode } from "./modes/useViewMode";
 import { ModeSwitcher } from "./modes/ModeSwitcher";
 import { SecondaryToolbar } from "./components/common/SecondaryToolbar";
@@ -92,8 +93,8 @@ import { AltCamera } from "./components/monitor/AltCamera";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { AssistAlert } from "./components/assist/AssistAlert";
 
-/** Sandbox's side panels share the top-right corner: one at a time. */
-type SidePanel = "control" | "supervision";
+/** Training's side panel, top right. */
+type SidePanel = "control";
 
 // The URLs themselves are described in `routing.ts`.
 export function App() {
@@ -260,9 +261,9 @@ function AppLayout({
   setXRMode: (mode: XRSessionMode) => void;
 }) {
   // What the viewer is for (`modes.ts`). The 3D view is the same in every mode; what is around it
-  // is not. Sandbox keeps every tool the viewer has had, mocks included.
+  // is not. Training keeps every tool the viewer has had, mocks included.
   const { mode, setMode } = useViewMode();
-  const isSandbox = mode === "sandbox";
+  const isTraining = mode === "training";
   // The mode on <html>, for the styles that follow it (Training's own accent colour, index.css).
   useEffect(() => {
     const root = document.documentElement;
@@ -361,25 +362,11 @@ function AppLayout({
     }
   }, [cameraEntity, pipCamera, renderSettings]);
 
-  const [openPanel, setOpenPanel] = useState<SidePanel | null>(null);
-
-  const onToggleControlPanel = useCallback(() => {
-    if (isSandbox) {
-      setOpenPanel((prev) => (prev === "control" ? null : "control"));
-    }
-  }, [isSandbox]);
-  const onToggleSupervision = useCallback(() => {
-    if (isSandbox) {
-      setOpenPanel((prev) => (prev === "supervision" ? null : "supervision"));
-    }
-  }, [isSandbox]);
-  const onClosePanel = useCallback(() => {
-    setOpenPanel(null);
-  }, []);
-
   const { resetCamera, isAtDefaultPosition } = useResetCamera(cameraController);
 
   useSceneThemeWatcher();
+  // The cell welds: the Fronius torch on the arm, not the milling spindle.
+  useFroniusTorchByDefault();
   const { theme, toggleTheme } = useSceneTheme();
   const sceneTheme = theme ?? "light";
 
@@ -400,24 +387,28 @@ function AppLayout({
   const hasRightColumn = isLargeScreen && showPart;
   const [rightSlot, setRightSlot] = useState<HTMLElement | null>(null);
 
-  // Leaving Part, where the camera went to the part: back to the cell's default view.
+  // Switching modes: the camera back to the cell's default view. Not into Part, which brings it to
+  // the part itself (`PartInCell`).
   const { setCloseUp: setPartCloseUp } = partView;
   const previousMode = useRef(mode);
   useEffect(() => {
-    if (previousMode.current === "part" && mode !== "part") {
-      void resetCamera();
+    const previous = previousMode.current;
+    previousMode.current = mode;
+    if (previous === mode) {
+      return;
+    }
+    if (previous === "part") {
       // Back in Part, the whole part first.
       setPartCloseUp(false);
     }
-    previousMode.current = mode;
+    if (mode !== "part") {
+      void resetCamera();
+    }
   }, [mode, resetCamera, setPartCloseUp]);
 
   useKeyboardShortcuts({
     // In Part, back to the part rather than to the cell's default view.
     onReset: isPart ? partView.refocus : resetCamera,
-    onToggleControlPanel,
-    onToggleSupervision,
-    onClosePanel,
     onToggleTheme: toggleTheme,
     onSelectMode: setMode,
   });
@@ -431,6 +422,9 @@ function AppLayout({
         pickInterceptor={pickInterceptor}
       >
         <IncidentDigestRecorder sceneId={sceneId} />
+        {/* In every mode: welding while the machine runs, and the bead it lays. */}
+        <AutoWeld />
+        <WeldBeads />
         <EntityProvider>
           {/* Below `lg`, it wraps before the toolbar on the right. */}
           <header
@@ -454,7 +448,7 @@ function AppLayout({
             <h1 className="font-orbitron text-xl font-bold mr-2 truncate">
               {machineName}
             </h1>
-            <LiveBadge />
+            {!isTraining && <LiveBadge />}
             {!isAssist && (
               <AssistAlert
                 onOpen={() => setMode("assistance")}
@@ -463,24 +457,18 @@ function AppLayout({
             )}
           </header>
           <Toolbar
-            variant={isSandbox ? "full" : "minimal"}
             cameraController={cameraController}
-            onToggleControlPanel={onToggleControlPanel}
-            onToggleSupervision={onToggleSupervision}
-            isSupervisionOpen={openPanel === "supervision"}
             onOpenAssistance={openAssistance}
           />
-          {isSandbox && (
-            <>
-              <ControlPanel
-                isOpen={openPanel === "control"}
-                onClose={onClosePanel}
+          {isTraining && (
+            <div className="fixed top-15 lg:top-17 left-4 z-50 flex flex-col gap-1 w-full max-w-md">
+              <ControlPanel />
+              <EntityCreator />
+              <EntityStatusPanel
+                hoveredEntity={hoveredEntity?.entity ?? null}
+                pickedEntity={pickedEntity?.entity ?? null}
               />
-              <SupervisionPanel
-                isOpen={openPanel === "supervision"}
-                onClose={onClosePanel}
-              />
-            </>
+            </div>
           )}
           {hasRightColumn && (
             <div
@@ -522,19 +510,22 @@ function AppLayout({
             <AssistChrome
               onBack={backToMonitor}
               cameraController={cameraController}
+              onResetCamera={resetCamera}
             />
           )}
-          {/* The job, in every mode, under the header. Below `lg`, Monitor has it in its sheet. */}
-          {isLargeScreen ? (
-            <ProductionStrip className="fixed top-16 left-4 right-4 z-40 starting:opacity-0 transition-opacity duration-500" />
-          ) : (
-            mode !== "monitor" && (
-              <ProductionStrip
-                compact
-                className="fixed top-28 left-4 z-40 max-w-[calc(100%-2rem)]"
-              />
-            )
-          )}
+          {/* The job, under the header, in every mode but Training. Below `lg`, Monitor has it in
+              its sheet. */}
+          {!isTraining &&
+            (isLargeScreen ? (
+              <ProductionStrip className="fixed top-16 left-4 right-4 z-40 starting:opacity-0 transition-opacity duration-500" />
+            ) : (
+              mode !== "monitor" && (
+                <ProductionStrip
+                  compact
+                  className="fixed top-28 left-4 z-40 max-w-[calc(100%-2rem)]"
+                />
+              )
+            ))}
           {isPart && (
             <PartChrome
               theme={sceneTheme}
@@ -583,7 +574,6 @@ function AppLayout({
               }
             />
           )}
-          {/* <DisplayDashboard /> */}
         </EntityProvider>
 
         <CameraEventListener />
@@ -634,7 +624,7 @@ function AppLayout({
               )}
             </SharedOverlayProvider>
 
-            {/* The welding arc at the torch tip, while "Start Weld" is on. */}
+            {/* The welding arc at the torch tip, while the machine runs or "Start Weld" is on. */}
             <WeldArc showEffect={view.weldArc} />
 
             {view.jointAngles && !isPart && <JointAnglesOverlay />}
@@ -654,7 +644,7 @@ function AppLayout({
               />
             )}
 
-            {isSandbox && showPipCamera && (
+            {isTraining && showPipCamera && (
               <div className="absolute bottom-3 max-lg:bottom-navbar right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
                 <Viewport cameraEntity={pipCamera} className="w-full h-full">
                   <CameraController />
@@ -670,18 +660,6 @@ function AppLayout({
               </div>
             )}
           </Viewport>
-
-          {/* The weld demo and the picking readout: mocks and debugging, Sandbox only. */}
-          {isSandbox && (
-            <>
-              <EntityCreator />
-
-              <EntityStatusPanel
-                hoveredEntity={hoveredEntity?.entity ?? null}
-                pickedEntity={pickedEntity?.entity ?? null}
-              />
-            </>
-          )}
         </Canvas>
 
         <footer className="absolute bottom-0 left-0 right-0 pointer-events-none z-50">
@@ -719,7 +697,7 @@ function AppLayout({
               {/* Assistance: pin a note, follow the other side's camera. */}
               {isAssist && <AssistActions />}
               {/* Training: a second 3D viewpoint, not one of the cell's cameras. */}
-              {isSandbox && (
+              {isTraining && (
                 <Button
                   variant="ghost"
                   size="sm"

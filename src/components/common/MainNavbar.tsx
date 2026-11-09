@@ -65,7 +65,7 @@ export function MainNavbarItem({
       title={title}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center gap-1.5 px-2.5 sm:px-3.5 rounded-lg cursor-pointer",
+        "relative flex flex-col items-center gap-1.5 px-2.5 sm:px-3 py-4! rounded-lg cursor-pointer",
         "text-4xs sm:text-3xs font-medium whitespace-nowrap transition-colors duration-200",
         "outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-300",
         isActive

@@ -285,9 +285,7 @@ export function PartChrome({
               <span
                 className={cn(
                   "size-1.5 rounded-full",
-                  build.arcOn
-                    ? "bg-current animate-pulse"
-                    : "bg-secondary/60",
+                  build.arcOn ? "bg-current animate-pulse" : "bg-secondary/60",
                 )}
               />
               Live

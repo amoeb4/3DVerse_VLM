@@ -18,6 +18,12 @@ import { viewerPath } from "../../routing";
  */
 const PREVIEW_IDLE_MS = 5 * 60_000;
 
+/**
+ * TEMPORARY: the tiles' live 3D previews (`MachinePreview`) are off — no Livelink session or canvas
+ * is opened from this page, and every tile shows its picture. Set back to `true` to bring them back.
+ */
+const SHOW_3D_PREVIEWS = false;
+
 const STATUS: Record<MachineStatus, { label: string; className: string }> = {
   operational: {
     label: "Operational",
@@ -207,7 +213,7 @@ function MachineTile({
   // the screen.
   const media = useRef<HTMLDivElement>(null);
   const seen = useSeenOnce(media);
-  const hasPreview = !isDeprecated && previewsOn && seen;
+  const hasPreview = SHOW_3D_PREVIEWS && !isDeprecated && previewsOn && seen;
   const [previewStatus, setPreviewStatus] = useState<PreviewStatus>("loading");
   const previewReady = hasPreview && previewStatus === "ready";
 
@@ -267,7 +273,7 @@ function MachineTile({
         )}
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-start gap-2 p-3">
-        {status && (
+          {status && (
             <span
               className={cn(
                 "inline-flex items-center h-6 px-2 rounded-full border text-3xs font-medium backdrop-blur-sm",
@@ -278,7 +284,6 @@ function MachineTile({
             </span>
           )}
           {liveSession && <LiveBadge />}
-          
         </div>
       </div>
 

@@ -58,8 +58,8 @@ const GROUPS: ViewGroup[] = [
   {
     label: "Render · your view",
     items: [
-      { setting: "outlines", label: "Edge outlines", icon: "fa-border-all" },
-      { setting: "grid", label: "Floor grid", icon: "fa-border-all" },
+      { setting: "outlines", label: "Edge outlines", icon: "fa-border-none" },
+      { setting: "grid", label: "Floor grid", icon: "fa-table-cells" },
     ],
   },
 ];

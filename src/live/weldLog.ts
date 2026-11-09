@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
- * Every weld point laid in this session, for the supervision panel. Kept as running totals and a
+ * Every weld point laid in this session, for Monitor's welding panel. Kept as running totals and a
  * short recent history rather than a growing list: auto-weld lays tens of points a second.
  */
 
@@ -48,10 +48,27 @@ export function recordWeld(temperature: number) {
   version += 1;
 }
 
+/**
+ * - `welding`: whether the arc burns, in this viewer;
+ * - `byMachine`: whether the machine turned it on (`AutoWeld`: its CN is laying a layer), rather
+ *   than someone here (Training's Start Weld).
+ */
+export type WeldState = { welding: boolean; byMachine: boolean };
+
+let weldState: WeldState = { welding: false, byMachine: false };
+
 const weldingListeners = new Set<() => void>();
 
-export function setWelding(value: boolean) {
+export function setWelding(value: boolean, { byMachine = false } = {}) {
+  const next = { welding: value, byMachine: value && byMachine };
+  if (
+    next.welding === weldState.welding &&
+    next.byMachine === weldState.byMachine
+  ) {
+    return;
+  }
   welding = value;
+  weldState = next;
   version += 1;
   weldingListeners.forEach((listener) => listener());
 }
@@ -66,6 +83,11 @@ function subscribeWelding(listener: () => void) {
 /** Whether auto-weld is on, updated the moment it changes (the weld arc effect follows it). */
 export function useIsWelding(): boolean {
   return useSyncExternalStore(subscribeWelding, () => welding);
+}
+
+/** Whether the arc burns, and who turned it on, updated the moment it changes. */
+export function useWeldState(): WeldState {
+  return useSyncExternalStore(subscribeWelding, () => weldState);
 }
 
 export function resetWeldLog() {

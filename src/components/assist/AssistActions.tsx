@@ -36,14 +36,12 @@ export function AssistActions() {
   if (isPlacingPin) {
     return (
       <>
-        <span className="flex items-center gap-1.5 px-2 text-2xs whitespace-nowrap">
-          <Icon className="fas fa-location-dot text-accent-300" />
-          <span className="hidden sm:inline">
-            Click on the cell where the note goes
-          </span>
+        <span className="flex items-center gap-1.5 px-2 text-2xs whitespace-nowrap text-accent-200">
+          <Icon className="fas fa-thumbtack" />
+          <span className="hidden sm:inline">Click on a cell</span>
           <span className="sm:hidden">Click on the cell</span>
         </span>
-        <Button variant="ghost" size="sm" onClick={cancelPin}>
+        <Button variant="ghost" size="2xs" onClick={cancelPin}>
           Cancel <Kbd className="hidden lg:inline-flex">Esc</Kbd>
         </Button>
         <ToolbarDivider />

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   CameraController,
+  LivelinkContext,
   Viewport,
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
@@ -19,7 +20,8 @@ const noHover = () => {};
  * bar with the toggle right on it. A click on the view opens the Part mode (`onOpen`).
  *
  * A viewport of the 3D canvas: it must be rendered inside the `Canvas`, positioned over the screen
- * by `className` (the canvas covers the whole screen). Its overlay is its own: the part and the
+ * by `className` (the canvas covers the whole screen). The click opens nothing until the scene is
+ * ready, as on the part in the main view (`PartInCell`). Its overlay is its own: the part and the
  * veil are drawn in it, not in the main view. The card's height is what Monitor's left column leaves
  * room for (`ALT_CAMERA_ROOM`, `altCameraLayout.ts`): keep the two in step.
  *
@@ -49,6 +51,9 @@ export function AltCamera({
   const [controller, setController] = useState<DefaultCameraController | null>(
     null,
   );
+  // While Livelink connects (its loading panel up) or after it dropped, there is no part to open.
+  const { isConnecting, isDisconnected } = useContext(LivelinkContext);
+  const canOpen = !isConnecting && !isDisconnected;
 
   return (
     <section
@@ -64,7 +69,7 @@ export function AltCamera({
       <header className="flex items-center justify-between h-8 pl-3 pr-1 shrink-0 bg-ground/65 backdrop-blur-lg">
         <h2 className="flex items-center gap-1.5 text-3xs font-bold tracking-wider uppercase">
           <Icon className="fas fa-video text-4xs text-secondary" />
-          Alt. camera
+          Piece details
         </h2>
         <Button
           variant="ghost"
@@ -110,22 +115,25 @@ export function AltCamera({
           <button
             type="button"
             onClick={onOpen}
-            title="Open the Part mode"
+            disabled={!canOpen}
+            title={canOpen ? "Open the Part mode" : undefined}
             aria-label="Open the Part mode"
             className={cn(
-              "absolute inset-0 grid place-items-center cursor-pointer",
+              "absolute inset-0 grid place-items-center enabled:cursor-pointer",
               "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
             )}
           >
-            <span
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
-                "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
-              )}
-            >
-              <Icon className="fas fa-cube text-4xs" />
-              Open piece details
-            </span>
+            {canOpen && (
+              <span
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
+                  "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
+                )}
+              >
+                <Icon className="fas fa-cube text-4xs" />
+                Open piece details
+              </span>
+            )}
           </button>
         </div>
       )}

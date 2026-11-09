@@ -18,7 +18,6 @@ import {
   type IncidentKind,
 } from "../../assist/procedures";
 import { useProcessFeed } from "../../live/processFeed";
-import { SourceBadge } from "../common/SourceBadge";
 
 /**
  * Opening an incident: what happened, and a note. Everyone in the session sees it at once, with its
@@ -85,7 +84,7 @@ export function RequestDialog({
           <DialogTitle>
             {isOperator ? "Request assistance" : "Open an incident"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-3xs text-secondary">
             Everyone in the session sees it at once, with its recovery steps.
             {isOperator && " Make the cell safe first."}
           </DialogDescription>
@@ -107,7 +106,7 @@ export function RequestDialog({
                 aria-checked={isChecked}
                 onClick={() => setKind(id)}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center text-2xs transition-colors",
+                  "flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center text-2xs transition-colors cursor-pointer",
                   "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent",
                   isChecked
                     ? "border-accent bg-accent/15 text-primary"
@@ -134,11 +133,6 @@ export function RequestDialog({
             className="w-full px-3 py-2 border border-secondary bg-ground text-xs rounded-xl [corner-shape:squircle] resize-none focus:outline-hidden focus:ring-2 focus:ring-accent"
           />
         </label>
-
-        <p className="flex items-center gap-1.5 text-3xs text-secondary">
-          <SourceBadge source="sim" />
-          The alarm and the block are simulated until the CN is connected.
-        </p>
 
         <DialogFooter>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>

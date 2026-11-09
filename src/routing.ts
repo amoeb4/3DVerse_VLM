@@ -5,7 +5,7 @@ import { MACHINES } from "./config";
 //   /<slug>                    a machine's viewer, e.g. /nj130-2.05 (joins its running session, if any)
 //   /<scene UUID>              the viewer on any other scene
 //   …?sessionId=<id>           the viewer joining that very session (invite links, LIVE tiles)
-//   …?mode=<mode>              the viewer's mode (`modes.ts`), e.g. ?mode=sandbox; Monitor without it
+//   …?mode=<mode>              the viewer's mode (`modes.ts`), e.g. ?mode=training; Monitor without it
 //   …&role=<role>              in Assistance, who the viewer is: operator or expert (`procedures.ts`)
 
 export const HOME_PATH = "/";

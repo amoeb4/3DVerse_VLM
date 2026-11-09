@@ -28,7 +28,7 @@ export function Sparkline({
     return (
       <div
         className={cn(
-          "grid place-items-center rounded border border-dashed border-tertiary text-3xs text-secondary",
+          "grid rounded border border-dashed border-tertiary text-4xs text-tertiary/50",
           className,
         )}
       >

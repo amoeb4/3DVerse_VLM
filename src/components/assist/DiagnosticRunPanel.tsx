@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
@@ -34,15 +34,18 @@ const RESULT_STYLE: Record<CheckResult | "todo", string> = {
  * centered under it — to validate it or skip it, then on to the next. What is found is shared at
  * once (check records), so a remote expert follows along. At any step, "Ask an expert" opens the
  * request with what was found so far; the session itself is what the expert joins. After the last
- * point, a summary.
+ * point, a summary. Done, Stop or Esc end the run, and the camera goes back to the default view.
  */
 export function DiagnosticRunPanel({
   cameraController,
   onAskExpert,
+  onEnd,
 }: {
   cameraController: DefaultCameraController | null;
   /** Opens the request for an expert, with what happened and what was found. */
   onAskExpert: (kind: IncidentKind, note: string) => void;
+  /** The run ended here (Done, Stop, Esc): the camera back to the default point of view. */
+  onEnd: () => void;
 }) {
   const run = useDiagnosticRun();
   const { store, me, snapshot, incident } = useAssist();
@@ -77,15 +80,25 @@ export function DiagnosticRunPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run?.index, run !== null, entity, cameraController]);
 
+  // Done, Stop or Esc: the run ends, and the camera leaves the last point for the default view.
+  const onEndRef = useRef(onEnd);
+  useEffect(() => {
+    onEndRef.current = onEnd;
+  }, [onEnd]);
+  const endRun = useCallback(() => {
+    stopDiagnosticRun();
+    onEndRef.current();
+  }, []);
+
   // Escape leaves the run.
   useEffect(() => {
     if (!run) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") stopDiagnosticRun();
+      if (event.key === "Escape") endRun();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [run]);
+  }, [run, endRun]);
 
   if (!run) return null;
 
@@ -118,21 +131,17 @@ export function DiagnosticRunPanel({
     >
       <Panel className="flex flex-col gap-3 px-4 py-3 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.25)] border border-accent/40">
         <header className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="grow flex items-center gap-2 min-w-0">
             <Icon className="fas fa-stethoscope text-2xs text-accent-300" />
             <span className="text-3xs font-bold tracking-wider uppercase truncate">
               Diagnostic · {INCIDENT_KINDS[run.kind].label}
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="xs"
-            className="text-3xs text-secondary"
-            title="Stop the diagnostic (Esc): what was found stays"
-            onClick={stopDiagnosticRun}
-          >
-            Stop
-          </Button>
+          {checkpoint && (
+            <p className="text-3xs text-secondary tabular-nums">
+              Point {index + 1} of {CHECKPOINTS.length}
+            </p>
+          )}
         </header>
 
         {/* Where the run is: a step per point, coloured by what was found; a click goes to it. */}
@@ -161,11 +170,8 @@ export function DiagnosticRunPanel({
         {checkpoint ? (
           <>
             <div>
-              <p className="text-3xs text-secondary tabular-nums">
-                Point {index + 1} of {CHECKPOINTS.length}
-              </p>
-              <h2 className="text-sm font-bold">{checkpoint.label}</h2>
-              <p className="text-2xs text-secondary">{checkpoint.detail}</p>
+              <h2 className="text-xl font-bold">{checkpoint.label}</h2>
+              <p className="text-xs">{checkpoint.detail}</p>
               {found && (
                 <p className="mt-1 text-4xs text-tertiary">
                   {found.result === "ok" ? "Validated" : "Skipped"} by{" "}
@@ -180,33 +186,33 @@ export function DiagnosticRunPanel({
               )}
             </div>
 
-            <footer className="flex items-center gap-2">
+            <footer className="flex items-center justify-between gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="mr-auto"
-                title="Share the 3D session and what was found with a VLM expert"
-                onClick={askExpert}
+                className="text-secondary"
+                title="Stop the diagnostic (Esc): what was found stays"
+                onClick={endRun}
               >
-                <Icon className="fas fa-headset text-2xs" />
-                Ask an expert
+                Stop
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => record("skipped")}
-              >
-                Skip
-              </Button>
-              <Button
-                
-                size="sm"
-                className="bg-positive hover:bg-positive/90 text-positive-100!"
-                onClick={() => record("ok")}
-              >
-                <Icon className="fas fa-check text-2xs" />
-                Validate
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => record("skipped")}
+                >
+                  Skip
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-positive hover:bg-positive/90 text-positive-100!"
+                  onClick={() => record("ok")}
+                >
+                  <Icon className="fas fa-check text-2xs" />
+                  Validate
+                </Button>
+              </div>
             </footer>
           </>
         ) : (
@@ -221,18 +227,18 @@ export function DiagnosticRunPanel({
               </p>
             </div>
             <footer className="flex items-center justify-end gap-2">
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={askExpert}
-              >
+              <Button variant="outline" size="sm" onClick={askExpert}>
                 <Icon className="fas fa-headset text-2xs" />
                 Ask an expert
               </Button>
-              <Button variant="accent" size="sm" className="min-w-20 text-white!" onClick={stopDiagnosticRun}>
+              <Button
+                variant="accent"
+                size="sm"
+                className="min-w-20 text-white!"
+                onClick={endRun}
+              >
                 Done
               </Button>
-              
             </footer>
           </>
         )}

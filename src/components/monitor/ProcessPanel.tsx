@@ -51,7 +51,7 @@ export function ProcessPanel({ className }: { className?: string }) {
       <header className="flex justify-between items-center gap-2 px-4 py-2 border-b border-tertiary">
         <PanelTitle>
           Process
-          <span className="ml-2 text-3xs font-normal text-secondary">
+          <span className="ml-2 text-5xs font-normal text-secondary">
             last {HISTORY_SECONDS} s
           </span>
         </PanelTitle>

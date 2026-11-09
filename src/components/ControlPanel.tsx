@@ -64,13 +64,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default function ControlPanel({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+export default function ControlPanel() {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
     ["material"],
@@ -102,30 +96,25 @@ export default function ControlPanel({
   return (
     <Panel
       className={cn(
-        "fixed top-15 lg:top-28 right-4 z-50 divide-y divide-tertiary w-[90vw] max-w-150 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        "origin-top-right transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
-        isOpen
-          ? "opacity-100 translate-x-0 scale-100 visible"
-          : "opacity-0 translate-x-4 scale-95 invisible",
+        "divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "origin-top-left transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
+        "starting:opacity-0 starting:-translate-x-4 starting:scale-95 starting:invisible",
       )}
     >
       <PanelHeader className="flex justify-between items-center">
-        <PanelTitle>Control Panel</PanelTitle>
-        <Button variant="ghost" size="icon-xs" onClick={onClose}>
-          <Icon className="fas fa-close" />
+        <PanelTitle>Training Panel</PanelTitle>
+        <Button variant="destructive" size="xs">
+          Back to start
         </Button>
       </PanelHeader>
 
       <div className="flex flex-wrap gap-2 px-3 py-2">
         <EntityDropdown />
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="xs">
           Mount Fronius torch
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="xs">
           Mount Spindle motor
-        </Button>
-        <Button variant="destructive" size="sm">
-          Back to start
         </Button>
       </div>
 
@@ -269,7 +258,7 @@ export function EntityDropdown() {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-sm border border-tertiary hover:bg-primary/10">
+        <MenuButton className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-xs border border-tertiary hover:bg-primary/10">
           {selectedEntity?.name || "Entities"}
           <Icon className="fas fa-angle-down text-5xs opacity-60" />
         </MenuButton>

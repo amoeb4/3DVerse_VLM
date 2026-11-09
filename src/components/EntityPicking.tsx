@@ -8,15 +8,15 @@ export function EntityStatusPanel({
   pickedEntity: Entity | null;
 }) {
   return (
-    <div className="absolute flex flex-col gap-4 m-4">
+    <div className="flex flex-col gap-2 mt-3">
       <EntityPanel
         label="Hovered entity"
-        color="bg-informative-500"
+        color="bg-informative-500/50"
         entity={hoveredEntity}
       />
       <EntityPanel
         label="Picked entity"
-        color="bg-positive-500"
+        color="bg-positive-500/50"
         entity={pickedEntity}
       />
     </div>
@@ -33,12 +33,12 @@ export function EntityPanel({
   entity: Entity | null;
 }) {
   return (
-    <div>
-      <span className="bg-ground px-3 py-2 rounded-lg rounded-r-none">
+    <div className="text-3xs">
+      <span className="bg-ground px-2 py-1 rounded-lg rounded-r-none">
         {label}
       </span>
       <span
-        className={`px-3 py-2 rounded-lg rounded-l-none text-primary-dark font-semibold ${entity ? color : "bg-negative-500"}`}
+        className={`px-2 py-1 rounded-lg rounded-l-none text-primary-dark font-medium ${entity ? color : "bg-negative-500/20"}`}
       >
         {entity ? entity.name : "none"}
       </span>

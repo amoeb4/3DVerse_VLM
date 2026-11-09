@@ -59,8 +59,6 @@ export function LiveBadge({
 
   const { status } = link;
   let detail = "";
-  // Waiting for the robot: the text shimmers, so the badge reads as busy rather than stuck.
-  let isWaiting = false;
   if (status === "live") {
     detail = `${Math.round(link.rate)} msg/s`;
     if (link.latencyMs !== null) {
@@ -71,14 +69,12 @@ export function LiveBadge({
       link.attempt > 1
         ? `Waiting for the robot model… · attempt ${link.attempt}`
         : "Waiting for the robot model…";
-    isWaiting = true;
   } else if (link.retryAt !== null) {
     detail = `Retry in ${Math.max(0, Math.ceil((link.retryAt - Date.now()) / 1000))} s`;
   } else if (link.lastMessageAt !== null) {
     detail = `last ${formatRelative(link.lastMessageAt)}`;
   } else if (status === "idle") {
     detail = "Waiting for the robot…";
-    isWaiting = true;
   }
 
   return (
@@ -86,7 +82,7 @@ export function LiveBadge({
       <div
         className={cn(
           // Solid and tinted by its state, so it reads over any picture.
-          "inline-flex items-center gap-2 min-h-6 px-2.5 rounded-full border shadow-sm",
+          "inline-flex items-center gap-2 min-h-6 pl-2 pr-3 rounded-full border",
           "bg-ground/90 backdrop-blur-xl text-3xs tabular-nums whitespace-nowrap",
           status === "live" && "border-accent-300/60 bg-accent/20",
           (status === "idle" || status === "connecting") &&
@@ -114,7 +110,7 @@ export function LiveBadge({
             status === "live" && "text-accent-300",
             status === "offline" && "text-secondary",
             status === "connecting" &&
-              "text-shimmer text-warning/20 [--shimmer-color:var(--color-warning)]",
+              "shimmer text-warning [--shimmer-color:white]",
           )}
         >
           {LABELS[status]}
@@ -135,8 +131,7 @@ export function LiveBadge({
       {showDetail && detail && (
         <span
           className={cn(
-            "text-4xs ml-1",
-            isWaiting ? "text-shimmer" : "text-secondary",
+            "ml-1 text-4xs text-tertiary",
             status === "live" && "w-[10ex] text-right tabular-nums",
           )}
         >

@@ -33,11 +33,14 @@ const stayHere = () => {};
 export function AssistChrome({
   onBack,
   cameraController,
+  onResetCamera,
 }: {
   /** Back to the Monitor mode: the incident and its notes stay open. */
   onBack: () => void;
   /** For the diagnostic's run, which brings the camera to each checkpoint. */
   cameraController: DefaultCameraController | null;
+  /** The camera back to the scene's default point of view (`useResetCamera`), as the run ends. */
+  onResetCamera: () => void;
 }) {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const [isRequestOpen, setIsRequestOpen] = useState(false);
@@ -61,6 +64,7 @@ export function AssistChrome({
       <DiagnosticRunPanel
         cameraController={cameraController}
         onAskExpert={openRequest}
+        onEnd={onResetCamera}
       />
       <RequestDialog
         open={isRequestOpen}

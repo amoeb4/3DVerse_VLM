@@ -51,14 +51,14 @@
 }
 
 /*
- * Training (the `sandbox` mode) in a colour of its own, the informative blue: the whole accent scale
+ * Training in a colour of its own, the informative blue: the whole accent scale
  * remapped while it is on (`data-mode` on <html>, set by the viewer). The informative tokens only
  * have 100, 500, 800 and 900: the steps between are mixed. Light and dark follow, as the informative
  * scale itself is inverted per theme. Out-ranks the themes' own accent (`[data-theme]`), on <html>
  * and on any element that sets its own theme.
  */
-:root[data-mode="sandbox"],
-:root[data-mode="sandbox"] [data-theme] {
+:root[data-mode="training"],
+:root[data-mode="training"] [data-theme] {
   --color-accent: var(--color-informative-500);
   --color-accent-100: var(--color-informative-100);
   --color-accent-200: color-mix(
@@ -96,8 +96,8 @@
  * accent back on the brand scale, which follows the theme as ever. After Training's rule, which has
  * the same specificity.
  */
-:root[data-mode="sandbox"] [data-accent="brand"],
-:root[data-mode="sandbox"] [data-accent="brand"] [data-theme] {
+:root[data-mode="training"] [data-accent="brand"],
+:root[data-mode="training"] [data-accent="brand"] [data-theme] {
   --color-accent: var(--brand-accent-500);
   --color-accent-100: var(--brand-accent-100);
   --color-accent-200: var(--brand-accent-200);

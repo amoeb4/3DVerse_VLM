@@ -6,8 +6,6 @@ export const SHORTCUTS = {
   // Not "r": keyBindings.tsx already uses it to move every entity back to the origin.
   reset: "p",
   controlPanel: "c",
-  // Not "s": keyBindings.tsx uses ZQSD to move the selected entity.
-  supervision: "v",
   // `event.key` is "Escape", compared lowercased like the others. Closes the open side panel.
   closePanel: "escape",
   theme: "t",
@@ -17,11 +15,11 @@ export const SHORTCUTS = {
 
 /**
  * A digit per mode. Digits are free: keyBindings.tsx uses letters, `+`, `-` and space. Part and
- * Assistance keep theirs though they left the navbar; Training (the `sandbox` mode) keeps 5.
+ * Assistance keep theirs though they left the navbar; Training keeps 5.
  */
 export const MODE_SHORTCUTS: Record<ViewMode, string> = {
   monitor: "1",
   part: "2",
   assistance: "3",
-  sandbox: "5",
+  training: "5",
 };

@@ -9,6 +9,7 @@ import type { Entity } from "@3dverse/livelink";
 import { useIsWelding } from "../../live/weldLog";
 import { WeldArcEffect } from "./arcEffect";
 import { TORCH_EUID } from "./torch";
+import { useWritesWeld } from "./useWritesWeld";
 
 //------------------------------------------------------------------------------
 /**
@@ -25,13 +26,15 @@ const ARC_LIGHT_RANGE = 2.5;
 const ARC_LIGHT_UPDATE_MS = 90;
 
 /**
- * The welding arc at the torch tip while "Start Weld" is on: blue glare, spatter, the pool's
- * afterglow and a subtle fume — see `WeldArcEffect` — plus the arc's real light on the scene.
+ * The welding arc at the torch tip while welding — the machine running (`AutoWeld`) or Training's
+ * Start Weld: blue glare, spatter, the pool's afterglow and a subtle fume — see `WeldArcEffect` —
+ * plus the arc's real light on the scene.
  *
  * `showEffect` (the View menu's "Arc light") shows or hides the glare, sparks and fume, for this
  * viewer only. The simulation carries on hidden, so the scene's light keeps flickering with it and
  * the effect comes back mid-flight. The light on the scene is an entity of the shared scene, there
- * for everyone while welding.
+ * for everyone while welding: created by the one viewer that writes the weld (`useWritesWeld`), so
+ * there is one light, not one per viewer.
  *
  * Must be rendered inside a `Viewport`.
  */
@@ -40,6 +43,7 @@ export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
   const { camera } = useContext(ViewportContext);
   const { entity: torch } = useEntity({ euid: TORCH_EUID });
   const welding = useIsWelding();
+  const writesLight = useWritesWeld();
 
   const smokeRef = useRef<HTMLCanvasElement>(null);
   const lightRef = useRef<HTMLCanvasElement>(null);
@@ -125,9 +129,9 @@ export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
     return () => cancelAnimationFrame(frame);
   }, [welding, torch, camera]);
 
-  // The arc's light on the scene, while welding.
+  // The arc's light on the scene, while welding, from the viewer that writes the weld.
   useEffect(() => {
-    if (!welding || !torch || !instance) {
+    if (!writesLight || !torch || !instance) {
       return;
     }
     let disposed = false;
@@ -177,7 +181,7 @@ export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
           );
       }
     };
-  }, [welding, torch, instance]);
+  }, [writesLight, torch, instance]);
 
   return (
     <div

@@ -3,6 +3,7 @@ import { useEntity } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { ButtonGroup } from "./common/ButtonGroup";
 import { IconSlashed } from "./common/IconSlashed";
+import { FRONIUS_TORCH_EUID, MILLING_SPINDLE_EUID } from "./weld/torch";
 
 function toggleEntity(entity?: Entity | null, entity2?: Entity | null) {
   if (entity && entity == entity2) {
@@ -18,12 +19,8 @@ export default function TorchExample() {
   const { entity: flame } = useEntity({
     euid: "103acb9d-8d29-4281-ba7a-15b0114ffbcf",
   });
-  const { entity: fronius } = useEntity({
-    euid: "63f5da3b-fcae-41b2-b615-b6ca73e8efc2",
-  });
-  const { entity: effecteur } = useEntity({
-    euid: "5c74d5c0-f601-4756-8b85-3bb55538b49e",
-  });
+  const { entity: fronius } = useEntity({ euid: FRONIUS_TORCH_EUID });
+  const { entity: effecteur } = useEntity({ euid: MILLING_SPINDLE_EUID });
 
   return (
     <ButtonGroup isAttached>

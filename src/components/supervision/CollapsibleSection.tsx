@@ -28,7 +28,7 @@ export function CollapsibleSection({
           aria-expanded={isOpen}
           aria-controls={contentId}
           onClick={() => setIsOpen((open) => !open)}
-          className="-translate-x-1 flex items-center gap-1.5 -ml-1 px-1 py-1 rounded-md cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="-translate-x-1 flex items-center gap-1.5 -ml-1 pl-1 pr-2 py-1 rounded-md cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <Icon
             className={cn(

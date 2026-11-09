@@ -859,6 +859,22 @@ export function useProcessFeed(refreshMs = 250): ProcessSnapshot {
   return state;
 }
 
+/**
+ * Whether the machine is welding — its CN running a layer, the arc on — checked every `refreshMs`.
+ * Off in the dwell between two layers and on hold. While anything uses it, the simulation runs.
+ */
+export function useArcOn(refreshMs = 250): boolean {
+  useRunningSimulation();
+  const [isOn, setIsOn] = useState(arcOn);
+  useEffect(() => {
+    const update = () => setIsOn(arcOn);
+    update();
+    const id = window.setInterval(update, refreshMs);
+    return () => window.clearInterval(id);
+  }, [refreshMs]);
+  return isOn;
+}
+
 export type BuildRecord = {
   source: DataSource;
   layers: number;

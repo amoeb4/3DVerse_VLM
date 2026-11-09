@@ -5,12 +5,14 @@
  * The text is in its colour (`currentColor`, a dimmed tertiary by default), the light in
  * `--shimmer-color` (the primary content colour by default). Both are set with utilities:
  *
- *   text-shimmer text-warning/20 [--shimmer-color:var(--color-warning)]
+ *   shimmer text-warning/20 [--shimmer-color:var(--color-warning)]
  *
- * ui-lib ships a `.text-shimmer` of its own (`--color-shimmer`, glyphs `color: transparent`), in the
- * `utilities` layer. As a Tailwind utility, this one lands in the same layer after it, so it wins;
- * and Tailwind sorts it before the colour utilities (`text-warning/20`), which win over its default
- * colour. The glyphs are made transparent with `-webkit-text-fill-color`, leaving `color` free.
+ * Not `text-shimmer`: tailwind-merge (`cn`) reads any `text-*` it does not know as a text colour,
+ * and drops it for a colour utility after it, so `cn("text-shimmer text-warning/20")` lost the
+ * effect. The name also stays clear of ui-lib's own `.text-shimmer` (`--color-shimmer`, glyphs
+ * `color: transparent`). Tailwind sorts this utility before the colour utilities
+ * (`text-warning/20`), which win over its default colour. The glyphs are made transparent with
+ * `-webkit-text-fill-color`, leaving `color` free.
  */
 @keyframes vlm-text-shimmer {
   to {
@@ -18,7 +20,7 @@
   }
 }
 
-@utility text-shimmer {
+@utility shimmer {
   position: relative;
   display: inline-block;
   color: color-mix(in srgb, var(--color-content-tertiary) 70%, transparent);

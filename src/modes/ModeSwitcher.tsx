@@ -43,18 +43,17 @@ const ENTRIES: readonly NavEntry[] = [
     activeIn: [],
   },
   {
-    label: MODES.sandbox.label,
-    icon: MODES.sandbox.icon,
-    description: MODES.sandbox.description,
-    mode: "sandbox",
-    activeIn: ["sandbox"],
+    label: MODES.training.label,
+    icon: MODES.training.icon,
+    description: MODES.training.description,
+    mode: "training",
+    activeIn: ["training"],
   },
 ];
 
 /**
  * The viewer's main sections, docked at the bottom centre of the screen: Monitor (with Part, opened
- * from it), Diagnostic (the `assistance` mode), Security and Documentation (not built yet, disabled), and Training (the
- * `sandbox` mode).
+ * from it), Diagnostic (the `assistance` mode), Security and Documentation (not built yet, disabled), and Training.
  */
 export function ModeSwitcher({
   mode,

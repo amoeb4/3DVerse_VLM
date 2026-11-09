@@ -19,7 +19,7 @@ import { QrCodeModal } from "./QrCodeModal";
 // Unlike the mobile viewer, this app connects with a public token, which cannot mint guest tokens
 // (that needs `manage` scope). The invite link therefore names the session itself, and the guest
 // joins it with the same public token: the machine's URL, e.g. /nj130-2.05?sessionId=….
-// The guest opens in the inviter's mode (`&mode=sandbox`), and is free to switch from there. From
+// The guest opens in the inviter's mode (`&mode=training`), and is free to switch from there. From
 // Assistance, where one invites the expert to help, the guest comes in as the expert (`&role=expert`).
 const makeInviteLink = (sessionId: string, sceneId: string, mode: ViewMode) =>
   new URL(

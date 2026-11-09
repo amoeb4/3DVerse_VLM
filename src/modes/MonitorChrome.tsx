@@ -9,14 +9,15 @@ import { ProductionStrip } from "../components/monitor/ProductionStrip";
 import { RemoteActions } from "../components/monitor/RemoteActions";
 import { SensorTiles } from "../components/monitor/SensorTiles";
 import { SupervisionPanel } from "../components/supervision/SupervisionPanel";
+import { WeldPanel } from "../components/monitor/WeldPanel";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { ALT_CAMERA_ROOM } from "../components/monitor/altCameraLayout";
 
 /**
  * Monitor mode: remote monitoring of the process, for an expert away from the cell. Is the build in
  * spec, and if not, why? The job along the top; the process's indicators and the sensors on the
- * left; on the right, the actions (adjust, stop, assistance) over the cell (link, axes, CN,
- * events).
+ * left; on the right, the actions (adjust, stop, assistance) over the welding and the cell (link,
+ * axes, CN, events).
  *
  * Below `lg`, the panels share one sheet at the bottom of the screen, a tab each.
  */
@@ -66,12 +67,15 @@ function MonitorColumns({
         <SensorTiles className="shrink-0" />
       </div>
 
-      {/* The cell, under the app's actions on the right. */}
+      {/* The welding, then the cell, under the app's actions on the right. */}
       {rightSlot &&
         createPortal(
-          <SupervisionPanel isOpen docked className="min-h-0 grow">
-            <CnSection />
-          </SupervisionPanel>,
+          <>
+            <WeldPanel className="shrink-0" />
+            <SupervisionPanel className="grow">
+              <CnSection />
+            </SupervisionPanel>
+          </>,
           rightSlot,
         )}
     </>
@@ -119,12 +123,9 @@ function MonitorSheet({ onOpenAssistance }: { onOpenAssistance: () => void }) {
         </ButtonGroup>
       </div>
       {tab === "process" && <ProcessPanel className="min-h-0" />}
+      {tab === "cell" && <WeldPanel className="shrink-0" />}
       {/* Mounted on every tab: its telemetry logs the robot starting and stopping. */}
-      <SupervisionPanel
-        isOpen
-        docked
-        className={cn("min-h-0", tab !== "cell" && "hidden")}
-      >
+      <SupervisionPanel className={cn(tab !== "cell" && "hidden")}>
         <CnSection />
       </SupervisionPanel>
       {tab === "sensors" && <SensorTiles />}

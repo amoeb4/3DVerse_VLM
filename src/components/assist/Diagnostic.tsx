@@ -56,7 +56,7 @@ function Step({
     <section className="px-4 py-3">
       <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="flex items-center gap-2 text-3xs font-bold tracking-wider uppercase">
-          <span className="size-4 grid place-items-center rounded-full bg-accent text-accent-100 text-5xs tabular-nums">
+          <span className="size-4 grid place-items-center rounded-full bg-accent text-white text-5xs tabular-nums">
             {number}
           </span>
           {title}
@@ -293,7 +293,7 @@ export function Diagnostic({
             <div className="flex flex-col gap-2">
               <Button
                 variant="accent"
-                size="sm"
+                size="lg"
                 className="w-full justify-center text-white!"
                 disabled={run !== null}
                 title={`Check the robot's ${CHECKPOINTS.length} points one at a time, the camera on each`}
@@ -304,7 +304,7 @@ export function Diagnostic({
                   )
                 }
               >
-                <Icon className="fas fa-list-check text-2xs" />
+                <Icon className="fas fa-list-check text-3xs!" />
                 {run
                   ? "Diagnostic running…"
                   : checked === 0

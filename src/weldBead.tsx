@@ -1,11 +1,13 @@
 "use client";
 import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
+import type { Entity } from "@3dverse/livelink";
 import { Button, cn, Panel, Slider } from "@3dverse/ui-lib";
 
 import { logEvent } from "./live/eventLog";
-import { recordWeld, setWelding } from "./live/weldLog";
+import { recordWeld, setWelding, useIsWelding } from "./live/weldLog";
 import { TORCH_EUID } from "./components/weld/torch";
+import { useWritesWeld } from "./components/weld/useWritesWeld";
 
 const MATERIAL_REFS = [
   "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
@@ -39,8 +41,8 @@ export const createEntity = async (
   instance: any,
   position: [number, number, number],
   temperature: number,
-) => {
-  await instance.scene.newEntity({
+): Promise<Entity> => {
+  const bead = await instance.scene.newEntity({
     name: "Weld Bead",
     components: {
       local_transform: {
@@ -52,9 +54,16 @@ export const createEntity = async (
         value: getMaterialFromTemperature(temperature),
       },
     },
+    // Gone with the viewer that laid it: the session keeps its edits, and a running machine lays
+    // beads all day.
+    options: { delete_on_client_disconnection: true },
   });
   recordWeld(temperature);
+  return bead;
 };
+
+/** The temperature beads are laid at, 0–100: Training's slider sets it. */
+let beadTemperature = 50;
 
 const MAX_CONCURRENT_CREATES = 5;
 
@@ -62,44 +71,35 @@ const SAMPLE_INTERVAL_MS = 32;
 
 const MIN_MOVE_DISTANCE = 0.008;
 
-export function EntityCreator() {
-  const { instance } = useContext(LivelinkContext);
+/** The beads a viewer keeps in the scene: past this, the oldest go as new ones are laid. */
+const MAX_BEADS = 1500;
 
-  const [temperature, setTemperature] = useState<number>(50);
-  const [latency, setLatency] = useState(0);
-  const [autoWeld, setAutoWeld] = useState(false);
-  const { entity: torch, isPending: isTorchPending } = useEntity({
-    euid: TORCH_EUID,
-  });
-  const isTorchMissing = !isTorchPending && !torch;
-  const { entity: plateau } = useEntity({
-    euid: "19a0b434-94d5-4546-8e8a-7b894148c504",
-  });
+const distance = (a: number[], b: number[]) =>
+  Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
+
+//------------------------------------------------------------------------------
+/**
+ * Lays the bead along the torch's path while the arc burns: a "Weld Bead" entity in the shared
+ * scene every `MIN_MOVE_DISTANCE` the tip moves, the last `MAX_BEADS` kept. Only the viewer that
+ * writes the weld lays them (`useWritesWeld`), so the session gets one bead, not one per viewer.
+ *
+ * In every mode, whether the weld was started by the machine (`AutoWeld`) or by Training's Start
+ * Weld. Mount once, inside `Livelink`.
+ */
+export function WeldBeads() {
+  const { instance } = useContext(LivelinkContext);
+  const { entity: torch } = useEntity({ euid: TORCH_EUID });
+  const isLaying = useWritesWeld();
 
   const lastPosition = useRef<[number, number, number] | null>(null);
-  const temperatureRef = useRef(temperature);
-  useEffect(() => {
-    temperatureRef.current = temperature;
-  }, [temperature]);
   const queue = useRef<[number, number, number][]>([]);
   const inFlight = useRef(0);
+  /** The beads this viewer laid, oldest first. */
+  const laid = useRef<Entity[]>([]);
 
+  // Where the tip has been, as it moves.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setLatency(instance?.latency || 0);
-    }, 33);
-
-    return () => clearInterval(timer);
-  }, [instance]);
-
-  const distance = (a: number[], b: number[]) => {
-    return Math.sqrt(
-      (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2,
-    );
-  };
-
-  useEffect(() => {
-    if (!autoWeld || !torch) return;
+    if (!isLaying || !torch) return;
 
     const id = setInterval(() => {
       const pos = torch?.global_transform?.position as
@@ -117,9 +117,11 @@ export function EntityCreator() {
       }
     }, SAMPLE_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [autoWeld, torch]);
+  }, [isLaying, torch]);
+
+  // A bead on each, a few creations in flight at most.
   useEffect(() => {
-    if (!autoWeld || !instance) return;
+    if (!isLaying || !instance) return;
 
     let active = true;
 
@@ -133,7 +135,19 @@ export function EntityCreator() {
         const pos = queue.current.shift()!;
         inFlight.current++;
 
-        createEntity(instance, pos, temperatureRef.current)
+        createEntity(instance, pos, beadTemperature)
+          .then((bead) => {
+            laid.current.push(bead);
+            const excess = laid.current.length - MAX_BEADS;
+            if (excess > 0) {
+              const oldest = laid.current.splice(0, excess);
+              void instance.scene
+                .deleteEntities({ entities: oldest })
+                .catch((err: unknown) =>
+                  console.error("Cannot remove old weld beads", err),
+                );
+            }
+          })
           .catch((err) => console.error("createEntity failed", err))
           .finally(() => {
             inFlight.current--;
@@ -148,29 +162,39 @@ export function EntityCreator() {
       active = false;
       cancelAnimationFrame(frame);
     };
-  }, [autoWeld, instance]);
+  }, [isLaying, instance]);
+
+  // The arc off: the next weld starts from where the tip is then, not from where this one ended.
   useEffect(() => {
-    if (!autoWeld) {
+    if (!isLaying) {
       queue.current = [];
       lastPosition.current = null;
     }
-  }, [autoWeld]);
+  }, [isLaying]);
 
-  // For the supervision panel. The first run is the initial "off", not a stop.
-  const wasWelding = useRef(false);
+  return null;
+}
+
+//------------------------------------------------------------------------------
+/** Training's weld demo: the bead's temperature, a single bead, and Start / Stop Weld. */
+export function EntityCreator() {
+  const { instance } = useContext(LivelinkContext);
+
+  const [temperature, setTemperature] = useState<number>(() => beadTemperature);
+  const [latency, setLatency] = useState(0);
+  const welding = useIsWelding();
+  const { entity: torch, isPending: isTorchPending } = useEntity({
+    euid: TORCH_EUID,
+  });
+  const isTorchMissing = !isTorchPending && !torch;
+
   useEffect(() => {
-    setWelding(autoWeld);
-    if (autoWeld !== wasWelding.current) {
-      logEvent(
-        "info",
-        "weld",
-        autoWeld
-          ? `Welding started at ${temperatureRef.current} °C`
-          : "Welding stopped",
-      );
-      wasWelding.current = autoWeld;
-    }
-  }, [autoWeld]);
+    const timer = setInterval(() => {
+      setLatency(instance?.latency || 0);
+    }, 33);
+
+    return () => clearInterval(timer);
+  }, [instance]);
 
   const handleCreate = async () => {
     if (!instance || !torch) return;
@@ -180,11 +204,22 @@ export function EntityCreator() {
     await createEntity(instance, pos as [number, number, number], temperature);
   };
 
+  // By hand, until the machine next starts or ends a layer (`AutoWeld`). For the supervision panel.
+  const toggleWeld = () => {
+    setWelding(!welding);
+    logEvent(
+      "info",
+      "weld",
+      welding ? "Welding stopped" : `Welding started at ${temperature} °C`,
+    );
+  };
+
   return (
     <Panel
       className={cn(
-        "absolute bottom-toolbar max-lg:bottom-navbar-toolbar left-4 min-w-68 max-w-80 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
-        "starting:opacity-0 starting:-translate-y-8 transition-all duration-500",
+        "backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+        "origin-top-left transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
+        "starting:opacity-0 starting:-translate-x-4 starting:scale-95 starting:invisible",
       )}
     >
       <div className="flex flex-col gap-2 px-4 py-3 text-3xs">
@@ -197,7 +232,10 @@ export function EntityCreator() {
             min={0}
             max={100}
             value={temperature}
-            onValueChange={(value) => setTemperature(value)}
+            onValueChange={(value) => {
+              setTemperature(value);
+              beadTemperature = value;
+            }}
             size="2xs"
             className="[&_output]:text-white"
           />
@@ -219,11 +257,11 @@ export function EntityCreator() {
         <Button
           variant="accent"
           size="sm"
-          onClick={() => setAutoWeld((v) => !v)}
+          onClick={toggleWeld}
           disabled={!instance || isTorchMissing}
           className="text-white! grow"
         >
-          {autoWeld ? "Stop Weld" : "Start Weld"}
+          {welding ? "Stop Weld" : "Start Weld"}
         </Button>
       </div>
     </Panel>

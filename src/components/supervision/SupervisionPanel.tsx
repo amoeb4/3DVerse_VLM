@@ -7,7 +7,6 @@ import { PartEntitiesContext } from "../../partEntitiesContext";
 import { jointInfoFor, twistAngle } from "../joints/joints";
 import { LiveBadge } from "../LiveBadge";
 import { SourceBadge } from "../common/SourceBadge";
-import { Sparkline } from "../common/Sparkline";
 import { useLiveLink } from "../../live/liveLink";
 import {
   clearEvents,
@@ -15,7 +14,6 @@ import {
   useEventLog,
   type EventLevel,
 } from "../../live/eventLog";
-import { RECENT_WELDS, useWeldStats } from "../../live/weldLog";
 import { formatClock, formatDuration } from "../../live/format";
 import { TimeAgo } from "../common/TimeAgo";
 import { CollapsibleSection } from "./CollapsibleSection";
@@ -27,8 +25,6 @@ const MOVING_SPEED = 0.5;
 /** Slower than `STOPPED_SPEED` for this long and it has stopped: a pause mid-path is not a stop. */
 const STOPPED_SPEED = 0.2;
 const STOPPED_AFTER_MS = 1500;
-/** The temperature scale the weld points are coloured on (`weldBead.tsx`). */
-const WELD_SCALE = { min: 0, max: 100 };
 
 type JointReading = {
   id: string;
@@ -128,63 +124,37 @@ function useJointTelemetry(active: boolean) {
 }
 
 /**
- * Remote supervision: everything a supervisor away from the cell needs to trust and follow the
- * robot — the live link's health, every joint's angle and speed, the welding, and a log of what
- * happened. Stays mounted while closed, so its log keeps recording.
- *
- * `docked`: always open, laid out by its parent (the Monitor mode's right column), without its
- * close button nor the demo's welding section, which Monitor's process panel replaces. `children`
- * are extra sections, shown before the events.
+ * Monitor's cell panel: everything a supervisor away from the cell needs to trust and follow the
+ * robot — the live link's health, every joint's angle and speed, and a log of what happened. Laid
+ * out by its parent (the Monitor mode's right column, or its sheet). `children` are extra
+ * sections, shown before the events. The welding has its own panel (`WeldPanel`).
  */
 export function SupervisionPanel({
-  isOpen,
-  onClose,
-  docked = false,
   className,
   children,
 }: {
-  isOpen: boolean;
-  onClose?: () => void;
-  docked?: boolean;
   className?: string;
   children?: React.ReactNode;
 }) {
-  const open = docked || isOpen;
-  const { readings, moving } = useJointTelemetry(open);
+  const { readings, moving } = useJointTelemetry(true);
 
   return (
     <Panel
-      aria-hidden={!open}
       className={cn(
-        "flex flex-col divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        docked
-          ? "min-h-0"
-          : [
-              "fixed top-15 lg:top-28 right-4 bottom-24 z-50 w-[90vw] max-w-96",
-              "origin-top-right transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
-              isOpen
-                ? "opacity-100 translate-x-0 scale-100 visible"
-                : "opacity-0 translate-x-4 scale-95 invisible",
-            ],
+        "flex flex-col min-h-0 divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
         className,
       )}
     >
       <header className="flex justify-between items-center px-4 py-1.5">
-        <PanelTitle>{docked ? "Cell" : "Remote supervision"}</PanelTitle>
-        {onClose && !docked && (
-          <Button variant="ghost" size="icon-xs" onClick={onClose}>
-            <Icon className="fas fa-close" />
-          </Button>
-        )}
+        <PanelTitle>Cell</PanelTitle>
       </header>
 
       {/* The sections scroll, under the header: the panel never grows past its column. */}
       <div className="min-h-0 grow overflow-y-auto overscroll-contain scroll-fade-y divide-y divide-tertiary">
-        {open && <LinkSection />}
+        <LinkSection />
         <RobotSection readings={readings} moving={moving} />
-        {open && children}
-        {open && !docked && <WeldSection />}
-        {open && <EventSection />}
+        {children}
+        <EventSection />
       </div>
     </Panel>
   );
@@ -218,7 +188,7 @@ export function Row({
   return (
     <div className="flex justify-between gap-3 text-2xs">
       <span className="text-secondary">{label}</span>
-      <span className="tabular-nums text-right">{value}</span>
+      <span className="tabular-nums text-right text-3xs">{value}</span>
     </div>
   );
 }
@@ -233,7 +203,7 @@ function LinkSection() {
   return (
     <CollapsibleSection
       title="Link to the robot"
-      aside={<LiveBadge showDetail={false} />}
+      aside={<LiveBadge showDetail={false} className="translate-x-1" />}
     >
       <LinkDetails />
     </CollapsibleSection>
@@ -250,7 +220,7 @@ function LinkDetails() {
     <div className="space-y-0.5">
       <Row
         label="Feed"
-        value={<code className="text-3xs">{link.url || "—"}</code>}
+        value={<code className="text-4xs">{link.url || "—"}</code>}
       />
       <Row
         label="Connected for"
@@ -316,7 +286,6 @@ function RobotSection({
             moving ? "text-positive" : "text-secondary",
           )}
         >
-          <SourceBadge source={status === "live" ? "live" : "none"} />
           <span
             className={cn(
               "size-1.5 rounded-full",
@@ -324,6 +293,7 @@ function RobotSection({
             )}
           />
           {moving ? "MOVING" : "STOPPED"}
+          <SourceBadge source={status === "live" ? "live" : "none"} />
         </span>
       }
     >
@@ -376,62 +346,6 @@ function RobotSection({
 }
 
 //------------------------------------------------------------------------------
-function WeldSection() {
-  const welds = useWeldStats();
-  const fmt = (value: number | null) =>
-    value === null ? "—" : `${Math.round(value)} °C`;
-
-  return (
-    <section className="px-4 py-3">
-      <SectionTitle
-        aside={
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 text-3xs font-bold",
-              welds.welding ? "text-accent" : "text-secondary",
-            )}
-          >
-            <SourceBadge source="sim" />
-            {welds.welding ? "WELDING" : "IDLE"}
-          </span>
-        }
-      >
-        Welding
-      </SectionTitle>
-      <div className="grid grid-cols-4 gap-2 mb-2">
-        <Stat label="Points" value={welds.count.toLocaleString()} />
-        <Stat label="Last" value={fmt(welds.last?.temperature ?? null)} />
-        <Stat label="Mean" value={fmt(welds.mean)} />
-        <Stat label="Max" value={fmt(welds.max)} />
-      </div>
-      <Sparkline
-        values={welds.recent.map((w) => w.temperature)}
-        length={RECENT_WELDS}
-        min={WELD_SCALE.min}
-        max={WELD_SCALE.max}
-        label={`Temperature of the last ${welds.recent.length} weld points`}
-        emptyText="No weld points yet"
-        className="h-10 text-accent"
-      />
-      {welds.startedAt !== null && (
-        <p className="mt-1 text-3xs text-secondary">
-          Since {formatClock(welds.startedAt)} · last {RECENT_WELDS} points
-        </p>
-      )}
-    </section>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-3xs text-secondary">{label}</span>
-      <span className="text-xs font-bold tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-//------------------------------------------------------------------------------
 const LEVEL_ICON: Record<EventLevel, string> = {
   info: "fa-circle-info text-secondary",
   ok: "fa-circle-check text-positive",
@@ -462,28 +376,33 @@ function EventSection() {
       {events.length === 0 ? (
         <p className="text-4xs text-tertiary">Nothing yet.</p>
       ) : (
-        <ol className="-mx-1 px-1 space-y-0.5">
+        <ol className="-mx-1 px-1 space-y-2">
           {events.map((event) => (
             <li
               key={event.id}
               className="flex items-baseline gap-2 text-3xs leading-5"
             >
+              <div className="grow flex flex-col items-baseline">
+                <div className="flex items-center gap-1">
+                  <Icon
+                    className={cn(
+                      "fas shrink-0 text-3xs",
+                      LEVEL_ICON[event.level],
+                    )}
+                  />
+                  <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary mt-px w-14">
+                    {event.source}
+                  </span>
+                  {event.simulated && (
+                    <SourceBadge source="sim" className="mr-1.5 align-[1px]" />
+                  )}
+                </div>
+                <span className="text-balance">{event.text}</span>
+              </div>
               <TimeAgo
                 at={event.at}
-                className="shrink-0 w-15 text-5xs text-secondary tabular-nums"
+                className="shrink-0 w-15 text-right text-5xs text-secondary tabular-nums"
               />
-              <Icon
-                className={cn("fas shrink-0 text-3xs", LEVEL_ICON[event.level])}
-              />
-              <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary mt-px w-14">
-                {event.source}
-              </span>
-              <span className="text-balance">
-                {event.simulated && (
-                  <SourceBadge source="sim" className="mr-1.5 align-[1px]" />
-                )}
-                {event.text}
-              </span>
             </li>
           ))}
         </ol>

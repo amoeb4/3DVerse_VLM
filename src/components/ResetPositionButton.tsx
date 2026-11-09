@@ -1,4 +1,4 @@
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Button, cn } from "@3dverse/ui-lib";
 import { Kbd } from "./common/Kbd";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 
@@ -37,7 +37,7 @@ export function ResetPositionButton({
       onClick={onReset}
       disabled={disabled}
     >
-      {isToolbar && <Icon className="fas fa-arrows-to-dot text-2xs" />}
+      {/* {isToolbar && <Icon className="fas fa-arrows-to-dot text-2xs" />} */}
       <p className={cn(isToolbar && "hidden sm:block")}>
         Reset camera{" "}
         <span className="underline underline-offset-2 decoration-current/40">
