@@ -26,7 +26,7 @@ export default function TorchExample() {
   });
 
   return (
-    <ButtonGroup>
+    <ButtonGroup isAttached>
       <Button
         variant="outline"
         size="icon-sm"
