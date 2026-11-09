@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate } from "react-router";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
@@ -6,7 +6,15 @@ import Dtext from "../Dtext";
 import { MACHINES, type Machine, type MachineStatus } from "../../config";
 import { displayNameOf, initialsOf } from "../../utils/clientName";
 import { useLiveSessions, type LiveSession } from "./useLiveSessions";
+import { MachinePreview, type PreviewStatus } from "./MachinePreview";
 import { viewerPath } from "../../routing";
+
+/**
+ * With no one at the page for this long, the 3D previews close their sessions and the tiles go
+ * back to their pictures; they open again on the next move. The streams already pause while the
+ * tab is hidden, but the sessions would stay open on the platform.
+ */
+const PREVIEW_IDLE_MS = 5 * 60_000;
 
 const STATUS: Record<MachineStatus, { label: string; className: string }> = {
   operational: {
@@ -33,6 +41,7 @@ export function MachineGallery() {
   const navigate = useNavigate();
   const { byScene, available } = useLiveSessions();
   const [customSceneId, setCustomSceneId] = useState("");
+  const previewsOn = usePageAwake(PREVIEW_IDLE_MS);
 
   const liveCount = MACHINES.filter((m) => byScene.has(m.sceneId)).length;
   const operationalCount = MACHINES.filter(
@@ -76,6 +85,7 @@ export function MachineGallery() {
               <MachineTile
                 machine={machine}
                 sessions={byScene.get(machine.sceneId) ?? []}
+                previewsOn={previewsOn}
               />
             </li>
           ))}
@@ -140,7 +150,7 @@ function SummaryPill({
       className={cn(
         "inline-flex items-center gap-1.5 h-7 px-3 rounded-full border bg-ground",
         highlight
-          ? "border-negative/40 text-negative"
+          ? "border-accent/40 text-accent"
           : "border-tertiary text-secondary",
       )}
     >
@@ -155,9 +165,12 @@ function SummaryPill({
 function MachineTile({
   machine,
   sessions,
+  previewsOn,
 }: {
   machine: Machine;
   sessions: LiveSession[];
+  /** Whether the 3D previews may run: off while the page is left idle. */
+  previewsOn: boolean;
 }) {
   const {
     name,
@@ -181,6 +194,15 @@ function MachineTile({
     : null;
   const next = milestones.find((m) => !m.done);
 
+  // The scene itself, live, over the picture, which shows until it is ready (or if it cannot be).
+  // Deprecated machines keep their picture. A session is started only once the tile comes near
+  // the screen.
+  const media = useRef<HTMLDivElement>(null);
+  const seen = useSeenOnce(media);
+  const hasPreview = !isDeprecated && previewsOn && seen;
+  const [previewStatus, setPreviewStatus] = useState<PreviewStatus>("loading");
+  const previewReady = hasPreview && previewStatus === "ready";
+
   return (
     <Link
       to={viewerPath(machine.slug, liveSession?.sessionId)}
@@ -190,13 +212,13 @@ function MachineTile({
         "transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_10px_rgba(0,0,0,0.1)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
         liveSession
-          ? "border-negative/40 hover:border-negative/70"
-          : "border-tertiary hover:border-accent/50",
+          ? "border-accent/40 hover:border-accent/70"
+          : "border-tertiary hover:border-secondary",
         isDeprecated && "opacity-60 hover:opacity-100",
       )}
     >
       {/* Media */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-white">
+      <div ref={media} className="relative aspect-4/3 overflow-hidden bg-white">
         {image ? (
           <img
             src={image}
@@ -210,10 +232,30 @@ function MachineTile({
         ) : (
           <div className="flex size-full flex-col items-center justify-center gap-3 bg-linear-to-br from-accent/15 via-ground to-accent/5 text-accent/60">
             <Icon className="fas fa-bolt-lightning text-2xl" />
-            <span className="text-4xs uppercase tracking-[0.25em]">
-              No preview yet
-            </span>
+            {!hasPreview && (
+              <span className="text-4xs uppercase tracking-[0.25em]">
+                No preview yet
+              </span>
+            )}
           </div>
+        )}
+
+        {hasPreview && (
+          <MachinePreview
+            sceneId={machine.sceneId}
+            onStatus={setPreviewStatus}
+            className={cn(
+              "absolute inset-0 pointer-events-none transition-opacity duration-700",
+              previewReady ? "opacity-100" : "opacity-0",
+            )}
+          />
+        )}
+
+        {hasPreview && previewStatus === "loading" && (
+          <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-tertiary bg-ground/80 text-4xs text-secondary backdrop-blur-sm">
+            <Icon className="fas fa-circle-notch motion-safe:animate-spin text-4xs" />
+            Loading 3D
+          </span>
         )}
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
@@ -349,4 +391,67 @@ function AvatarStack({ usernames }: { usernames: string[] }) {
       ))}
     </span>
   );
+}
+
+//------------------------------------------------------------------------------
+/** True until no one has moved, typed or scrolled on the page for `idleMs`; true again on the next. */
+function usePageAwake(idleMs: number) {
+  const [awake, setAwake] = useState(true);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const wake = () => {
+      setAwake(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setAwake(false), idleMs);
+    };
+    const events = [
+      "pointermove",
+      "pointerdown",
+      "keydown",
+      "wheel",
+      "scroll",
+      "touchstart",
+    ] as const;
+    wake();
+    for (const event of events) {
+      window.addEventListener(event, wake, { passive: true });
+    }
+    return () => {
+      clearTimeout(timer);
+      for (const event of events) {
+        window.removeEventListener(event, wake);
+      }
+    };
+  }, [idleMs]);
+
+  return awake;
+}
+
+/** Whether the element has come near the screen yet; it stays true once it has. */
+function useSeenOnce(ref: RefObject<HTMLElement | null>) {
+  const [seen, setSeen] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (seen || !element) {
+      return;
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      setSeen(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setSeen(true);
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref, seen]);
+
+  return seen;
 }

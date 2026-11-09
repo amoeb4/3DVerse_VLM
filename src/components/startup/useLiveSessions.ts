@@ -17,6 +17,7 @@ type RunningSession = {
   session_id: string;
   scene_id: string;
   created_at: string;
+  is_transient_session?: boolean;
   clients?: { username?: string }[];
 };
 
@@ -47,6 +48,11 @@ export function useLiveSessions() {
           const sessions = (await response.json()) as RunningSession[];
           const next = new Map<string, LiveSession[]>();
           for (const session of sessions) {
+            // The tiles' 3D previews (`MachinePreview`), not someone at work on the machine. The
+            // viewer only ever opens persistent sessions, so a transient one is never one to join.
+            if (session.is_transient_session) {
+              continue;
+            }
             const live: LiveSession = {
               sessionId: session.session_id,
               sceneId: session.scene_id,

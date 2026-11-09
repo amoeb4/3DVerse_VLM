@@ -56,9 +56,7 @@ export function StartupScreen() {
             round
             aria-pressed={view === value}
             onClick={() => select(value)}
-            className={cn(
-              view === value && "bg-accent/15 text-accent",
-            )}
+            className={cn(view === value && "bg-accent/15 text-accent")}
             title={label}
           >
             <Icon className={cn(icon, "text-3xs")} />
@@ -66,11 +64,7 @@ export function StartupScreen() {
         ))}
       </div>
 
-      {view === "grid" ? (
-        <MachineGallery />
-      ) : (
-        <StartupPanel />
-      )}
+      {view === "grid" ? <MachineGallery /> : <StartupPanel />}
     </div>
   );
 }
