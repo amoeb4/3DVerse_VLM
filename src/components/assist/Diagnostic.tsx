@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
 
-import { useAssist } from "../../assist/assistContext";
+import { authorLabel, useAssist } from "../../assist/assistContext";
+import { lastClosedIncident } from "../../assist/assistStore";
 import { CHECKPOINTS } from "../../assist/checkpoints";
 import {
   checksFor,
@@ -53,9 +54,9 @@ function Step({
 }) {
   return (
     <section className="px-4 py-3">
-      <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="flex items-center gap-2 text-3xs font-bold tracking-wider uppercase">
-          <span className="size-4 grid place-items-center rounded-full bg-accent/20 text-accent-300 text-5xs tabular-nums">
+          <span className="size-4 grid place-items-center rounded-full bg-accent text-accent-100 text-5xs tabular-nums">
             {number}
           </span>
           {title}
@@ -76,11 +77,16 @@ function Step({
  *
  * The expert does not run it (it is done at the machine): they see what the operator found, and
  * open the incident. The CN's alarms and state are simulated until the CN is connected.
+ *
+ * A panel of its own, the left column of the Diagnostic mode until an incident is opened; the last
+ * incident closed, at its foot.
  */
 export function Diagnostic({
   onRequest,
+  className,
 }: {
   onRequest: (kind: IncidentKind, note?: string) => void;
+  className?: string;
 }) {
   const { role, snapshot, incident } = useAssist();
   const process = useProcessFeed(500);
@@ -111,16 +117,22 @@ export function Diagnostic({
   ).length;
   const resumeAt = nextUnchecked(checks);
   const askNote = checked > 0 ? diagnosticSummary(checks) : undefined;
+  const last = lastClosedIncident(snapshot);
 
   return (
-    <>
-      <section className="px-4 py-3 border-b border-tertiary">
+    <Panel
+      className={cn(
+        "flex flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        className,
+      )}
+    >
+      <section className="shrink-0 px-4 py-3 border-b border-tertiary">
         <SectionTitle aside={<SourceBadge source={process.source} />}>
           Diagnostic
         </SectionTitle>
         <p className="text-2xs text-secondary">
           {isOperator
-            ? "Look at the cell, say what happened, then run the diagnostic or ask an expert."
+            ? "Find out what happened, then run the diagnostic."
             : "See what the cell says and what the operator found, then open an incident."}
         </p>
       </section>
@@ -208,14 +220,14 @@ export function Diagnostic({
           {recent.length > 0 ? (
             <ol className="space-y-1 text-3xs">
               {recent.map((event) => (
-                <li key={event.id} className="flex gap-2">
+                <li key={event.id} className="flex items-baseline gap-2">
                   <TimeAgo
                     at={event.at}
-                    className="text-tertiary tabular-nums shrink-0"
+                    className="text-5xs text-tertiary tabular-nums shrink-0 w-15"
                   />
                   <span
                     className={cn(
-                      "min-w-0 wrap-break-word",
+                      "min-w-0 wrap-break-word text-balance",
                       event.level === "error"
                         ? "text-negative"
                         : "text-warning",
@@ -335,6 +347,14 @@ export function Diagnostic({
           )}
         </Step>
       </div>
-    </>
+
+      {last?.closed && (
+        <p className="shrink-0 px-4 py-2 text-3xs text-secondary border-t border-tertiary">
+          Last: {INCIDENT_KINDS[last.kind].label},{" "}
+          {last.closed.outcome === "resumed" ? "resumed" : "closed"}{" "}
+          <TimeAgo at={last.closed.at} /> by {authorLabel(last.closed.by)}.
+        </p>
+      )}
+    </Panel>
   );
 }

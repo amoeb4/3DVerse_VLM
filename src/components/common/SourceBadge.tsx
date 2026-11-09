@@ -29,7 +29,7 @@ export function SourceBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center h-4 px-1.5 rounded-sm border",
+        "inline-flex items-center h-4 px-1 rounded-sm border",
         "text-5xs font-bold tracking-wider uppercase whitespace-nowrap",
         STYLES[source],
         className,

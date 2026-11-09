@@ -1,0 +1,111 @@
+/*
+ * Purple accent, replacing the 3dverse yellow. design-tokens sets the whole scale on every
+ * [data-theme] element (the scale is inverted in the light theme), and ui-lib uses the steps
+ * directly (e.g. the accent Button's hover:bg-accent-400), so the full scale is overridden here.
+ * Base: #6700ac = hsl(276 100% 34%). The scale itself is `--brand-accent-*`, the accent pointing at
+ * it: a mode may give the accent another colour (Training), and `[data-accent="brand"]` keeps VLM's.
+ */
+:root,
+[data-theme="dark"] {
+  --brand-accent-100: hsl(276 90% 94%);
+  --brand-accent-200: hsl(276 90% 80%);
+  --brand-accent-300: hsl(276 85% 62%);
+  --brand-accent-400: hsl(276 85% 46%);
+  --brand-accent-500: #6700ac;
+  --brand-accent-600: hsl(276 100% 27%);
+  --brand-accent-700: hsl(276 100% 20%);
+  --brand-accent-800: hsl(276 100% 13%);
+  --brand-accent-900: hsl(276 100% 6%);
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
+}
+
+[data-theme="light"] {
+  --brand-accent-100: hsl(276 100% 6%);
+  --brand-accent-200: hsl(276 100% 13%);
+  --brand-accent-300: hsl(276 100% 20%);
+  --brand-accent-400: hsl(276 100% 27%);
+  --brand-accent-500: #6700ac;
+  --brand-accent-600: hsl(276 85% 46%);
+  --brand-accent-700: hsl(276 85% 62%);
+  --brand-accent-800: hsl(276 90% 80%);
+  --brand-accent-900: hsl(276 90% 94%);
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
+}
+
+/*
+ * Training (the `sandbox` mode) in a colour of its own, the informative blue: the whole accent scale
+ * remapped while it is on (`data-mode` on <html>, set by the viewer). The informative tokens only
+ * have 100, 500, 800 and 900: the steps between are mixed. Light and dark follow, as the informative
+ * scale itself is inverted per theme. Out-ranks the themes' own accent (`[data-theme]`), on <html>
+ * and on any element that sets its own theme.
+ */
+:root[data-mode="sandbox"],
+:root[data-mode="sandbox"] [data-theme] {
+  --color-accent: var(--color-informative-500);
+  --color-accent-100: var(--color-informative-100);
+  --color-accent-200: color-mix(
+    in oklab,
+    var(--color-informative-100) 50%,
+    var(--color-informative-500)
+  );
+  --color-accent-300: color-mix(
+    in oklab,
+    var(--color-informative-100) 20%,
+    var(--color-informative-500)
+  );
+  --color-accent-400: color-mix(
+    in oklab,
+    var(--color-informative-500) 80%,
+    var(--color-informative-800)
+  );
+  --color-accent-500: var(--color-informative-500);
+  --color-accent-600: color-mix(
+    in oklab,
+    var(--color-informative-500) 60%,
+    var(--color-informative-800)
+  );
+  --color-accent-700: color-mix(
+    in oklab,
+    var(--color-informative-500) 25%,
+    var(--color-informative-800)
+  );
+  --color-accent-800: var(--color-informative-800);
+  --color-accent-900: var(--color-informative-900);
+}
+
+/*
+ * Inside Training, what stays in VLM's own colour whatever the mode (e.g. "Ask an expert"): the
+ * accent back on the brand scale, which follows the theme as ever. After Training's rule, which has
+ * the same specificity.
+ */
+:root[data-mode="sandbox"] [data-accent="brand"],
+:root[data-mode="sandbox"] [data-accent="brand"] [data-theme] {
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
+}

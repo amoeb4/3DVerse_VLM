@@ -25,7 +25,7 @@ import {
 } from "react-router";
 
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Button, cn, Icon, Tabs, TabsList, TabsTrigger } from "@3dverse/ui-lib";
 import KeyboardHandler from "./keyBindings";
 import CameraEventListener from "./camera/CameraEventListener";
 import ControlPanel, {
@@ -489,7 +489,11 @@ function AppLayout({
               <RemoteActions
                 onOpenAssistance={openAssistance}
                 inAssistance={isAssist}
-                className="shrink-0 max-h-[55%] overflow-y-auto"
+                // Alone in the Diagnostic; over the mode's own panel elsewhere.
+                className={cn(
+                  "overflow-y-auto",
+                  isAssist ? "min-h-0" : "shrink-0 max-h-[55%]",
+                )}
               >
                 {/* The Diagnostic: who is in the session, with the expert to ask for. */}
                 {isAssist && <PeopleSection />}
@@ -511,7 +515,6 @@ function AppLayout({
             <AssistChrome
               onBack={backToMonitor}
               cameraController={cameraController}
-              rightSlot={rightSlot}
             />
           )}
           {/* The job, in every mode, under the header. Below `lg`, Monitor has it in its sheet. */}
@@ -533,6 +536,44 @@ function AppLayout({
               onOpenAssistance={openAssistance}
               onBack={backToMonitor}
               rightSlot={rightSlot}
+              // Over the timeline: the camera on the part or on the bead, and the part in AR.
+              toolbar={
+                <TertiaryToolbar aria-label="Camera and AR" inFlow>
+                  <Tabs
+                    value={partView.closeUp ? "bead" : "part"}
+                    onValueChange={(value) => {
+                      if (value === "bead") partView.setCloseUp(true);
+                    }}
+                  >
+                    <TabsList variant="segment" size="sm" aria-label="View">
+                      <TabsTrigger
+                        value="part"
+                        className="px-3 text-2xs"
+                        title={`The whole part (${SHORTCUTS.reset.toUpperCase()})`}
+                        // Again on the part, even when already on it: the camera back to it.
+                        onClick={partView.refocus}
+                      >
+                        Whole part
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="bead"
+                        className="px-3 text-2xs"
+                        title="Close up on the bead being laid, following the torch"
+                      >
+                        Weld bead
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <ToolbarDivider />
+                  <XRButton
+                    mode="immersive-ar"
+                    text="Open in"
+                    variant="ghost"
+                    icon="fa-cube"
+                    setXRMode={setXRMode}
+                  />
+                </TertiaryToolbar>
+              }
             />
           )}
           {/* <DisplayDashboard /> */}
@@ -665,50 +706,8 @@ function AppLayout({
           </SecondaryToolbar>
 
           {/* At the bottom centre, over the modes: the camera, and what one does on the cell. Part
-              has its own, over its timeline: the camera on the part, and the part in AR. */}
-          {isPart ? (
-            <TertiaryToolbar
-              aria-label="Camera and AR"
-              className="lg:bottom-[calc(var(--spacing-navbar)+5.5rem)]"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-pressed={partView.closeUp}
-                className={cn(partView.closeUp && "text-accent-300")}
-                title={
-                  partView.closeUp
-                    ? "Back to the whole part"
-                    : "Close up on the point being welded, following it"
-                }
-                onClick={() =>
-                  partView.closeUp
-                    ? partView.refocus()
-                    : partView.setCloseUp(true)
-                }
-              >
-                <Icon className="fas fa-magnifying-glass-plus text-2xs" />
-                <span className="hidden sm:inline">Close up</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                title={`Back to the part (${SHORTCUTS.reset.toUpperCase()})`}
-                onClick={partView.refocus}
-              >
-                <Icon className="fas fa-arrows-to-dot text-2xs" />
-                <span className="hidden sm:inline">Back to the part</span>
-              </Button>
-              <ToolbarDivider />
-              <XRButton
-                mode="immersive-ar"
-                text="Open in"
-                variant="ghost"
-                icon="fa-cube"
-                setXRMode={setXRMode}
-              />
-            </TertiaryToolbar>
-          ) : (
+              has its own, over its timeline (`PartChrome`). */}
+          {!isPart && (
             <TertiaryToolbar aria-label="Camera and notes">
               {/* Assistance: pin a note, follow the other side's camera. */}
               {isAssist && <AssistActions />}

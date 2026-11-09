@@ -26,7 +26,7 @@ export function PeopleSection() {
   return (
     <section className="px-4 py-3">
       <SectionTitle>In the session</SectionTitle>
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-1 empty:hidden">
         {me && <Person look={lookOf(me.clientId)} role={role} isMe />}
         {clients.map((client) => {
           const isFollowed = following === client.id;
@@ -63,7 +63,7 @@ export function PeopleSection() {
         })}
       </ul>
       {clients.length === 0 && (
-        <p className="mt-2 text-3xs text-secondary">No one else yet.</p>
+        <p className="mt-1 text-3xs text-secondary">No one else yet.</p>
       )}
     </section>
   );

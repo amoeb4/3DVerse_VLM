@@ -1,4 +1,4 @@
-import { useContext, useEffect, useId, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
 import { PanelTitle } from "../common/PanelTitle";
@@ -18,6 +18,7 @@ import {
 import { RECENT_WELDS, useWeldStats } from "../../live/weldLog";
 import { formatClock, formatDuration } from "../../live/format";
 import { TimeAgo } from "../common/TimeAgo";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 /** How often the joints are sampled, for their speeds and to tell moving from stopped. */
 const SAMPLE_MS = 200;
@@ -229,86 +230,64 @@ export function Row({
  * than in it, so its own button stays a button of its own.
  */
 function LinkSection() {
-  const [isOpen, setIsOpen] = useState(false);
-  const contentId = useId();
-
   return (
-    <section className="px-4 py-2">
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={contentId}
-          onClick={() => setIsOpen((open) => !open)}
-          className="flex items-center gap-1.5 -ml-1 px-1 py-1 rounded-md cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          <Icon
-            className={cn(
-              "fas fa-chevron-right text-5xs text-secondary transition-transform duration-200",
-              isOpen && "rotate-90",
-            )}
-          />
-          <h2 className="text-3xs font-bold tracking-wider uppercase">
-            Link to the robot
-          </h2>
-        </button>
-        <LiveBadge showDetail={false} />
-      </div>
-      {isOpen && <LinkDetails id={contentId} />}
-    </section>
+    <CollapsibleSection
+      title="Link to the robot"
+      aside={<LiveBadge showDetail={false} />}
+    >
+      <LinkDetails />
+    </CollapsibleSection>
   );
 }
 
-function LinkDetails({ id }: { id: string }) {
+function LinkDetails() {
   const link = useLiveLink(500);
   const { instance } = useContext(LivelinkContext);
   const streamLatency = (instance as { latency?: number } | null)?.latency;
   const now = Date.now();
 
   return (
-    <div id={id} className="mt-1.5 mb-1">
-      <div className="space-y-0.5">
-        <Row
-          label="Feed"
-          value={<code className="text-3xs">{link.url || "—"}</code>}
-        />
-        <Row
-          label="Connected for"
-          value={
-            link.connectedSince !== null
-              ? formatDuration(now - link.connectedSince)
-              : "—"
-          }
-        />
-        <Row
-          label="Messages"
-          value={`${Math.round(link.rate)} /s · ${link.totalMessages.toLocaleString()} total`}
-        />
-        <Row
-          label="Data latency"
-          value={
-            link.latencyMs !== null
-              ? `${Math.round(link.latencyMs)} ms`
-              : "not timestamped"
-          }
-        />
-        <Row
-          label="3D stream latency"
-          value={
-            typeof streamLatency === "number" && streamLatency > 0
-              ? `${Math.round(streamLatency)} ms`
-              : "—"
-          }
-        />
-        <Row
-          label="Last update"
-          value={
-            link.lastMessageAt !== null
-              ? `${formatClock(link.lastMessageAt)} (${formatDuration(now - link.lastMessageAt)} ago)`
-              : "never"
-          }
-        />
-      </div>
+    <div className="space-y-0.5">
+      <Row
+        label="Feed"
+        value={<code className="text-3xs">{link.url || "—"}</code>}
+      />
+      <Row
+        label="Connected for"
+        value={
+          link.connectedSince !== null
+            ? formatDuration(now - link.connectedSince)
+            : "—"
+        }
+      />
+      <Row
+        label="Messages"
+        value={`${Math.round(link.rate)} /s · ${link.totalMessages.toLocaleString()} total`}
+      />
+      <Row
+        label="Data latency"
+        value={
+          link.latencyMs !== null
+            ? `${Math.round(link.latencyMs)} ms`
+            : "not timestamped"
+        }
+      />
+      <Row
+        label="3D stream latency"
+        value={
+          typeof streamLatency === "number" && streamLatency > 0
+            ? `${Math.round(streamLatency)} ms`
+            : "—"
+        }
+      />
+      <Row
+        label="Last update"
+        value={
+          link.lastMessageAt !== null
+            ? `${formatClock(link.lastMessageAt)} (${formatDuration(now - link.lastMessageAt)} ago)`
+            : "never"
+        }
+      />
     </div>
   );
 }
@@ -327,28 +306,27 @@ function RobotSection({
   // The axes are the twin's: the robot's own only while its feed is live.
   const { status } = useLiveLink(1000);
   return (
-    <section className="px-4 py-3">
-      <SectionTitle
-        aside={
+    // Folded by default; whether the robot moves stays in its title.
+    <CollapsibleSection
+      title="Robot axes"
+      aside={
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 text-3xs font-bold",
+            moving ? "text-positive" : "text-secondary",
+          )}
+        >
+          <SourceBadge source={status === "live" ? "live" : "none"} />
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 text-3xs font-bold",
-              moving ? "text-positive" : "text-secondary",
+              "size-1.5 rounded-full",
+              moving ? "bg-positive animate-pulse" : "bg-secondary/50",
             )}
-          >
-            <SourceBadge source={status === "live" ? "live" : "none"} />
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                moving ? "bg-positive animate-pulse" : "bg-secondary/50",
-              )}
-            />
-            {moving ? "MOVING" : "STOPPED"}
-          </span>
-        }
-      >
-        Robot axes
-      </SectionTitle>
+          />
+          {moving ? "MOVING" : "STOPPED"}
+        </span>
+      }
+    >
       {readings.length === 0 ? (
         <p className="text-2xs text-secondary">Waiting for the robot model…</p>
       ) : (
@@ -393,7 +371,7 @@ function RobotSection({
           </tbody>
         </table>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -470,7 +448,7 @@ function EventSection() {
           events.length > 0 && (
             <Button
               variant="ghost"
-              size="xs"
+              size="2xs"
               className="text-3xs"
               onClick={clearEvents}
             >
@@ -482,22 +460,25 @@ function EventSection() {
         Events
       </SectionTitle>
       {events.length === 0 ? (
-        <p className="text-3xs text-secondary">Nothing yet.</p>
+        <p className="text-4xs text-tertiary">Nothing yet.</p>
       ) : (
         <ol className="-mx-1 px-1 space-y-0.5">
           {events.map((event) => (
-            <li key={event.id} className="flex gap-2 text-3xs leading-5">
+            <li
+              key={event.id}
+              className="flex items-baseline gap-2 text-3xs leading-5"
+            >
               <TimeAgo
                 at={event.at}
-                className="text-secondary tabular-nums whitespace-nowrap"
+                className="shrink-0 w-15 text-5xs text-secondary tabular-nums"
               />
               <Icon
-                className={cn("fas mt-1 text-3xs", LEVEL_ICON[event.level])}
+                className={cn("fas shrink-0 text-3xs", LEVEL_ICON[event.level])}
               />
-              <span className="text-3xs uppercase tracking-wide text-secondary mt-px w-14 shrink-0">
+              <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary mt-px w-14">
                 {event.source}
               </span>
-              <span className="min-w-0">
+              <span className="text-balance">
                 {event.simulated && (
                   <SourceBadge source="sim" className="mr-1.5 align-[1px]" />
                 )}

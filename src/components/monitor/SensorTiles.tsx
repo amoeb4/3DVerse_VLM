@@ -31,8 +31,8 @@ export function SensorTiles({ className }: { className?: string }) {
       )}
     >
       <header className="flex items-center justify-between">
-      <PanelTitle>Sensors</PanelTitle>
-      <SourceBadge source={process.source} />
+        <PanelTitle>Sensors</PanelTitle>
+        <SourceBadge source={process.source} />
       </header>
       <div className="grid grid-cols-2 gap-2">
         {CAMERA_FEEDS.map((feed) => (

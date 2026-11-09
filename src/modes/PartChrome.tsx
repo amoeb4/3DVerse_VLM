@@ -29,7 +29,7 @@ import {
 
 /** Layers a second while the build replays. */
 // "Live" and "Back to Live" share a width, so the bar does not shift when one becomes the other.
-const LIVE_BUTTON_WIDTH = "w-32 shrink-0 justify-center";
+const LIVE_BUTTON_WIDTH = "w-32 shrink-0 justify-start gap-2 pl-3 text-white!";
 
 const PLAY_LAYERS_PER_S = 8;
 
@@ -51,6 +51,7 @@ export function PartChrome({
   onOpenAssistance,
   onBack,
   rightSlot,
+  toolbar,
 }: {
   theme: Theme;
   state: PartViewState;
@@ -61,9 +62,11 @@ export function PartChrome({
   onBack: () => void;
   /**
    * Large screens: under the app's actions, in the right column (`App`), where the layers out of
-   * WPS go. The camera's buttons (close up, back to the part, AR) are in the app's toolbar.
+   * WPS go.
    */
   rightSlot: HTMLElement | null;
+  /** The app's toolbar for Part (the camera on the part or the bead, AR), over the timeline. */
+  toolbar?: React.ReactNode;
 }) {
   const build = useBuildRecord(500);
   const {
@@ -202,131 +205,141 @@ export function PartChrome({
         </Panel>
       </div>
 
-      {isLargeScreen
-        ? // Under the app's actions on the right: the layers that left their window, which scroll.
-          rightSlot &&
-          createPortal(
-            <FindingsPanel
-              findings={findings}
-              built={built}
-              focusLayer={focusLayer}
-              onSelect={selectFinding}
-              className="flex min-h-0"
-            />,
-            rightSlot,
-          )
-        : sheet && (
-            // Over the layer bar, whichever is open.
-            <div className="fixed z-40 left-4 right-4 bottom-[calc(var(--spacing-navbar-toolbar)+7rem)] max-h-[40vh] flex flex-col">
-              {sheet === "actions" ? (
-                <RemoteActions onOpenAssistance={onOpenAssistance} />
-              ) : (
-                <FindingsPanel
-                  findings={findings}
-                  built={built}
-                  focusLayer={focusLayer}
-                  onSelect={selectFinding}
-                  className="flex min-h-0"
-                />
-              )}
-            </div>
-          )}
+      {/* Under the app's actions on the right: the layers that left their window, which scroll. */}
+      {isLargeScreen &&
+        rightSlot &&
+        createPortal(
+          <FindingsPanel
+            findings={findings}
+            built={built}
+            focusLayer={focusLayer}
+            onSelect={selectFinding}
+            className="flex min-h-0"
+          />,
+          rightSlot,
+        )}
 
-      {/* The build, layer by layer. Below `lg`, above the XR toolbar, itself over the modes. */}
-      <Panel
-        className={cn(
-          "fixed z-40 bottom-navbar max-lg:bottom-navbar-toolbar left-4 right-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[46rem]",
-          "flex items-center gap-2 px-3 py-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        )}
-      >
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          title={
-            isPlaying ? "Stop the replay (Space)" : "Replay the build (Space)"
-          }
-          aria-label={isPlaying ? "Stop the replay" : "Replay the build"}
-          onClick={() => (isPlaying ? setIsPlaying(false) : play())}
-          disabled={built < 2}
-        >
-          <Icon
-            className={cn("fas text-2xs", isPlaying ? "fa-stop" : "fa-play")}
-          />
-        </Button>
-        <BuildTimeline
-          build={build}
-          pinnedLayer={pinnedLayer}
-          focusLayer={focusLayer}
-          onScrub={(layer) => {
-            setIsPlaying(false);
-            setPinnedLayer(layer);
-          }}
-          className="grow min-w-0"
-        />
-        {pinnedLayer === null ? (
-          // Live: a quiet indicator, the dot beating while the arc burns.
-          <Button
-            variant="outline-accent"
-            size="sm"
-            className={LIVE_BUTTON_WIDTH}
-            title="Following the build as it is laid"
-            aria-pressed
-          >
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                build.arcOn ? "bg-accent-300 animate-pulse" : "bg-secondary/60",
-              )}
-            />
-            Live
-          </Button>
-        ) : (
-          // Rewound: the way back stands out.
-          <Button
-            variant="accent"
-            size="sm"
-            className={cn(
-              LIVE_BUTTON_WIDTH,
-              "text-white! whitespace-nowrap shadow-[0_0_14px_var(--color-accent)]",
+      {/* The bottom stack, at the centre, laid out as a column so nothing in it overlaps: below
+          `lg` the panel opened from the timeline, then the toolbar, then the timeline itself.
+          Below `lg`, above the XR toolbar, itself over the modes. Only what is in it takes the
+          pointer, not the column around. */}
+      <div className="fixed z-40 inset-x-4 bottom-navbar max-lg:bottom-navbar-toolbar flex flex-col items-center gap-2 pointer-events-none *:pointer-events-auto">
+        {!isLargeScreen && sheet && (
+          <div className="w-full max-h-[40vh] flex flex-col">
+            {sheet === "actions" ? (
+              <RemoteActions onOpenAssistance={onOpenAssistance} />
+            ) : (
+              <FindingsPanel
+                findings={findings}
+                built={built}
+                focusLayer={focusLayer}
+                onSelect={selectFinding}
+                className="flex min-h-0"
+              />
             )}
-            title="Back to the build as it is laid"
-            onClick={() => {
-              setIsPlaying(false);
-              setPinnedLayer(null);
-            }}
-          >
-            <Icon className="fas fa-forward-step text-2xs" />
-            Back to Live
-          </Button>
+          </div>
         )}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="lg:hidden"
-          title="Actions: adjust, stop, assistance"
-          aria-label="Actions"
-          aria-pressed={sheet === "actions"}
-          onClick={() => toggleSheet("actions")}
-        >
-          <Icon className="fas fa-hand text-2xs" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="lg:hidden relative"
-          title="Layers out of WPS"
-          aria-label="Layers out of WPS"
-          aria-pressed={sheet === "findings"}
-          onClick={() => toggleSheet("findings")}
-        >
-          <Icon className="fas fa-triangle-exclamation text-2xs" />
-          {findings.length > 0 && (
-            <span className="absolute -top-1 -right-1 text-5xs font-bold tabular-nums">
-              {findings.length}
-            </span>
+
+        {toolbar}
+
+        {/* The build, layer by layer. */}
+        <Panel
+          className={cn(
+            "w-full lg:w-[46rem] max-w-full",
+            "flex items-center gap-2 px-3 py-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
           )}
-        </Button>
-      </Panel>
+        >
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={
+              isPlaying ? "Stop the replay (Space)" : "Replay the build (Space)"
+            }
+            aria-label={isPlaying ? "Stop the replay" : "Replay the build"}
+            onClick={() => (isPlaying ? setIsPlaying(false) : play())}
+            disabled={built < 2}
+          >
+            <Icon
+              className={cn("fas text-2xs", isPlaying ? "fa-stop" : "fa-play")}
+            />
+          </Button>
+          <BuildTimeline
+            build={build}
+            pinnedLayer={pinnedLayer}
+            focusLayer={focusLayer}
+            onScrub={(layer) => {
+              setIsPlaying(false);
+              setPinnedLayer(layer);
+            }}
+            className="grow min-w-0"
+          />
+          {pinnedLayer === null ? (
+            // Live: a quiet indicator, the dot beating while the arc burns.
+            <Button
+              variant="accent"
+              size="sm"
+              className={LIVE_BUTTON_WIDTH}
+              title="Following the build as it is laid"
+              aria-pressed
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  build.arcOn
+                    ? "bg-current animate-pulse"
+                    : "bg-secondary/60",
+                )}
+              />
+              Live
+            </Button>
+          ) : (
+            // Rewound: the way back stands out.
+            <Button
+              variant="accent"
+              size="sm"
+              className={cn(
+                LIVE_BUTTON_WIDTH,
+                "text-white! whitespace-nowrap shadow-[0_0_14px_var(--color-accent)]",
+              )}
+              title="Back to the build as it is laid"
+              onClick={() => {
+                setIsPlaying(false);
+                setPinnedLayer(null);
+              }}
+            >
+              <Icon className="fas fa-forward-step text-2xs" />
+              Back to Live
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="lg:hidden"
+            title="Actions: adjust, stop, assistance"
+            aria-label="Actions"
+            aria-pressed={sheet === "actions"}
+            onClick={() => toggleSheet("actions")}
+          >
+            <Icon className="fas fa-hand text-2xs" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="lg:hidden relative"
+            title="Layers out of WPS"
+            aria-label="Layers out of WPS"
+            aria-pressed={sheet === "findings"}
+            onClick={() => toggleSheet("findings")}
+          >
+            <Icon className="fas fa-triangle-exclamation text-2xs" />
+            {findings.length > 0 && (
+              <span className="absolute -top-1 -right-1 text-5xs font-bold tabular-nums">
+                {findings.length}
+              </span>
+            )}
+          </Button>
+        </Panel>
+      </div>
 
       {hover && hovered && (
         <PointInspector

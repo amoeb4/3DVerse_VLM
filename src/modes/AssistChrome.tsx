@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
@@ -8,7 +7,7 @@ import type { IncidentKind } from "../assist/procedures";
 import { ButtonGroup } from "../components/common/ButtonGroup";
 import { IncidentPanel } from "../components/assist/IncidentPanel";
 import { PeopleSection } from "../components/assist/PeopleSection";
-import { RecoveryPanel } from "../components/assist/RecoveryPanel";
+import { Diagnostic } from "../components/assist/Diagnostic";
 import { RequestDialog } from "../components/assist/RequestDialog";
 import { RemoteActions } from "../components/monitor/RemoteActions";
 import { BackButton } from "../components/common/BackButton";
@@ -20,15 +19,13 @@ const stayHere = () => {};
 
 /**
  * The Diagnostic (the `assistance` mode): an operator at the machine and a remote expert, back to
- * production together. The Diagnostic, then the recovery's steps, on the left; on the right, the
- * app's actions (E-Stop, adjust) with who is in the session (`App`), then the incident (alarm,
- * block, trace, cameras). "Run the diagnostic" goes through the robot's checkpoints one at a time,
- * in a panel at the centre (`DiagnosticRunPanel`). Pinning a note, following the other's
- * camera and the camera's reset are in the toolbar at the bottom centre (`AssistActions`). All of it shared
- * through the session (`assistStore.ts`).
- *
- * Before an incident, the left is the Diagnostic: an incident is opened, or an expert asked for,
- * from there only, once the cell has been looked at.
+ * production together. On the left, the Diagnostic (`Diagnostic`): an incident is opened, or an
+ * expert asked for, from there only, once the cell has been looked at. Once an incident is open,
+ * the incident (alarm, block, trace, cameras, and closing it) takes its place. On the right, the
+ * app's actions (E-Stop, adjust) with who is in the session (`App`). "Run the diagnostic" goes
+ * through the robot's checkpoints one at a time, in a panel at the centre (`DiagnosticRunPanel`).
+ * Pinning a note, following the other's camera and the camera's reset are in the toolbar at the
+ * bottom centre (`AssistActions`). All of it shared through the session (`assistStore.ts`).
  *
  * Everyone is the operator, unless their URL says `?role=expert` (`useAssistRole`). Below `lg`,
  * the panels share a sheet, a tab each.
@@ -36,14 +33,11 @@ const stayHere = () => {};
 export function AssistChrome({
   onBack,
   cameraController,
-  rightSlot,
 }: {
   /** Back to the Monitor mode: the incident and its notes stay open. */
   onBack: () => void;
   /** For the diagnostic's run, which brings the camera to each checkpoint. */
   cameraController: DefaultCameraController | null;
-  /** Large screens: under the app's actions, in the right column (`App`), where the incident goes. */
-  rightSlot: HTMLElement | null;
 }) {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const [isRequestOpen, setIsRequestOpen] = useState(false);
@@ -60,11 +54,7 @@ export function AssistChrome({
   return (
     <>
       {isLargeScreen ? (
-        <AssistColumns
-          onRequest={openRequest}
-          onBack={onBack}
-          rightSlot={rightSlot}
-        />
+        <AssistColumn onRequest={openRequest} onBack={onBack} />
       ) : (
         <AssistSheet onRequest={openRequest} onBack={onBack} />
       )}
@@ -105,45 +95,44 @@ function ActionsWithPeople({ className }: { className?: string }) {
   );
 }
 
-function AssistColumns({
+/** The Diagnostic, or the incident once one is open. */
+function MainPanel({
+  onRequest,
+}: {
+  onRequest: (kind: IncidentKind, note?: string) => void;
+}) {
+  const { incident } = useAssist();
+  return incident ? (
+    <IncidentPanel className="min-h-0" />
+  ) : (
+    <Diagnostic onRequest={onRequest} className="min-h-0" />
+  );
+}
+
+/** Large screens: the left column. The right one is the app's (`App`). */
+function AssistColumn({
   onRequest,
   onBack,
-  rightSlot,
 }: {
   onRequest: (kind: IncidentKind, note?: string) => void;
   onBack: () => void;
-  rightSlot: HTMLElement | null;
 }) {
-  const { incident } = useAssist();
   return (
-    <>
-      {/* Under the job strip, above the XR buttons, bottom left. */}
-      <div
-        className={cn(
-          "fixed left-4 top-28 bottom-toolbar z-40 w-80 xl:w-96 flex flex-col gap-2",
-          "starting:opacity-0 starting:-translate-x-4 transition-all duration-500",
-        )}
-      >
-        <BackToMonitoring onClick={onBack} />
-        <RecoveryPanel onRequest={onRequest} className="min-h-0" />
-      </div>
-
-      {/* The incident, under the app's actions on the right. */}
-      {rightSlot &&
-        incident &&
-        createPortal(<IncidentPanel className="min-h-0" />, rightSlot)}
-    </>
+    // Under the job strip, above the XR buttons, bottom left.
+    <div
+      className={cn(
+        "fixed left-4 top-28 bottom-toolbar z-40 w-80 xl:w-96 flex flex-col gap-2",
+        "starting:opacity-0 starting:-translate-x-4 transition-all duration-500",
+      )}
+    >
+      <BackToMonitoring onClick={onBack} />
+      <MainPanel onRequest={onRequest} />
+    </div>
   );
 }
 
 //------------------------------------------------------------------------------
-type SheetTab = "steps" | "incident" | "actions";
-
-const TABS: { id: SheetTab; label: string; icon: string }[] = [
-  { id: "steps", label: "Steps", icon: "fa-list-check" },
-  { id: "incident", label: "Incident", icon: "fa-triangle-exclamation" },
-  { id: "actions", label: "Actions", icon: "fa-hand" },
-];
+type SheetTab = "main" | "actions";
 
 function AssistSheet({
   onRequest,
@@ -153,14 +142,21 @@ function AssistSheet({
   onBack: () => void;
 }) {
   const { incident } = useAssist();
-  const [tab, setTab] = useState<SheetTab | null>("steps");
+  const [tab, setTab] = useState<SheetTab | null>("main");
+  // The first tab is the Diagnostic, or the incident once one is open.
+  const tabs: { id: SheetTab; label: string; icon: string }[] = [
+    incident
+      ? { id: "main", label: "Incident", icon: "fa-triangle-exclamation" }
+      : { id: "main", label: "Diagnostic", icon: "fa-stethoscope" },
+    { id: "actions", label: "Actions", icon: "fa-hand" },
+  ];
 
   return (
     // Above the toolbars, themselves over the modes: AR is for the operator at the machine, on a phone.
     <div className="fixed inset-x-4 bottom-navbar-toolbar z-40 flex flex-col gap-2 max-h-[60vh]">
       <BackToMonitoring onClick={onBack} />
       <ButtonGroup className="self-start">
-        {TABS.map(({ id, label, icon }) => (
+        {tabs.map(({ id, label, icon }) => (
           <Button
             key={id}
             variant="overlay-outline"
@@ -170,7 +166,6 @@ function AssistSheet({
               tab === id && "text-accent-300 before:bg-accent/15",
             )}
             aria-pressed={tab === id}
-            disabled={id === "incident" && !incident}
             // The open tab again folds the sheet away, for the whole 3D view.
             onClick={() => setTab((previous) => (previous === id ? null : id))}
           >
@@ -179,10 +174,7 @@ function AssistSheet({
           </Button>
         ))}
       </ButtonGroup>
-      {tab === "steps" && (
-        <RecoveryPanel onRequest={onRequest} className="min-h-0" />
-      )}
-      {tab === "incident" && incident && <IncidentPanel className="min-h-0" />}
+      {tab === "main" && <MainPanel onRequest={onRequest} />}
       {tab === "actions" && (
         <ActionsWithPeople className="min-h-0 overflow-y-auto" />
       )}

@@ -27,8 +27,8 @@ import { TimeAgo } from "../common/TimeAgo";
 
 /**
  * The incident open, as the expert reads it for the diagnosis: the CN's alarm and the block it
- * stopped on, the trace and the cameras before the stop, the operator's note. Then `children`:
- * the people in the session.
+ * stopped on, the trace and the cameras before the stop, the operator's note. Then `children`.
+ * At its foot, always in view: closing it without resuming.
  *
  * The alarm, the block and the trace are SIMULATED until the CN and the cell's recording are
  * connected; the cameras have no recording yet.
@@ -52,29 +52,18 @@ export function IncidentPanel({
         {incident && <IncidentSections />}
         {children}
       </div>
+      {incident && <CloseIncident />}
     </Panel>
   );
 }
 
 function IncidentSections() {
-  const { incident, store, me } = useAssist();
-  const [isCloseOpen, setIsCloseOpen] = useState(false);
+  const { incident } = useAssist();
   const kind = incident?.kind ?? "other";
   const seed = incident?.seed ?? 1;
   const trace = useMemo(() => incidentTrace(kind, seed), [kind, seed]);
   if (!incident) return null;
   const info = INCIDENT_KINDS[incident.kind];
-
-  const close = () => {
-    setIsCloseOpen(false);
-    if (store && me) {
-      store.closeIncident(incident, {
-        at: Date.now(),
-        by: me,
-        outcome: "closed",
-      });
-    }
-  };
 
   return (
     <>
@@ -159,18 +148,40 @@ function IncidentSections() {
           The replay shows here once the cameras are recorded.
         </p>
       </section>
+    </>
+  );
+}
 
-      <section className="px-4 py-2">
+/** The incident's way out, highlighted at the panel's foot, behind a confirmation. */
+function CloseIncident() {
+  const { incident, store, me } = useAssist();
+  const [isCloseOpen, setIsCloseOpen] = useState(false);
+  if (!incident) return null;
+
+  const close = () => {
+    setIsCloseOpen(false);
+    if (store && me) {
+      store.closeIncident(incident, {
+        at: Date.now(),
+        by: me,
+        outcome: "closed",
+      });
+    }
+  };
+
+  return (
+    <>
+      <footer className="shrink-0 px-4 py-3 border-t border-tertiary">
         <Button
-          variant="ghost"
-          size="xs"
-          className="-ml-2 text-3xs text-secondary"
+          variant="accent"
+          size="sm"
+          className="w-full justify-center text-white!"
           onClick={() => setIsCloseOpen(true)}
         >
-          <Icon className="fas fa-xmark text-5xs" />
+          <Icon className="fas fa-xmark text-2xs" />
           Close without resuming
         </Button>
-      </section>
+      </footer>
 
       <Dialog open={isCloseOpen} onOpenChange={setIsCloseOpen}>
         <DialogContent className="max-w-md backdrop-blur-xl">

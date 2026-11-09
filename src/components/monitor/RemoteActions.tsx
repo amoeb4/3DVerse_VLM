@@ -199,9 +199,9 @@ export function RemoteActions({
       )}
 
       <Dialog open={isStopOpen} onOpenChange={setIsStopOpen}>
-        <DialogContent className="max-w-md backdrop-blur-xl">
+        <DialogContent className="max-w-lg backdrop-blur-xl text-balance">
           <DialogHeader>
-            <DialogTitle>E-Stop: stop the cell?</DialogTitle>
+            <DialogTitle className="text-lg font-bold">E-Stop: stop the cell?</DialogTitle>
             <DialogDescription>
               This asks the CN to stop (NC Stop, feed hold): the robot stops on
               its path and the arc goes off. Resuming needs NC Start at the

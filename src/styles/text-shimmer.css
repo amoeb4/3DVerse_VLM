@@ -1,0 +1,42 @@
+/*
+ * Text that is waiting for something: a light sweeping across it (from 3dverse-mobile-viewer's
+ * base/text-shimmer.css). Still under reduced motion.
+ *
+ * The text is in its colour (`currentColor`, a dimmed tertiary by default), the light in
+ * `--shimmer-color` (the primary content colour by default). Both are set with utilities:
+ *
+ *   text-shimmer text-warning/20 [--shimmer-color:var(--color-warning)]
+ *
+ * ui-lib ships a `.text-shimmer` of its own (`--color-shimmer`, glyphs `color: transparent`), in the
+ * `utilities` layer. As a Tailwind utility, this one lands in the same layer after it, so it wins;
+ * and Tailwind sorts it before the colour utilities (`text-warning/20`), which win over its default
+ * colour. The glyphs are made transparent with `-webkit-text-fill-color`, leaving `color` free.
+ */
+@keyframes vlm-text-shimmer {
+  to {
+    background-position: -200% center;
+  }
+}
+
+@utility text-shimmer {
+  position: relative;
+  display: inline-block;
+  color: color-mix(in srgb, var(--color-content-tertiary) 70%, transparent);
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    currentColor 40%,
+    var(--shimmer-color, var(--color-content-primary)) 50%,
+    currentColor 60%
+  );
+  background-size: 200% 100%;
+  background-position: 200% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: vlm-text-shimmer 2.5s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    background-position: 50% center;
+  }
+}

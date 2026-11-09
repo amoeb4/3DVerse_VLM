@@ -12,20 +12,29 @@ import { cn } from "@3dverse/ui-lib";
 export function TertiaryToolbar({
   children,
   "aria-label": ariaLabel,
+  inFlow = false,
   className,
 }: {
   children: ReactNode;
   "aria-label"?: string;
+  /**
+   * Laid out by its parent rather than fixed at the bottom centre: in Part, it stands in the bottom
+   * stack, over the build's timeline (`PartChrome`).
+   */
+  inFlow?: boolean;
   className?: string;
 }) {
   return (
     <nav
       aria-label={ariaLabel}
       className={cn(
-        "fixed z-50 flex items-center gap-0.5 h-9 px-1 pointer-events-auto",
+        "flex items-center gap-0.5 h-9 px-1 pointer-events-auto",
         "rounded-full border border-secondary bg-ground/65 backdrop-blur-lg shadow-[0_2px_14px_rgb(0_0_0/0.25)] light:shadow-[0_2px_14px_rgb(0_0_0/0.06)]",
-        "lg:bottom-navbar lg:left-1/2 lg:-translate-x-1/2",
-        "max-lg:bottom-navbar max-lg:right-2 max-lg:max-w-[calc(100%-1rem)]",
+        !inFlow && [
+          "fixed z-50",
+          "lg:bottom-navbar lg:left-1/2 lg:-translate-x-1/2",
+          "max-lg:bottom-navbar max-lg:right-2 max-lg:max-w-[calc(100%-1rem)]",
+        ],
         "[&_button]:outline-none",
         "starting:opacity-0 starting:translate-y-8 transition-all duration-500",
         className,
@@ -38,5 +47,7 @@ export function TertiaryToolbar({
 
 /** A thin vertical line between groups of a toolbar's entries. */
 export function ToolbarDivider() {
-  return <span aria-hidden className="h-4 mx-0.5 border-l border-secondary" />;
+  return (
+    <span aria-hidden className="h-full mx-0.5 border-l border-secondary/50" />
+  );
 }

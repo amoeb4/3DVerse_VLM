@@ -113,7 +113,8 @@ export function LiveBadge({
             "font-bold tracking-wider",
             status === "live" && "text-accent-300",
             status === "offline" && "text-secondary",
-            status === "connecting" && "text-shimmer",
+            status === "connecting" &&
+              "text-shimmer text-warning/20 [--shimmer-color:var(--color-warning)]",
           )}
         >
           {LABELS[status]}
@@ -134,8 +135,8 @@ export function LiveBadge({
       {showDetail && detail && (
         <span
           className={cn(
-            "text-4xs text-secondary ml-1",
-            isWaiting && "text-shimmer",
+            "text-4xs ml-1",
+            isWaiting ? "text-shimmer" : "text-secondary",
             status === "live" && "w-[10ex] text-right tabular-nums",
           )}
         >

@@ -199,9 +199,9 @@ export function DiagnosticRunPanel({
                 Skip
               </Button>
               <Button
-                variant="accent"
+                
                 size="sm"
-                className="text-white!"
+                className="bg-positive hover:bg-positive/90 text-positive-100!"
                 onClick={() => record("ok")}
               >
                 <Icon className="fas fa-check text-2xs" />
@@ -221,18 +221,18 @@ export function DiagnosticRunPanel({
               </p>
             </div>
             <footer className="flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={stopDiagnosticRun}>
-                Done
-              </Button>
-              <Button
-                variant="accent"
+            <Button
+                variant="outline"
                 size="sm"
-                className="text-white!"
                 onClick={askExpert}
               >
                 <Icon className="fas fa-headset text-2xs" />
                 Ask an expert
               </Button>
+              <Button variant="accent" size="sm" className="min-w-20 text-white!" onClick={stopDiagnosticRun}>
+                Done
+              </Button>
+              
             </footer>
           </>
         )}

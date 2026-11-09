@@ -7,7 +7,7 @@ import { ToolbarDivider } from "../common/TertiaryToolbar";
  * What one does from the Assistance mode, as entries of the bottom-right toolbar
  * (`TertiaryToolbar`), beside the camera's reset: pin a note on the cell, follow the other side's
  * camera (the operator the expert's, the expert the operator's). An incident is opened from the
- * Diagnostic (`RecoveryPanel`), once the cell has been looked at.
+ * Diagnostic (`Diagnostic`), once the cell has been looked at.
  *
  * Nothing until a role is chosen.
  */

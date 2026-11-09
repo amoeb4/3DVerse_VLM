@@ -1,0 +1,31 @@
+/* The app's own design tokens, as Tailwind utilities: `font-orbitron`, `bottom-navbar`… */
+@theme {
+  --font-orbitron: "Orbitron", sans-serif;
+  /*
+   * What the mode navbar (`MainNavbar`) takes at the bottom of the screen: its height and a gap.
+   * `bottom-navbar`, `pb-navbar`… lift what stands at the bottom centre above it.
+   */
+  --spacing-navbar: 5.5rem;
+  /*
+   * What the secondary toolbar (`SecondaryToolbar`) takes at the bottom left: its height and a gap.
+   * `bottom-toolbar` lifts what stands at the bottom left above it. Below `lg` the toolbar stands
+   * over the navbar, and `bottom-navbar-toolbar` lifts what stands there above both.
+   */
+  --spacing-toolbar: 3rem;
+  --spacing-navbar-toolbar: calc(
+    var(--spacing-navbar) + var(--spacing-toolbar)
+  );
+}
+
+@font-face {
+  font-family: "Orbitron";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/orbitron/v34/yMJRMIlzdpvBhQQL_Qq7dy0.woff2)
+    format("woff2");
+}
+
+.font-orbitron {
+  font-family: "Orbitron", sans-serif !important;
+}
