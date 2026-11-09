@@ -2,33 +2,33 @@ import { Button, cn, Icon, IslandBar } from "@3dverse/ui-lib";
 import { Kbd } from "./common/Kbd";
 
 import { InvitePanel } from "../invite/InvitePanel";
+import { AskExpertButton } from "./assist/AskExpertButton";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { AvatarList } from "../invite/Avatars";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
-import type { SceneTheme } from "../hooks/useSceneTheme";
-import { ButtonGroup } from "./common/ButtonGroup";
-import { IconSlashed } from "./common/IconSlashed";
 
 const SHOW_KBD_SHORTCUTS = false;
 
+/**
+ * The viewer's top-right tools: the people (avatars, invite) and "Ask an expert", in every mode.
+ * The View menu, with the theme, is in the secondary toolbar, bottom left, with VR and AR. `full`
+ * adds the Sandbox's Control Panel and Supervision panels.
+ */
 export function Toolbar({
+  variant = "full",
   onToggleControlPanel,
-  showDOM3D,
-  setShowDOM3D,
-  showHolo,
-  setShowHolo,
-  theme,
-  onToggleTheme,
+  onToggleSupervision,
+  isSupervisionOpen,
   cameraController,
+  onOpenAssistance,
 }: {
+  variant?: "full" | "minimal";
   onToggleControlPanel: () => void;
-  showDOM3D: boolean;
-  setShowDOM3D: (show: boolean) => void;
-  showHolo: boolean;
-  setShowHolo: (show: boolean) => void;
-  theme: SceneTheme | null;
-  onToggleTheme: () => void;
+  onToggleSupervision: () => void;
+  isSupervisionOpen: boolean;
   cameraController: DefaultCameraController | null;
+  /** To the Assistance mode, from "Ask an expert". */
+  onOpenAssistance: () => void;
 }) {
   return (
     <div
@@ -41,61 +41,52 @@ export function Toolbar({
         <AvatarList cameraController={cameraController} />
         <InvitePanel />
       </IslandBar>
-      <Button
-        variant="overlay-outline"
-        className="py-2 before:opacity-100 before:backdrop-blur-xl"
-        title={`Control Panel (${SHORTCUTS.controlPanel.toUpperCase()})`}
-        onClick={onToggleControlPanel}
-      >
-        <p className="hidden lg:block">
-          <span className="underline underline-offset-2 decoration-current/40">
-            C
-          </span>
-          ontrol Panel
-        </p>
-        <Icon className="fas fa-sliders text-2xs" />
-        {SHOW_KBD_SHORTCUTS && (
-          <Kbd className="hidden lg:inline-flex py-px">
-            {SHORTCUTS.controlPanel.toUpperCase()}
-          </Kbd>
-        )}
-      </Button>
-      <ButtonGroup>
-        <Button
-          variant="overlay-outline"
-          className="py-2 before:opacity-100 before:backdrop-blur-xl"
-          title={showHolo ? "Hide hologram HUD" : "Show hologram HUD"}
-          onClick={() => setShowHolo(!showHolo)}
-        >
-          <IconSlashed slashed={!showHolo} className="opacity-50">
-            <Icon className="fas fa-atom" />
-          </IconSlashed>
-        </Button>
-        <Button
-          variant="overlay-outline"
-          className="py-2 before:opacity-100 before:backdrop-blur-xl"
-          title={showDOM3D ? "Hide infos" : "Show infos"}
-          onClick={() => setShowDOM3D(!showDOM3D)}
-        >
-          <Icon
-            className={cn(
-              "fas",
-              showDOM3D ? "fa-eye" : "fa-eye-slash opacity-50",
+      <AskExpertButton onOpenAssistance={onOpenAssistance} />
+      {/* The Sandbox's side panels. */}
+      {variant === "full" && (
+        <>
+          <Button
+            variant="overlay-outline"
+            className="py-2 before:opacity-100 before:backdrop-blur-xl"
+            title={`Control Panel (${SHORTCUTS.controlPanel.toUpperCase()})`}
+            onClick={onToggleControlPanel}
+          >
+            <p className="hidden lg:block">
+              <span className="underline underline-offset-2 decoration-current/40">
+                C
+              </span>
+              ontrol Panel
+            </p>
+            <Icon className="fas fa-sliders text-2xs" />
+            {SHOW_KBD_SHORTCUTS && (
+              <Kbd className="hidden lg:inline-flex py-px">
+                {SHORTCUTS.controlPanel.toUpperCase()}
+              </Kbd>
             )}
-          />
-        </Button>
-        <Button
-          variant="overlay-outline"
-          className="py-2 before:opacity-100 before:backdrop-blur-xl"
-          title={`${theme === "dark" ? "Light" : "Dark"} theme (${SHORTCUTS.theme.toUpperCase()})`}
-          onClick={onToggleTheme}
-          disabled={!theme}
-        >
-          <Icon
-            className={cn("fas", theme === "dark" ? "fa-sun" : "fa-moon")}
-          />
-        </Button>
-      </ButtonGroup>
+          </Button>
+          <Button
+            variant="overlay-outline"
+            className="py-2 before:opacity-100 before:backdrop-blur-xl"
+            title={`Remote supervision (${SHORTCUTS.supervision.toUpperCase()})`}
+            aria-pressed={isSupervisionOpen}
+            onClick={onToggleSupervision}
+          >
+            <p>
+              Super
+              <span className="underline underline-offset-2 decoration-current/40">
+                v
+              </span>
+              ision
+            </p>
+            <Icon className="fas fa-tower-broadcast text-2xs" />
+            {SHOW_KBD_SHORTCUTS && (
+              <Kbd className="hidden lg:inline-flex py-px">
+                {SHORTCUTS.supervision.toUpperCase()}
+              </Kbd>
+            )}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
