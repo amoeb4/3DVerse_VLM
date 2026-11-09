@@ -9,20 +9,8 @@ import {
 } from "@3dverse/livelink-react";
 import { DOM3DAvatar } from "@3dverse/livelink-react-ui";
 
-import { displayNameOf, initialsOf } from "../utils/clientName";
-
-//------------------------------------------------------------------------------
-// Deterministic color per client id, so the same person keeps the same avatar color for the whole
-// session — shared by the 3D avatar and the bubble in the list.
-function colorFromClientId(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash << 5) - hash + id.charCodeAt(i);
-    hash |= 0;
-  }
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 70%, 55%)`;
-}
+import { ParticipantMark } from "../assist/ParticipantMark";
+import { useParticipantLook } from "../assist/participantLook";
 
 //------------------------------------------------------------------------------
 // Must be rendered inside a `Viewport`, since `DOM3DOverlay` projects onto it.
@@ -86,7 +74,8 @@ const Avatar3D = ({
   onTravel: (entity: Entity) => void;
 }) => {
   const clientCameraEntity = useClientCameraEntity(client);
-  const color = colorFromClientId(client.id);
+  const look = useParticipantLook()(client.id, client.username);
+  const { color } = look;
 
   return (
     <DOM3DAvatar
@@ -94,7 +83,7 @@ const Avatar3D = ({
       entity={clientCameraEntity}
       scaleFactor={0.0025}
       color={color}
-      label={displayNameOf(client.username)}
+      label={look.name}
       showOffscreenIndicator
       showViewportRectangle
       onTravel={onTravel}
@@ -107,7 +96,7 @@ const Avatar3D = ({
         background: `color-mix(in srgb, ${color} 90%, transparent)`,
       }}
     >
-      {initialsOf(client.username)}
+      <ParticipantMark look={look} />
     </DOM3DAvatar>
   );
 };
@@ -135,7 +124,7 @@ export const AvatarList = ({
     return null;
   }
   return (
-    <div className="flex items-center pl-1" role="none">
+    <div className="flex items-center pl-px" role="none">
       {[...clients].reverse().map((client) => (
         <AvatarBubble key={client.id} client={client} onTravel={handleTravel} />
       ))}
@@ -152,8 +141,9 @@ const AvatarBubble = ({
   onTravel: (entity: Entity) => void;
 }) => {
   const cameraEntity = useClientCameraEntity(client);
-  const color = colorFromClientId(client.id);
-  const displayName = displayNameOf(client.username);
+  const look = useParticipantLook()(client.id, client.username);
+  const { color } = look;
+  const displayName = look.name;
 
   return (
     <div className="relative group -ml-1 first:ml-0">
@@ -173,7 +163,7 @@ const AvatarBubble = ({
           } as React.CSSProperties
         }
       >
-        {initialsOf(client.username)}
+        <ParticipantMark look={look} className="text-[0.55rem]" />
       </button>
       <span
         role="tooltip"

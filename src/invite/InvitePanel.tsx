@@ -12,13 +12,25 @@ import {
 
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { viewerPath } from "../routing";
+import { DEFAULT_MODE, type ViewMode } from "../modes/modes";
+import { useViewMode } from "../modes/useViewMode";
 import { QrCodeModal } from "./QrCodeModal";
 
 // Unlike the mobile viewer, this app connects with a public token, which cannot mint guest tokens
 // (that needs `manage` scope). The invite link therefore names the session itself, and the guest
 // joins it with the same public token: the machine's URL, e.g. /nj130-2.05?sessionId=….
-const makeInviteLink = (sessionId: string, sceneId: string) =>
-  new URL(viewerPath(sceneId, sessionId), location.origin).toString();
+// The guest opens in the inviter's mode (`&mode=sandbox`), and is free to switch from there. From
+// Assistance, where one invites the expert to help, the guest comes in as the expert (`&role=expert`).
+const makeInviteLink = (sessionId: string, sceneId: string, mode: ViewMode) =>
+  new URL(
+    viewerPath(
+      sceneId,
+      sessionId,
+      mode === DEFAULT_MODE ? undefined : mode,
+      mode === "assistance" ? "expert" : undefined,
+    ),
+    location.origin,
+  ).toString();
 
 const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
 
@@ -32,11 +44,13 @@ export const InvitePanel = () => {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const canShare = typeof navigator.share === "function";
 
+  const { mode } = useViewMode();
   const sessionId = instance?.session.session_id;
   const sceneId = instance?.session.scene_id;
   const guestLink = useMemo(
-    () => (sessionId && sceneId ? makeInviteLink(sessionId, sceneId) : ""),
-    [sessionId, sceneId],
+    () =>
+      sessionId && sceneId ? makeInviteLink(sessionId, sceneId, mode) : "",
+    [sessionId, sceneId, mode],
   );
 
   const copyGuestLink = useCallback(() => {
@@ -66,6 +80,11 @@ export const InvitePanel = () => {
   }, [guestLink, canShare, copyGuestLink]);
 
   const actions = [
+    {
+      label: "QR code",
+      onClick: () => setIsQrCodeModalOpen(true),
+      icon: "fas fa-qrcode",
+    },
     { label: "Copy link", onClick: copyGuestLink, icon: "fas fa-link" },
     ...(canShare
       ? [
@@ -76,18 +95,13 @@ export const InvitePanel = () => {
           },
         ]
       : []),
-    {
-      label: "QR code",
-      onClick: () => setIsQrCodeModalOpen(true),
-      icon: "fas fa-qrcode",
-    },
   ];
 
   const triggerContent = (
     <>
       <Icon
         className={cn(
-          "fas fa-user-plus text-2xs text-primary translate-x-px lg:translate-x-0",
+          "block lg:hidden! fas fa-user-plus text-2xs text-primary translate-x-px lg:translate-x-0",
           isTextCopied && "invisible",
         )}
       />
@@ -97,19 +111,19 @@ export const InvitePanel = () => {
           isTextCopied && "invisible",
         )}
       >
-        Invite
+        Share
       </span>
       {isTextCopied && (
-        <span className="absolute inset-0 bg-accent/60 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
+        <span className="absolute inset-0 text-white bg-accent/60 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
           <Icon
             className={cn(
-              "fas fa-check text-white text-sm lg:text-xs",
+              "fas fa-check text-sm lg:text-xs",
               "starting:opacity-0 starting:translate-y-2 transition-all duration-400 ease-out",
             )}
           />
           <span
             className={cn(
-              "hidden lg:block text-2xs font-medium text-neutral-1000",
+              "hidden text-2xs font-medium",
               "starting:opacity-0 starting:translate-y-2 transition-all duration-300 delay-50 ease-out",
             )}
           >
