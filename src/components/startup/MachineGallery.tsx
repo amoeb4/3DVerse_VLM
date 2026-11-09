@@ -7,6 +7,8 @@ import { MACHINES, type Machine, type MachineStatus } from "../../config";
 import { displayNameOf, initialsOf } from "../../utils/clientName";
 import { useLiveSessions, type LiveSession } from "./useLiveSessions";
 import { MachinePreview, type PreviewStatus } from "./MachinePreview";
+import { MachineInsights } from "./MachineInsights";
+import { useIncidentDigests } from "../../assist/incidentDigest";
 import { viewerPath } from "../../routing";
 
 /**
@@ -34,8 +36,9 @@ const STATUS: Record<MachineStatus, { label: string; className: string }> = {
 //------------------------------------------------------------------------------
 /**
  * The second startup page: one tile per machine, with its picture, whether someone is in it right
- * now (LIVE, from the platform's running sessions), how far its digital twin has come, and what it
- * is made of. Each tile links to the machine's URL; a live machine's to the session running on it.
+ * now (LIVE, from the platform's running sessions), and a digest of where it stands — the machine,
+ * its production order, the part's quality, its last incident (`MachineInsights`). Each tile links to the machine's
+ * URL; a live machine's to the session running on it.
  */
 export function MachineGallery() {
   const navigate = useNavigate();
@@ -46,6 +49,11 @@ export function MachineGallery() {
   const liveCount = MACHINES.filter((m) => byScene.has(m.sceneId)).length;
   const operationalCount = MACHINES.filter(
     (m) => m.status === "operational",
+  ).length;
+  // Open as last seen here, on a machine whose session still runs (`MachineInsights`).
+  const digests = useIncidentDigests();
+  const incidentCount = MACHINES.filter(
+    (m) => byScene.has(m.sceneId) && digests[m.sceneId]?.closedAt === null,
   ).length;
 
   return (
@@ -70,6 +78,14 @@ export function MachineGallery() {
                 value={liveCount}
                 label="live now"
                 highlight={liveCount > 0}
+              />
+            )}
+            {incidentCount > 0 && (
+              <SummaryPill
+                icon="fas fa-triangle-exclamation"
+                value={incidentCount}
+                label={incidentCount === 1 ? "incident open" : "incidents open"}
+                tone="negative"
               />
             )}
           </div>
@@ -139,19 +155,24 @@ function SummaryPill({
   value,
   label,
   highlight = false,
+  tone,
 }: {
   icon: string;
   value: number;
   label: string;
   highlight?: boolean;
+  /** `negative`: something is wrong somewhere. */
+  tone?: "negative";
 }) {
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 h-7 px-3 rounded-full border bg-ground",
-        highlight
-          ? "border-accent/40 text-accent"
-          : "border-tertiary text-secondary",
+        tone === "negative"
+          ? "border-negative/40 text-negative"
+          : highlight
+            ? "border-accent/40 text-accent"
+            : "border-tertiary text-secondary",
       )}
     >
       <Icon className={cn(icon, "text-3xs")} />
@@ -172,14 +193,7 @@ function MachineTile({
   /** Whether the 3D previews may run: off while the page is left idle. */
   previewsOn: boolean;
 }) {
-  const {
-    name,
-    description,
-    image,
-    status,
-    specs = [],
-    milestones = [],
-  } = machine;
+  const { name, description, image, status } = machine;
   const isDeprecated = status === "deprecated";
 
   // The busiest session is the one to join.
@@ -187,12 +201,6 @@ function MachineTile({
     (a, b) => b.usernames.length - a.usernames.length,
   )[0];
   const liveUsers = liveSession?.usernames ?? [];
-
-  const done = milestones.filter((m) => m.done).length;
-  const completion = milestones.length
-    ? Math.round((done / milestones.length) * 100)
-    : null;
-  const next = milestones.find((m) => !m.done);
 
   // The scene itself, live, over the picture, which shows until it is ready (or if it cannot be).
   // Deprecated machines keep their picture. A session is started only once the tile comes near
@@ -258,9 +266,8 @@ function MachineTile({
           </span>
         )}
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
-          {liveSession && <LiveBadge users={liveUsers} />}
-          {status && (
+        <div className="absolute inset-x-0 top-0 flex items-start justify-start gap-2 p-3">
+        {status && (
             <span
               className={cn(
                 "inline-flex items-center h-6 px-2 rounded-full border text-3xs font-medium backdrop-blur-sm",
@@ -270,6 +277,8 @@ function MachineTile({
               {STATUS[status].label}
             </span>
           )}
+          {liveSession && <LiveBadge />}
+          
         </div>
       </div>
 
@@ -280,60 +289,16 @@ function MachineTile({
             {name}
           </h2>
           {description && (
-            <p className="mt-0.5 text-3xs text-secondary">{description}</p>
+            <p className="mt-0.5 text-3xs text-secondary truncate">
+              {description}
+            </p>
           )}
         </div>
 
-        {specs.length > 0 && (
-          <ul className="flex flex-wrap gap-1">
-            {specs.map((spec) => (
-              <li
-                key={spec}
-                className="px-2 py-0.5 rounded-md bg-underground text-3xs text-secondary"
-              >
-                {spec}
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* Where it stands, in a few rows: the machine, the part, its last incident. */}
+        <MachineInsights machine={machine} isLive={liveSession !== undefined} />
 
-        {completion !== null && (
-          <div className="mt-auto flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between text-3xs">
-              <span className="text-secondary">Digital twin</span>
-              <span className="font-semibold tabular-nums text-primary">
-                {completion}%
-              </span>
-            </div>
-            {/* One segment per milestone, so the bar says which steps are done, not just how many. */}
-            <div className="flex gap-1" aria-hidden="true">
-              {milestones.map((milestone) => (
-                <span
-                  key={milestone.label}
-                  title={`${milestone.label}${milestone.done ? " ✓" : ""}`}
-                  className={cn(
-                    "h-1.5 grow rounded-full",
-                    milestone.done ? "bg-accent" : "bg-tertiary/40",
-                  )}
-                />
-              ))}
-            </div>
-            {/* <p className="text-3xs text-secondary">
-              {next ? (
-                <>
-                  Next: <span className="text-primary">{next.label}</span>
-                </>
-              ) : (
-                <>
-                  <Icon className="fas fa-check text-positive mr-1" />
-                  {milestones.map((m) => m.label).join(" · ")}
-                </>
-              )}
-            </p> */}
-          </div>
-        )}
-
-        <div className="flex items-center justify-between border-t border-tertiary pt-3 text-2xs">
+        <div className="mt-auto flex items-center justify-between border-t border-tertiary pt-3 text-2xs">
           {liveSession ? (
             <span className="flex items-center gap-2 text-secondary">
               <AvatarStack usernames={liveUsers} />
@@ -360,7 +325,7 @@ function MachineTile({
 }
 
 //------------------------------------------------------------------------------
-function LiveBadge({ users }: { users: string[] }) {
+function LiveBadge() {
   return (
     <span className="inline-flex items-center gap-2 h-6 px-2 rounded-full bg-accent text-white text-4xs font-bold tracking-wider">
       <span className="relative flex size-2">
@@ -368,11 +333,6 @@ function LiveBadge({ users }: { users: string[] }) {
         <span className="relative inline-flex size-2 rounded-full bg-white" />
       </span>
       LIVE
-      {users.length > 0 && (
-        <span className="font-normal opacity-90 tabular-nums">
-          · {users.length}
-        </span>
-      )}
     </span>
   );
 }

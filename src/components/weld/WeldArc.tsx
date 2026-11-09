@@ -28,12 +28,14 @@ const ARC_LIGHT_UPDATE_MS = 90;
  * The welding arc at the torch tip while "Start Weld" is on: blue glare, spatter, the pool's
  * afterglow and a subtle fume — see `WeldArcEffect` — plus the arc's real light on the scene.
  *
- * `sceneLight` (the View menu's "Arc light") turns the light on the scene off, keeping the glare.
- * The light is an entity of the shared scene: off here, the cell is unlit for everyone.
+ * `showEffect` (the View menu's "Arc light") shows or hides the glare, sparks and fume, for this
+ * viewer only. The simulation carries on hidden, so the scene's light keeps flickering with it and
+ * the effect comes back mid-flight. The light on the scene is an entity of the shared scene, there
+ * for everyone while welding.
  *
  * Must be rendered inside a `Viewport`.
  */
-export function WeldArc({ sceneLight = true }: { sceneLight?: boolean }) {
+export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
   const { instance } = useContext(LivelinkContext);
   const { camera } = useContext(ViewportContext);
   const { entity: torch } = useEntity({ euid: TORCH_EUID });
@@ -42,6 +44,11 @@ export function WeldArc({ sceneLight = true }: { sceneLight?: boolean }) {
   const smokeRef = useRef<HTMLCanvasElement>(null);
   const lightRef = useRef<HTMLCanvasElement>(null);
   const effectRef = useRef<WeldArcEffect | null>(null);
+  // Read by the frame loop, which is not restarted for it.
+  const showEffectRef = useRef(showEffect);
+  useEffect(() => {
+    showEffectRef.current = showEffect;
+  }, [showEffect]);
 
   // Frame loop: runs while welding, and on until the last spark has fallen and the fume cleared.
   useEffect(() => {
@@ -92,7 +99,10 @@ export function WeldArc({ sceneLight = true }: { sceneLight?: boolean }) {
       smoke.setTransform(dpr, 0, 0, dpr, 0, 0);
       light.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      if (camera && width > 0 && height > 0) {
+      if (!showEffectRef.current) {
+        smoke.clearRect(0, 0, width, height);
+        light.clearRect(0, 0, width, height);
+      } else if (camera && width > 0 && height > 0) {
         effect.draw(light, smoke, {
           clipFromWorld: camera.clip_from_world_matrix,
           focalY: camera.clip_from_view_matrix[5],
@@ -117,7 +127,7 @@ export function WeldArc({ sceneLight = true }: { sceneLight?: boolean }) {
 
   // The arc's light on the scene, while welding.
   useEffect(() => {
-    if (!sceneLight || !welding || !torch || !instance) {
+    if (!welding || !torch || !instance) {
       return;
     }
     let disposed = false;
@@ -167,7 +177,7 @@ export function WeldArc({ sceneLight = true }: { sceneLight?: boolean }) {
           );
       }
     };
-  }, [sceneLight, welding, torch, instance]);
+  }, [welding, torch, instance]);
 
   return (
     <div

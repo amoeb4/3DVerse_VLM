@@ -28,12 +28,6 @@ export const PUBLIC_TOKEN = "public_ml59vXKlgs9fTJlx";
 /** Where a machine's digital twin stands, shown as a chip on its tile. */
 export type MachineStatus = "operational" | "in-progress" | "deprecated";
 
-/**
- * One step of a digital twin, from the bare 3D model to the full welding loop. The tile's
- * completion bar is the share of these that are done.
- */
-export type Milestone = { label: string; done: boolean };
-
 export type Machine = {
   name: string;
   /**
@@ -47,9 +41,6 @@ export type Machine = {
   /** Image from src/assets; tiles without one get a placeholder. */
   image?: string;
   status?: MachineStatus;
-  /** Facts shown as small chips: axes, tooling, … */
-  specs?: string[];
-  milestones?: Milestone[];
   /**
    * The entity the part is built on (its top face): where the Monitor and Part modes draw the part
    * in construction. Without one, the part is not shown in the cell.
@@ -58,9 +49,6 @@ export type Machine = {
 };
 
 //------------------------------------------------------------------------------
-// Milestones as checked in each scene on 2026-11-05: `part_N` joints present (kinematics), a
-// joint-angle mapping for the live feed (grpc_proxy.ts / tester_python/ws_bridge.py), and a torch
-// entity wired to "Start Weld" (weldBead.tsx). Update them as the twins progress.
 export const MACHINES: Machine[] = [
   {
     name: "NJ130 2.05",
@@ -69,15 +57,8 @@ export const MACHINES: Machine[] = [
     description: "Welding cell · 6-axis arm on positioner and turntable",
     image: nj130Image,
     status: "operational",
-    specs: ["8 axes", "Fronius torch", "Live data"],
     // "meshes[321]", the turntable's plate, under part_8.
     buildPlate: "19a0b434-94d5-4546-8e8a-7b894148c504",
-    milestones: [
-      { label: "3D model", done: true },
-      { label: "Kinematics", done: true },
-      { label: "Live data", done: true },
-      { label: "Welding", done: true },
-    ],
   },
   {
     name: "NJ40",
@@ -86,13 +67,6 @@ export const MACHINES: Machine[] = [
     description: "Welding cell · 6-axis arm with tilting positioner",
     image: nj40Image,
     status: "in-progress",
-    specs: ["8 axes", "Fronius torch"],
-    milestones: [
-      { label: "3D model", done: true },
-      { label: "Kinematics", done: true },
-      { label: "Live data", done: false },
-      { label: "Welding", done: false },
-    ],
   },
   {
     name: "Comau racer 3",
@@ -100,13 +74,6 @@ export const MACHINES: Machine[] = [
     sceneId: "516d270a-5a6b-44e6-99c6-44df631bf475",
     description: "Compact 6-axis arm",
     status: "in-progress",
-    specs: ["6 axes"],
-    milestones: [
-      { label: "3D model", done: true },
-      { label: "Kinematics", done: false },
-      { label: "Live data", done: false },
-      { label: "Welding", done: false },
-    ],
   },
   {
     name: "Test_primitive [deprecated]",

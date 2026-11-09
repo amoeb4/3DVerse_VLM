@@ -27,8 +27,8 @@ type ViewItem = {
 type ViewGroup = { label: string; items: ViewItem[] };
 
 /**
- * The menu's options, by where they are drawn: over the stream in this browser, by 3dverse for this
- * viewer's camera, or in the shared scene for everyone (`useViewSettings`).
+ * The menu's options, by where they are drawn: over the stream in this browser, or by 3dverse for
+ * this viewer's camera (`useViewSettings`).
  */
 const GROUPS: ViewGroup[] = [
   {
@@ -47,6 +47,12 @@ const GROUPS: ViewGroup[] = [
         ofTheCell: true,
       },
       { setting: "atmosphere", label: "Atmosphere", icon: "fa-smog" },
+      // The blue glare and the sparks at the torch while it welds. Over the part too, in Part.
+      {
+        setting: "weldArc",
+        label: "Arc light",
+        icon: "fa-wand-magic-sparkles",
+      },
     ],
   },
   {
@@ -56,17 +62,6 @@ const GROUPS: ViewGroup[] = [
       { setting: "grid", label: "Floor grid", icon: "fa-border-all" },
     ],
   },
-  {
-    label: "In the scene · for everyone",
-    items: [
-      {
-        setting: "arcLight",
-        label: "Arc light",
-        icon: "fa-lightbulb",
-        ofTheCell: true,
-      },
-    ],
-  },
 ];
 
 /** What the eye on the button says: something is drawn over or into the picture. */
@@ -74,7 +69,7 @@ const SHOWN_SETTINGS: ViewSetting[] = [
   "holo",
   "jointAngles",
   "atmosphere",
-  "arcLight",
+  "weldArc",
 ];
 
 /**

@@ -76,6 +76,7 @@ import { usePartViewState } from "./modes/partViewState";
 import { PartInCell } from "./components/part/PartInCell";
 import { SharedOverlayProvider } from "./components/holo/SharedOverlayProvider";
 import { AssistProvider } from "./assist/AssistProvider";
+import { IncidentDigestRecorder } from "./assist/IncidentDigestRecorder";
 import { AssistChrome } from "./modes/AssistChrome";
 import { AssistPins } from "./components/assist/AssistPins";
 import { AssistCheckpoints } from "./components/assist/AssistCheckpoints";
@@ -198,6 +199,7 @@ function Viewer({
                 <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
                   <AppLayout
                     machineName={scene.name}
+                    sceneId={scene.sceneId}
                     buildPlate={buildPlate}
                     setXRMode={setXRMode}
                   />
@@ -231,6 +233,7 @@ function Viewer({
                 /* --- MODE NORMAL (Navigateur Classique) --- */
                 <AppLayout
                   machineName={scene.name}
+                  sceneId={scene.sceneId}
                   buildPlate={buildPlate}
                   setXRMode={setXRMode}
                 />
@@ -245,10 +248,13 @@ function Viewer({
 
 function AppLayout({
   machineName,
+  sceneId,
   buildPlate,
   setXRMode,
 }: {
   machineName: string;
+  /** For the startup page's tile: the machine's last incident (`IncidentDigestRecorder`). */
+  sceneId: string;
   /** Where the part in construction stands in the cell (`Machine.buildPlate`). */
   buildPlate?: string;
   setXRMode: (mode: XRSessionMode) => void;
@@ -424,6 +430,7 @@ function AppLayout({
         cameraController={cameraController}
         pickInterceptor={pickInterceptor}
       >
+        <IncidentDigestRecorder sceneId={sceneId} />
         <EntityProvider>
           {/* Below `lg`, it wraps before the toolbar on the right. */}
           <header
@@ -628,7 +635,7 @@ function AppLayout({
             </SharedOverlayProvider>
 
             {/* The welding arc at the torch tip, while "Start Weld" is on. */}
-            <WeldArc sceneLight={view.arcLight} />
+            <WeldArc showEffect={view.weldArc} />
 
             {view.jointAngles && !isPart && <JointAnglesOverlay />}
 

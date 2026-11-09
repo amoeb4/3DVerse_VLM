@@ -86,7 +86,7 @@ export function LiveBadge({
       <div
         className={cn(
           // Solid and tinted by its state, so it reads over any picture.
-          "inline-flex items-center gap-2 h-7 px-2.5 rounded-full border shadow-sm",
+          "inline-flex items-center gap-2 min-h-6 px-2.5 rounded-full border shadow-sm",
           "bg-ground/90 backdrop-blur-xl text-3xs tabular-nums whitespace-nowrap",
           status === "live" && "border-accent-300/60 bg-accent/20",
           (status === "idle" || status === "connecting") &&

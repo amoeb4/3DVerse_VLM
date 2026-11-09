@@ -2,11 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * What the 3D view shows, toggled from the toolbar's View menu and remembered on this device:
- * - drawn over the stream, in this browser only: the hologram HUD, the joint angles and the
- *   atmosphere;
+ * - drawn over the stream, in this browser only: the hologram HUD, the joint angles, the
+ *   atmosphere, and the welding arc's glare and sparks at the torch (`WeldArc`);
  * - rendered by 3dverse for this viewer's camera only: the outlines and the floor grid
- *   (`cameraRenderSettings`);
- * - in the shared scene, for everyone: the arc's light.
+ *   (`cameraRenderSettings`).
  */
 export type ViewSettings = {
   holo: boolean;
@@ -14,7 +13,8 @@ export type ViewSettings = {
   atmosphere: boolean;
   outlines: boolean;
   grid: boolean;
-  arcLight: boolean;
+  /** Not `arcLight`, which was the scene's light: a choice stored under that name means nothing here. */
+  weldArc: boolean;
 };
 
 export type ViewSetting = keyof ViewSettings;
@@ -25,7 +25,7 @@ export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
   atmosphere: false,
   outlines: true,
   grid: false,
-  arcLight: true,
+  weldArc: true,
 };
 
 const STORAGE_KEY = "vlm.view";
