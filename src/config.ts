@@ -1,6 +1,26 @@
 import nj130Image from "./assets/NJ130-2.05_1x.webp";
 import nj40Image from "./assets/NJ40_1x.webp";
 
+/**
+ * The robot feed `WebSocketProvider` drives the arm from: the bridge to the real machine.
+ * Overridden with `VITE_LIVE_FEED_URL` when the app is not running next to it.
+ */
+export const LIVE_FEED_URL =
+  import.meta.env.VITE_LIVE_FEED_URL ?? "ws://localhost:8767";
+
+/**
+ * The cell's two welding cameras, as image URLs (an MJPEG stream works), from the environment. Until
+ * they are set, their tiles in Monitor say "not connected".
+ */
+export const CAMERA_FEEDS: { id: string; label: string; url?: string }[] = [
+  { id: "arc", label: "Cam 1 · arc", url: import.meta.env.VITE_CAMERA_1_URL },
+  {
+    id: "pool",
+    label: "Cam 2 · pool",
+    url: import.meta.env.VITE_CAMERA_2_URL,
+  },
+];
+
 /** The token every session in this app is opened with. */
 export const PUBLIC_TOKEN = "public_ml59vXKlgs9fTJlx";
 
@@ -30,6 +50,11 @@ export type Machine = {
   /** Facts shown as small chips: axes, tooling, … */
   specs?: string[];
   milestones?: Milestone[];
+  /**
+   * The entity the part is built on (its top face): where the Monitor and Part modes draw the part
+   * in construction. Without one, the part is not shown in the cell.
+   */
+  buildPlate?: string;
 };
 
 //------------------------------------------------------------------------------
@@ -45,6 +70,8 @@ export const MACHINES: Machine[] = [
     image: nj130Image,
     status: "operational",
     specs: ["8 axes", "Fronius torch", "Live data"],
+    // "meshes[321]", the turntable's plate, under part_8.
+    buildPlate: "19a0b434-94d5-4546-8e8a-7b894148c504",
     milestones: [
       { label: "3D model", done: true },
       { label: "Kinematics", done: true },

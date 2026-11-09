@@ -3,6 +3,10 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { Button, cn, Panel, Slider } from "@3dverse/ui-lib";
 
+import { logEvent } from "./live/eventLog";
+import { recordWeld, setWelding } from "./live/weldLog";
+import { TORCH_EUID } from "./components/weld/torch";
+
 const MATERIAL_REFS = [
   "5a54e41e-164c-47f8-bf4b-c8d00c3b61aa",
   "561b317b-017f-410b-a04e-f925519dea62",
@@ -49,6 +53,7 @@ export const createEntity = async (
       },
     },
   });
+  recordWeld(temperature);
 };
 
 const MAX_CONCURRENT_CREATES = 5;
@@ -64,7 +69,7 @@ export function EntityCreator() {
   const [latency, setLatency] = useState(0);
   const [autoWeld, setAutoWeld] = useState(false);
   const { entity: torch, isPending: isTorchPending } = useEntity({
-    euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
+    euid: TORCH_EUID,
   });
   const isTorchMissing = !isTorchPending && !torch;
   const { entity: plateau } = useEntity({
@@ -151,6 +156,22 @@ export function EntityCreator() {
     }
   }, [autoWeld]);
 
+  // For the supervision panel. The first run is the initial "off", not a stop.
+  const wasWelding = useRef(false);
+  useEffect(() => {
+    setWelding(autoWeld);
+    if (autoWeld !== wasWelding.current) {
+      logEvent(
+        "info",
+        "weld",
+        autoWeld
+          ? `Welding started at ${temperatureRef.current} °C`
+          : "Welding stopped",
+      );
+      wasWelding.current = autoWeld;
+    }
+  }, [autoWeld]);
+
   const handleCreate = async () => {
     if (!instance || !torch) return;
 
@@ -162,7 +183,7 @@ export function EntityCreator() {
   return (
     <Panel
       className={cn(
-        "absolute top-14 left-5 min-w-68 max-w-80 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+        "absolute bottom-toolbar max-lg:bottom-navbar-toolbar left-4 min-w-68 max-w-80 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
         "starting:opacity-0 starting:-translate-y-8 transition-all duration-500",
       )}
     >

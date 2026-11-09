@@ -10,6 +10,11 @@ import {
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
 import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
 import { useSpeed } from "./components/ControlPanel";
+import { LIVE_FEED_URL } from "./config";
+import { liveLink, messageTimestamp } from "./live/liveLink";
+
+/** Reconnection attempts before giving up; the LIVE badge can then retry by hand. */
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -46,11 +51,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   }, [selectedEntity]);
 
   const connectWebSocket = useCallback(() => {
-    const socket = new WebSocket("ws://localhost:8767");
+    liveLink.connecting(LIVE_FEED_URL);
+    const socket = new WebSocket(LIVE_FEED_URL);
     socketRef.current = socket;
 
     socket.onopen = () => {
       reconnectAttempts.current = 0;
+      liveLink.opened();
       if (selectedEntityRef.current) {
         socket.send(`select ${selectedEntityRef.current}`);
       }
@@ -71,6 +78,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         ) {
           return;
         }
+        liveLink.message(messageTimestamp(parsed));
 
         if (!instance || entitiesMap.size === 0) {
           return;
@@ -97,10 +105,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
       reconnectAttempts.current += 1;
 
-      if (reconnectAttempts.current >= 5) {
+      if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
         console.log("❌ Too many connection attempts, aborting.");
+        liveLink.closed(null);
         return;
       }
+      liveLink.closed(timeout);
 
       reconnectTimeoutRef.current = window.setTimeout(() => {
         connectWebSocket();
@@ -129,10 +139,26 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     connectWebSocket();
+
+    // A manual retry, from the LIVE badge once the automatic ones are spent.
+    liveLink.setReconnect(() => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      reconnectAttempts.current = 0;
+      connectWebSocket();
+    });
+
     return () => {
+      liveLink.setReconnect(null);
       if (reconnectTimeoutRef.current)
         clearTimeout(reconnectTimeoutRef.current);
-      socketRef.current?.close();
+      const socket = socketRef.current;
+      if (socket) {
+        // Closed on purpose: no reconnection, and not reported as a lost link.
+        socket.onclose = null;
+        socket.close();
+      }
     };
   }, [instance, entitiesMap]);
 

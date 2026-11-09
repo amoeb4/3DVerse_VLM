@@ -1,0 +1,147 @@
+import { useEffect, useRef } from "react";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+
+import {
+  onLiveMessage,
+  reconnectLiveLink,
+  useLiveLink,
+  type LinkStatus,
+} from "../live/liveLink";
+import { formatRelative } from "../live/format";
+
+/** The dot beats at most this often, so a fast feed reads as a calm heartbeat, not a flicker. */
+const PULSE_INTERVAL_MS = 1600;
+/** One beat: the ring widening and fading. */
+const PULSE_DURATION_MS = 1200;
+
+const LABELS: Record<LinkStatus, string> = {
+  live: "LIVE",
+  idle: "NO DATA",
+  connecting: "CONNECTING",
+  offline: "OFFLINE",
+};
+
+/**
+ * Says whether what is on screen is the real robot, now: `● LIVE` while its data flows, with the
+ * feed's rate and, when the feed is timestamped, its end-to-end latency. The dot beats with the
+ * incoming messages, so it stops the moment they do — something a canned animation cannot fake.
+ */
+export function LiveBadge({
+  className,
+  showDetail = true,
+}: {
+  className?: string;
+  showDetail?: boolean;
+}) {
+  const link = useLiveLink(500);
+  const dot = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    let last = 0;
+    return onLiveMessage(() => {
+      const now = performance.now();
+      if (now - last < PULSE_INTERVAL_MS || !dot.current) {
+        return;
+      }
+      last = now;
+      dot.current.animate(
+        [
+          { transform: "scale(1.15)", boxShadow: "0 0 0 0 currentColor" },
+          { transform: "scale(1)", boxShadow: "0 0 0 6px transparent" },
+        ],
+        { duration: PULSE_DURATION_MS, easing: "ease-out" },
+      );
+    });
+  }, []);
+
+  const { status } = link;
+  let detail = "";
+  // Waiting for the robot: the text shimmers, so the badge reads as busy rather than stuck.
+  let isWaiting = false;
+  if (status === "live") {
+    detail = `${Math.round(link.rate)} msg/s`;
+    if (link.latencyMs !== null) {
+      detail += ` · ${Math.round(link.latencyMs)} ms`;
+    }
+  } else if (status === "connecting") {
+    detail =
+      link.attempt > 1
+        ? `Waiting for the robot model… · attempt ${link.attempt}`
+        : "Waiting for the robot model…";
+    isWaiting = true;
+  } else if (link.retryAt !== null) {
+    detail = `Retry in ${Math.max(0, Math.ceil((link.retryAt - Date.now()) / 1000))} s`;
+  } else if (link.lastMessageAt !== null) {
+    detail = `last ${formatRelative(link.lastMessageAt)}`;
+  } else if (status === "idle") {
+    detail = "Waiting for the robot…";
+    isWaiting = true;
+  }
+
+  return (
+    <>
+      <div
+        className={cn(
+          // Solid and tinted by its state, so it reads over any picture.
+          "inline-flex items-center gap-2 h-7 px-2.5 rounded-full border shadow-sm",
+          "bg-ground/90 backdrop-blur-xl text-3xs tabular-nums whitespace-nowrap",
+          status === "live" && "border-accent-300/60 bg-accent/20",
+          (status === "idle" || status === "connecting") &&
+            "border-warning/50 bg-warning/10",
+          status === "offline" && "border-secondary",
+          className,
+        )}
+        title={`Robot feed: ${link.url || "not connected yet"} · ${link.totalMessages} messages received`}
+      >
+        <span
+          ref={dot}
+          aria-hidden
+          className={cn(
+            "size-2.5 rounded-full",
+            status === "live" && "bg-accent-300 text-accent-300/60",
+            status === "idle" && "bg-warning",
+            status === "connecting" && "bg-warning",
+            status === "offline" && "bg-secondary/50",
+          )}
+        />
+        <span
+          role="status"
+          className={cn(
+            "font-bold tracking-wider",
+            status === "live" && "text-accent-300",
+            status === "offline" && "text-secondary",
+            status === "connecting" && "text-shimmer",
+          )}
+        >
+          {LABELS[status]}
+        </span>
+
+        {link.canRetry && link.retryAt === null && (
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            title="Reconnect to the robot feed"
+            onClick={reconnectLiveLink}
+            className="-mr-1.5"
+          >
+            <Icon className="fas fa-rotate-right text-5xs" />
+          </Button>
+        )}
+      </div>
+      {showDetail && detail && (
+        <span
+          className={cn(
+            "text-4xs text-secondary ml-1",
+            isWaiting && "text-shimmer",
+            status === "live" && "w-[10ex] text-right tabular-nums",
+          )}
+        >
+          {detail}
+        </span>
+      )}
+    </>
+  );
+}
