@@ -31,7 +31,10 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const CLMService: any = protoDescriptor.CLMService;
 
-const client: any = new CLMService(GRPC_ADDRESS, grpc.credentials.createInsecure());
+const client: any = new CLMService(
+  GRPC_ADDRESS,
+  grpc.credentials.createInsecure(),
+);
 if (!client) console.error("❌ Impossible de créer le client gRPC");
 
 // Connexion WebSocket
@@ -67,7 +70,10 @@ ws.on("error", (e) => console.error("❌ WebSocket error:", e));
 //   7: (val) => [0, 0, -val],
 //   8: (val) => [-val, 0, 0],
 
-const orientationMap: Record<number, (val: number) => [number, number, number]> = {
+const orientationMap: Record<
+  number,
+  (val: number) => [number, number, number]
+> = {
   // robot
   1: (val) => [90, 0, val],
   2: (val) => [-90, val, 90],
@@ -83,7 +89,9 @@ const orientationMap: Record<number, (val: number) => [number, number, number]> 
 // values[0] est un int (compteur/timestamp ?), les axes sont lus à partir de values[1].
 // ATTENTION : ReadRequest est vide, donc c'est le serveur qui décide ce que contient
 // values[1..8]. Ce ne sont des angles d'axes que si le serveur les publie ainsi.
-function parsePartsFromResponse(response: any): { name: string; location: number[] }[] {
+function parsePartsFromResponse(
+  response: any,
+): { name: string; location: number[] }[] {
   const values = response?.values;
   if (!Array.isArray(values)) return [];
 
@@ -122,7 +130,9 @@ function dumpChanges(values: any[]) {
 // Appel gRPC unaire sous forme de promesse
 function call(method: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    client[method]({}, (err: any, res: any) => (err ? reject(err) : resolve(res)));
+    client[method]({}, (err: any, res: any) =>
+      err ? reject(err) : resolve(res),
+    );
   });
 }
 
@@ -131,7 +141,10 @@ async function probe() {
   console.log("🔎 RPC disponibles :", Object.keys(CLMService.service));
   for (const method of ["ReadHeader", "readAquisition"]) {
     try {
-      console.log(`🔎 ${method} :`, JSON.stringify(await call(method), null, 1));
+      console.log(
+        `🔎 ${method} :`,
+        JSON.stringify(await call(method), null, 1),
+      );
     } catch (e) {
       console.error(`❌ ${method} :`, e);
     }
