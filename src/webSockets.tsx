@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
 import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
-import { useSpeed } from "./components/ControlPanel";
+import { useSpeed } from "./components/TrainingPanel";
 import { LIVE_FEED_URL } from "./config";
 import { liveLink, messageTimestamp } from "./live/liveLink";
 

@@ -28,10 +28,10 @@ import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import { Button, cn, Icon, Tabs, TabsList, TabsTrigger } from "@3dverse/ui-lib";
 import KeyboardHandler from "./keyBindings";
 import CameraEventListener from "./camera/CameraEventListener";
-import ControlPanel, {
+import TrainingPanel, {
   SpeedProvider,
   EntityProvider,
-} from "./components/ControlPanel";
+} from "./components/TrainingPanel";
 import { CameraEntityContext } from "./camera/cameraControl";
 import { WebSocketProvider } from "./webSockets";
 import { PartEntitiesProvider } from "./partEntitiesContext";
@@ -92,9 +92,6 @@ import { PeopleSection } from "./components/assist/PeopleSection";
 import { AltCamera } from "./components/monitor/AltCamera";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { AssistAlert } from "./components/assist/AssistAlert";
-
-/** Training's side panel, top right. */
-type SidePanel = "control";
 
 // The URLs themselves are described in `routing.ts`.
 export function App() {
@@ -462,7 +459,7 @@ function AppLayout({
           />
           {isTraining && (
             <div className="fixed top-15 lg:top-17 left-4 z-50 flex flex-col gap-1 w-full max-w-md">
-              <ControlPanel />
+              <TrainingPanel />
               <EntityCreator />
               <EntityStatusPanel
                 hoveredEntity={hoveredEntity?.entity ?? null}

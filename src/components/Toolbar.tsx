@@ -7,8 +7,7 @@ import type { DefaultCameraController } from "@3dverse/livelink-react";
 
 /**
  * The viewer's top-right tools: the people (avatars, invite) and "Ask an expert", in every mode.
- * The View menu, with the theme, is in the secondary toolbar, bottom left, with VR and AR. `full`
- * adds Training's Control Panel.
+ * The View menu, with the theme, is in the secondary toolbar, bottom left, with VR and AR.
  */
 export function Toolbar({
   cameraController,

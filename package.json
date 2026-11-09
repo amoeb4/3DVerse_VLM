@@ -19,7 +19,6 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "22": "^0.0.0",
     "@3dverse/api": "^0.8.9",
     "@3dverse/design-tokens": "^0.1.28",
     "@3dverse/livelink": "^0.8.43",

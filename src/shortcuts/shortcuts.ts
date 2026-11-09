@@ -5,9 +5,6 @@ import type { ViewMode } from "../modes/modes";
 export const SHORTCUTS = {
   // Not "r": keyBindings.tsx already uses it to move every entity back to the origin.
   reset: "p",
-  controlPanel: "c",
-  // `event.key` is "Escape", compared lowercased like the others. Closes the open side panel.
-  closePanel: "escape",
   theme: "t",
   // Part mode: play the build's replay, or stop it. `event.key` for the space bar is " ".
   playBuild: " ",

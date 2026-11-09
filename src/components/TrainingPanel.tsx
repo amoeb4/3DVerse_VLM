@@ -64,7 +64,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default function ControlPanel() {
+export default function TrainingPanel() {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
     ["material"],
