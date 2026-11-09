@@ -11,7 +11,8 @@ import { PartEntitiesContext } from "../partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "../movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
+import { Button, cn, Icon, Panel, PanelHeader } from "@3dverse/ui-lib";
+import { PanelTitle } from "./common/PanelTitle";
 
 type SpeedContextType = {
   delayMs: number;
@@ -101,19 +102,19 @@ export default function ControlPanel({
   return (
     <Panel
       className={cn(
-        "fixed top-15 right-4 z-50 divide-y divide-tertiary w-[90vw] max-w-150 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "fixed top-15 lg:top-28 right-4 z-50 divide-y divide-tertiary w-[90vw] max-w-150 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
         "origin-top-right transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
         isOpen
           ? "opacity-100 translate-x-0 scale-100 visible"
           : "opacity-0 translate-x-4 scale-95 invisible",
       )}
     >
-      <header className="flex justify-between items-center px-4 py-2">
-        <h1 className="font-heading text-sm font-bold">Control Panel</h1>
+      <PanelHeader className="flex justify-between items-center">
+        <PanelTitle>Control Panel</PanelTitle>
         <Button variant="ghost" size="icon-xs" onClick={onClose}>
           <Icon className="fas fa-close" />
         </Button>
-      </header>
+      </PanelHeader>
 
       <div className="flex flex-wrap gap-2 px-3 py-2">
         <EntityDropdown />

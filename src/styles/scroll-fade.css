@@ -1,0 +1,120 @@
+/*
+ * Scroll edge fades driven by scroll position (from 3dverse-mobile-viewer's
+ * utilities/scroll-fade.css): content fades out at an edge while there is more of it past that
+ * edge. When content does not overflow, the scroll timeline is inactive and the fades stay at 0.
+ * Where scroll-driven animations are not supported, nothing fades: the content is simply cut.
+ *
+ * `scroll-fade-x` for horizontal scrolling; `scroll-fade-y`, its vertical twin, for the panels.
+ */
+
+@property --scroll-fade-left {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-fade-right {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-fade-x {
+  /* At start: hint that more content is on the right */
+  0% {
+    --scroll-fade-left: 0px;
+    --scroll-fade-right: 1.25rem;
+  }
+
+  /* In the middle: hint on both sides */
+  5%,
+  95% {
+    --scroll-fade-left: 1.25rem;
+    --scroll-fade-right: 1.25rem;
+  }
+
+  /* At end: hint that more content is on the left */
+  100% {
+    --scroll-fade-left: 1.25rem;
+    --scroll-fade-right: 0px;
+  }
+}
+
+@keyframes scroll-fade-y {
+  /* At the top: hint that more content is below */
+  0% {
+    --scroll-fade-top: 0px;
+    --scroll-fade-bottom: 1.25rem;
+  }
+
+  /* In the middle: hint on both ends */
+  5%,
+  95% {
+    --scroll-fade-top: 1.25rem;
+    --scroll-fade-bottom: 1.25rem;
+  }
+
+  /* At the bottom: hint that more content is above */
+  100% {
+    --scroll-fade-top: 1.25rem;
+    --scroll-fade-bottom: 0px;
+  }
+}
+
+.scroll-fade-x {
+  --scroll-fade-left: 0px;
+  --scroll-fade-right: 0px;
+
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--scroll-fade-left),
+    black calc(100% - var(--scroll-fade-right)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--scroll-fade-left),
+    black calc(100% - var(--scroll-fade-right)),
+    transparent
+  );
+
+  animation: scroll-fade-x linear;
+  animation-timeline: scroll(self inline);
+}
+
+.scroll-fade-y {
+  --scroll-fade-top: 0px;
+  --scroll-fade-bottom: 0px;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--scroll-fade-top),
+    black calc(100% - var(--scroll-fade-bottom)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--scroll-fade-top),
+    black calc(100% - var(--scroll-fade-bottom)),
+    transparent
+  );
+
+  animation: scroll-fade-y linear;
+  animation-timeline: scroll(self block);
+}

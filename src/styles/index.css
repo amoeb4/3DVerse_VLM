@@ -10,8 +10,26 @@
 /* bg-ground, text-primary, border-tertiary, rounded-xl, shadow-md… from the 3dverse design tokens */
 @import "@3dverse/design-tokens/css/tailwind-theme.css";
 
+/* Scrollbars, and fades at the ends of what scrolls (from 3dverse-mobile-viewer). */
+@import "./scrollbar.css";
+@import "./scroll-fade.css";
+
 @theme {
   --font-orbitron: "Orbitron", sans-serif;
+  /*
+   * What the mode navbar (`MainNavbar`) takes at the bottom of the screen: its height and a gap.
+   * `bottom-navbar`, `pb-navbar`… lift what stands at the bottom centre above it.
+   */
+  --spacing-navbar: 5.5rem;
+  /*
+   * What the secondary toolbar (`SecondaryToolbar`) takes at the bottom left: its height and a gap.
+   * `bottom-toolbar` lifts what stands at the bottom left above it. Below `lg` the toolbar stands
+   * over the navbar, and `bottom-navbar-toolbar` lifts what stands there above both.
+   */
+  --spacing-toolbar: 3rem;
+  --spacing-navbar-toolbar: calc(
+    var(--spacing-navbar) + var(--spacing-toolbar)
+  );
 }
 
 @font-face {
@@ -31,33 +49,52 @@
  * Purple accent, replacing the 3dverse yellow. design-tokens sets the whole scale on every
  * [data-theme] element (the scale is inverted in the light theme), and ui-lib uses the steps
  * directly (e.g. the accent Button's hover:bg-accent-400), so the full scale is overridden here.
- * Base: #6700ac = hsl(276 100% 34%).
+ * Base: #6700ac = hsl(276 100% 34%). The scale itself is `--brand-accent-*`, the accent pointing at
+ * it: a mode may give the accent another colour (Training), and `[data-accent="brand"]` keeps VLM's.
  */
 :root,
 [data-theme="dark"] {
-  --color-accent: var(--color-accent-500);
-  --color-accent-100: hsl(276 90% 94%);
-  --color-accent-200: hsl(276 90% 80%);
-  --color-accent-300: hsl(276 85% 62%);
-  --color-accent-400: hsl(276 85% 46%);
-  --color-accent-500: #6700ac;
-  --color-accent-600: hsl(276 100% 27%);
-  --color-accent-700: hsl(276 100% 20%);
-  --color-accent-800: hsl(276 100% 13%);
-  --color-accent-900: hsl(276 100% 6%);
+  --brand-accent-100: hsl(276 90% 94%);
+  --brand-accent-200: hsl(276 90% 80%);
+  --brand-accent-300: hsl(276 85% 62%);
+  --brand-accent-400: hsl(276 85% 46%);
+  --brand-accent-500: #6700ac;
+  --brand-accent-600: hsl(276 100% 27%);
+  --brand-accent-700: hsl(276 100% 20%);
+  --brand-accent-800: hsl(276 100% 13%);
+  --brand-accent-900: hsl(276 100% 6%);
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
 }
 
 [data-theme="light"] {
-  --color-accent: var(--color-accent-500);
-  --color-accent-100: hsl(276 100% 6%);
-  --color-accent-200: hsl(276 100% 13%);
-  --color-accent-300: hsl(276 100% 20%);
-  --color-accent-400: hsl(276 100% 27%);
-  --color-accent-500: #6700ac;
-  --color-accent-600: hsl(276 85% 46%);
-  --color-accent-700: hsl(276 85% 62%);
-  --color-accent-800: hsl(276 90% 80%);
-  --color-accent-900: hsl(276 90% 94%);
+  --brand-accent-100: hsl(276 100% 6%);
+  --brand-accent-200: hsl(276 100% 13%);
+  --brand-accent-300: hsl(276 100% 20%);
+  --brand-accent-400: hsl(276 100% 27%);
+  --brand-accent-500: #6700ac;
+  --brand-accent-600: hsl(276 85% 46%);
+  --brand-accent-700: hsl(276 85% 62%);
+  --brand-accent-800: hsl(276 90% 80%);
+  --brand-accent-900: hsl(276 90% 94%);
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
 }
 
 #root {
@@ -87,4 +124,110 @@ body {
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em var(--color-accent));
+}
+
+/*
+ * Text that is waiting for something: a light sweeping across it (from 3dverse-mobile-viewer's
+ * base/text-shimmer.css). Still under reduced motion.
+ */
+@keyframes shimmer {
+  to {
+    background-position: -200% center;
+  }
+}
+
+.text-shimmer {
+  position: relative;
+  display: inline-block;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-content-tertiary) 70%, transparent) 40%,
+    var(--color-content-primary) 50%,
+    color-mix(in srgb, var(--color-content-tertiary) 70%, transparent) 60%
+  );
+  background-size: 200% 100%;
+  background-position: 200% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer {
+    animation: none;
+    background-position: 50% center;
+  }
+}
+
+/*
+ * Training (the `sandbox` mode) in a colour of its own, the informative blue: the whole accent scale
+ * remapped while it is on (`data-mode` on <html>, set by the viewer). The informative tokens only
+ * have 100, 500, 800 and 900: the steps between are mixed. Light and dark follow, as the informative
+ * scale itself is inverted per theme. Out-ranks the themes' own accent (`[data-theme]`), on <html>
+ * and on any element that sets its own theme.
+ */
+:root[data-mode="sandbox"],
+:root[data-mode="sandbox"] [data-theme] {
+  --color-accent: var(--color-informative-500);
+  --color-accent-100: var(--color-informative-100);
+  --color-accent-200: color-mix(
+    in oklab,
+    var(--color-informative-100) 50%,
+    var(--color-informative-500)
+  );
+  --color-accent-300: color-mix(
+    in oklab,
+    var(--color-informative-100) 20%,
+    var(--color-informative-500)
+  );
+  --color-accent-400: color-mix(
+    in oklab,
+    var(--color-informative-500) 80%,
+    var(--color-informative-800)
+  );
+  --color-accent-500: var(--color-informative-500);
+  --color-accent-600: color-mix(
+    in oklab,
+    var(--color-informative-500) 60%,
+    var(--color-informative-800)
+  );
+  --color-accent-700: color-mix(
+    in oklab,
+    var(--color-informative-500) 25%,
+    var(--color-informative-800)
+  );
+  --color-accent-800: var(--color-informative-800);
+  --color-accent-900: var(--color-informative-900);
+}
+
+/*
+ * Placing a note on the cell (Assistance, "Pin a note"): the pointer is a pin, its tip where the
+ * note goes (the hotspot, 16 30). Over the inline cursors the 3D view sets while hovering. Its own
+ * colour, the base accent: a cursor cannot read the theme's variables.
+ */
+body.is-placing-pin,
+body.is-placing-pin * {
+  cursor:
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 2C10.5 2 6 6.4 6 11.9 6 19.2 16 30 16 30s10-10.8 10-18.1C26 6.4 21.5 2 16 2z' fill='%236700ac' stroke='white' stroke-width='2'/%3E%3Ccircle cx='16' cy='12' r='3.6' fill='white'/%3E%3C/svg%3E")
+      16 30,
+    crosshair !important;
+}
+
+/*
+ * Inside Training, what stays in VLM's own colour whatever the mode (e.g. "Ask an expert"): the
+ * accent back on the brand scale, which follows the theme as ever.
+ */
+:root[data-mode="sandbox"] [data-accent="brand"],
+:root[data-mode="sandbox"] [data-accent="brand"] [data-theme] {
+  --color-accent: var(--brand-accent-500);
+  --color-accent-100: var(--brand-accent-100);
+  --color-accent-200: var(--brand-accent-200);
+  --color-accent-300: var(--brand-accent-300);
+  --color-accent-400: var(--brand-accent-400);
+  --color-accent-500: var(--brand-accent-500);
+  --color-accent-600: var(--brand-accent-600);
+  --color-accent-700: var(--brand-accent-700);
+  --color-accent-800: var(--brand-accent-800);
+  --color-accent-900: var(--brand-accent-900);
 }
