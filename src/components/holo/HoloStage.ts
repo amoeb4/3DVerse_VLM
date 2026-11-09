@@ -9,21 +9,21 @@ import { loadMeshAsset, submeshGeometry } from "./meshAssets";
 import { GLOW_RESOLUTION } from "./GlowLines";
 import type { HoloShape } from "./holoTags";
 
-/** How deep under a "main" entity to look for meshes that belong to it. */
+/** How deep under a "hud" entity to look for meshes that belong to it. */
 const MAX_CHILD_DEPTH = 4;
 
 //------------------------------------------------------------------------------
 /** An entity making up a part, and the matrix taking its space into the part's (none for the part). */
-type Piece = { entity: Entity; toPart: THREE.Matrix4 | null };
+export type Piece = { entity: Entity; toPart: THREE.Matrix4 | null };
 
 /**
- * The entities that make up a part: the "main" entity itself and its children, so a part whose mesh
- * hangs on a child entity is still whole. Children that are "main" entities themselves are parts
+ * The entities that make up a part: the "hud" entity itself and its children, so a part whose mesh
+ * hangs on a child entity is still whole. Children that are "hud" entities themselves are parts
  * in their own right, and left out with everything under them.
  *
  * The children are measured where they stand now, relative to the part: they are rigid with it.
  */
-async function collectPieces(
+export async function collectPieces(
   entity: Entity,
   mainIds: Set<string>,
 ): Promise<Piece[]> {
@@ -58,7 +58,7 @@ async function collectPieces(
 }
 
 /** The part's bounding box in its own space: the `local_aabb`s of all its pieces, merged. */
-function localBoxOf(pieces: Piece[]): THREE.Box3 | null {
+export function localBoxOf(pieces: Piece[]): THREE.Box3 | null {
   const box = new THREE.Box3();
   const corner = new THREE.Vector3();
   for (const { entity, toPart } of pieces) {
@@ -133,7 +133,7 @@ async function buildPartMesh(pieces: Piece[]): Promise<PartMesh | null> {
 
 //------------------------------------------------------------------------------
 /**
- * Everything the HUD draws, for one set of "main" entities: a `HoloEntity` per part.
+ * Everything the HUD draws, for one set of "hud" entities: a `HoloEntity` per part.
  *
  * Built from bounding boxes, which are at hand at once; `loadGeometry` then fetches each part's
  * real mesh and swaps it in for its box.

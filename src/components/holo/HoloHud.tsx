@@ -1,9 +1,9 @@
-import { useContext, useEffect, useMemo } from "react";
-import { ViewportContext, useEntities } from "@3dverse/livelink-react";
+import { useEffect, useMemo } from "react";
+import { useEntities } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
 
-import { HoloOverlay } from "./HoloOverlay";
 import { HoloStage } from "./HoloStage";
+import { useSharedOverlay } from "./sharedOverlay";
 import { holoShapeOf, type HoloShape } from "./holoTags";
 
 const byNaturalName = (a: { entity: Entity }, b: { entity: Entity }) =>
@@ -12,18 +12,18 @@ const byNaturalName = (a: { entity: Entity }, b: { entity: Entity }) =>
   });
 
 /**
- * A holographic HUD around every entity tagged `main` (or `main:cylinder:<axis>`, see `holoTags`):
+ * A holographic HUD around every entity tagged `hud` (or `hud:cylinder:<axis>`, see `holoTags`):
  * glowing shells — boxes first, then the parts' real meshes from the 3dverse API — and joint
- * gauges. Drawn with Three.js in an
- * overlay that Livelink composites onto each streamed frame, so it stays locked to the picture.
+ * gauges. Drawn with Three.js in the viewport's shared overlay (`sharedOverlay.ts`), which Livelink
+ * composites onto each streamed frame, so it stays locked to the picture.
  *
  * The server renders the machine, so the browser has no depth for it: each part's shell is drawn
  * into the depth buffer, invisibly, and hides whatever of the HUD is behind it.
  *
- * Must be rendered inside a `Viewport`.
+ * Must be rendered inside a `SharedOverlayProvider`.
  */
 export function HoloHud() {
-  const { viewport } = useContext(ViewportContext);
+  const overlay = useSharedOverlay();
   const { entities } = useEntities({ mandatory_components: ["tags"] });
 
   const tagged = entities
@@ -40,14 +40,14 @@ export function HoloHud() {
   const parts = useMemo(() => tagged, [taggedKey]);
 
   useEffect(() => {
-    if (!viewport || parts.length === 0) {
+    if (!overlay || parts.length === 0) {
       return;
     }
 
     let disposed = false;
     let frame = 0;
-    let overlay: HoloOverlay | null = null;
     let stage: HoloStage | null = null;
+    let stopListening: (() => void) | null = null;
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -60,24 +60,22 @@ export function HoloHud() {
           return;
         }
         stage = created;
-        overlay = new HoloOverlay({ viewport });
         overlay.scene.add(stage.root);
-        overlay.onBeforeDraw = () => {
+        stopListening = overlay.addDrawListener(() => {
           const elapsed = (performance.now() - start) / 1000;
           stage?.update({
             time: reducedMotion ? 0 : elapsed,
             introTime: reducedMotion ? Infinity : elapsed,
-            viewportWidth: overlay!.width,
-            viewportHeight: overlay!.height,
+            viewportWidth: overlay.width,
+            viewportHeight: overlay.height,
           });
-        };
-        viewport.addOverlay({ overlay });
+        });
 
         // The boxes are up at once; the parts' real meshes follow from the API and scan in over
         // them. Each hologram ignores its mesh if the HUD is gone by the time it arrives.
         void created.loadGeometry().then(() => {
           if (!disposed && reducedMotion) {
-            overlay?.redraw();
+            overlay.requestRedraw();
           }
         });
 
@@ -87,15 +85,13 @@ export function HoloHud() {
           if (disposed) {
             return;
           }
-          if (document.visibilityState === "visible") {
-            overlay?.redraw();
-          }
+          overlay.requestRedraw();
           frame = requestAnimationFrame(tick);
         };
         if (!reducedMotion) {
           frame = requestAnimationFrame(tick);
         } else {
-          overlay.redraw();
+          overlay.requestRedraw();
         }
       })
       .catch((error) => console.error("HoloHud: cannot build the HUD", error));
@@ -103,13 +99,12 @@ export function HoloHud() {
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
-      if (overlay) {
-        // Releases the overlay and redraws the frame without it.
-        viewport.removeOverlay({ overlay });
-      }
+      stopListening?.();
       stage?.dispose();
+      // The frame, without the HUD.
+      overlay.requestRedraw();
     };
-  }, [viewport, parts]);
+  }, [overlay, parts]);
 
   return null;
 }

@@ -15,12 +15,16 @@ export const AXIS_COLORS: Record<JointAxis, THREE.Color> = {
   z: new THREE.Color("#4f7dff"),
 };
 
-/** Render order: occluders fill the depth buffer before anything visible is drawn. */
+/**
+ * Render order: occluders fill the depth buffer before anything visible is drawn. The joint glow
+ * comes last, over everything, like light blooming in the lens.
+ */
 export const RENDER_ORDER = {
   occluder: -100,
   box: 10,
   lines: 20,
   gauge: 30,
+  glow: 40,
 } as const;
 
 //------------------------------------------------------------------------------

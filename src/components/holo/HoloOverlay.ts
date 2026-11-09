@@ -5,19 +5,22 @@ import type { OverlayInterface, Viewport } from "@3dverse/livelink";
  * A Three.js scene composited by Livelink on top of every frame the server streams into a viewport.
  *
  * Livelink calls `draw` whenever it presents a frame, so the overlay's camera is copied from the
- * viewport's camera projection at that exact moment — the HUD can never drift from the picture it
- * is drawn over. Between server frames, `HoloHud` asks for a redraw of the last frame so the HUD
- * keeps animating while the scene itself is still.
+ * viewport's camera projection at that exact moment — what is drawn can never drift from the
+ * picture it is drawn over. Between server frames, `requestRedraw` re-presents the last frame so
+ * the overlay can animate while the scene itself is still.
  *
- * Same principle as `@3dverse/livelink-three`'s `ThreeOverlay`, plus a per-draw hook (`onBeforeDraw`)
- * where the HUD follows the entities and advances its animations.
+ * Livelink composites a single canvas overlay per viewport, so this one is shared
+ * (`SharedOverlayProvider`): the HUD and the part each add their objects to `scene` and a hook
+ * (`addDrawListener`) where they follow the entities and advance their animations.
+ *
+ * Same principle as `@3dverse/livelink-three`'s `ThreeOverlay`.
  */
 export class HoloOverlay implements OverlayInterface {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera();
 
-  /** Called right before each render, with the overlay's camera already synced to the viewport. */
-  onBeforeDraw: ((viewport: Viewport) => void) | null = null;
+  readonly #drawListeners = new Set<(viewport: Viewport) => void>();
+  #redrawFrame = 0;
 
   readonly #viewport: Viewport;
   readonly #canvas: OffscreenCanvas;
@@ -85,7 +88,9 @@ export class HoloOverlay implements OverlayInterface {
       projection.view_from_clip_matrix,
     );
 
-    this.onBeforeDraw?.(this.#viewport);
+    for (const listener of this.#drawListeners) {
+      listener(this.#viewport);
+    }
 
     this.#renderer.setViewport(0, 0, this.#canvas.width, this.#canvas.height);
     this.#renderer.render(this.scene, this.camera);
@@ -98,14 +103,39 @@ export class HoloOverlay implements OverlayInterface {
     this.#renderer.setSize(this.#canvas.width, this.#canvas.height, false);
   }
 
-  /** Re-present the last streamed frame, so the HUD animates while the scene is still. */
+  /**
+   * Called right before each render, with the overlay's camera already synced to the viewport.
+   * Returns the unsubscribe.
+   */
+  addDrawListener(listener: (viewport: Viewport) => void) {
+    this.#drawListeners.add(listener);
+    return () => {
+      this.#drawListeners.delete(listener);
+    };
+  }
+
+  /** Re-present the last streamed frame now, so the overlay animates while the scene is still. */
   redraw() {
     this.#viewport.rendering_surface.redrawLastFrame();
   }
 
+  /** `redraw`, at most once per animation frame however many ask for it. */
+  requestRedraw() {
+    if (this.#redrawFrame) {
+      return;
+    }
+    this.#redrawFrame = requestAnimationFrame(() => {
+      this.#redrawFrame = 0;
+      if (document.visibilityState === "visible") {
+        this.redraw();
+      }
+    });
+  }
+
   /** Called by `viewport.removeOverlay`. The scene's content belongs to whoever added it. */
   release() {
-    this.onBeforeDraw = null;
+    cancelAnimationFrame(this.#redrawFrame);
+    this.#drawListeners.clear();
     this.#renderer.dispose();
   }
 }

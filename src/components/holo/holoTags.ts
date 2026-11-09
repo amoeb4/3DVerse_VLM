@@ -2,8 +2,8 @@ import type { Entity } from "@3dverse/livelink";
 
 import type { JointAxis } from "../joints/joints";
 
-/** The tag marking the entities the HUD is drawn around. */
-export const HOLO_TAG = "main";
+/** The tag marking the entities the HUD is drawn around (it was `main` before). */
+export const HOLO_TAG = "hud";
 
 /**
  * The shape of the shell drawn around a part, in the part's own frame. A cylinder's axis is one of
@@ -17,8 +17,8 @@ const AXES: readonly string[] = ["x", "y", "z"];
 /**
  * The shell an entity's tags ask for, or `null` when it carries no HUD tag:
  *
- * - `main` or `main:box` — a box;
- * - `main:cylinder:<x|y|z>` — a cylinder along that local axis (y when the axis is missing or not
+ * - `hud` (or `hud:box`) — a box;
+ * - `hud:cylinder:<x|y|z>` — a cylinder along that local axis (y when the axis is missing or not
  *   one of x, y, z).
  */
 export function holoShapeOf(entity: Entity): HoloShape | null {
