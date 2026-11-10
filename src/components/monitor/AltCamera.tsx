@@ -2,12 +2,11 @@ import { useContext, useState } from "react";
 import {
   CameraController,
   LivelinkContext,
-  Viewport, // ← à importer depuis le même endroit que dans ton AppLayout
+  Viewport,
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
-import { cn, Icon } from "@3dverse/ui-lib";
-
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";
@@ -50,7 +49,9 @@ export function AltCamera({
   const viewportContent = (
     <>
       {/* En XR, c'est la pose du casque qui pilote la caméra */}
-      {!xrMode && <CameraController ref={(next) => setController(next ?? null)} />}
+      {!xrMode && (
+        <CameraController ref={(next) => setController(next ?? null)} />
+      )}
       {plateEuid && (
         <SharedOverlayProvider>
           <PartInCell
@@ -90,16 +91,28 @@ export function AltCamera({
           {/* Entrées XR : seulement quand la carte est ouverte et aucune session active */}
           {open && !xrMode && canOpen && (
             <>
-              <XRButton mode="immersive-ar" text="Start" setXRMode={setXRMode} />
-              <XRButton mode="immersive-vr" text="Start" setXRMode={setXRMode} />
+              <XRButton
+                mode="immersive-ar"
+                text="Start"
+                setXRMode={setXRMode}
+              />
+              <XRButton
+                mode="immersive-vr"
+                text="Start"
+                setXRMode={setXRMode}
+              />
             </>
           )}
           <Button
             variant="ghost"
             size="icon-xs"
             aria-expanded={open}
-            title={open ? "Fold the alternate camera" : "Show the alternate camera"}
-            aria-label={open ? "Fold the alternate camera" : "Show the alternate camera"}
+            title={
+              open ? "Fold the alternate camera" : "Show the alternate camera"
+            }
+            aria-label={
+              open ? "Fold the alternate camera" : "Show the alternate camera"
+            }
             onClick={onToggle}
           >
             <Icon
@@ -133,10 +146,18 @@ export function AltCamera({
                 </Button>
 
                 {xrMode !== "immersive-ar" && (
-                  <XRButton mode="immersive-ar" text="Switch to" setXRMode={setXRMode} />
+                  <XRButton
+                    mode="immersive-ar"
+                    text="Switch to"
+                    setXRMode={setXRMode}
+                  />
                 )}
                 {xrMode !== "immersive-vr" && (
-                  <XRButton mode="immersive-vr" text="Switch to" setXRMode={setXRMode} />
+                  <XRButton
+                    mode="immersive-vr"
+                    text="Switch to"
+                    setXRMode={setXRMode}
+                  />
                 )}
               </div>
             </>
@@ -147,6 +168,7 @@ export function AltCamera({
                 {viewportContent}
               </Viewport>
 
+              {/* Toute la vue ouvre le Part mode : elle prend le pointeur, la caméra tourne d'elle-même. */}
               <button
                 type="button"
                 onClick={onOpen}
