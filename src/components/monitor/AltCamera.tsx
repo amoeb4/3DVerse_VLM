@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import {
   CameraController,
   LivelinkContext,
-  Viewport,
+  Viewport, // ← à importer depuis le même endroit que dans ton AppLayout
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
@@ -11,22 +11,13 @@ import { cn, Icon } from "@3dverse/ui-lib";
 import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";
+import { XRButton } from "../../webXR";
+import { WebXR } from "@3dverse/livelink-webxr";
+
+type XRMode = "immersive-ar" | "immersive-vr";
 
 const noHover = () => {};
 
-/**
- * Monitor's second 3D viewpoint: the part as the Part mode shows it — the cell veiled, the part
- * coloured by `metric`, the camera turning around it — in a card bottom left, folding to its title
- * bar with the toggle right on it. A click on the view opens the Part mode (`onOpen`).
- *
- * A viewport of the 3D canvas: it must be rendered inside the `Canvas`, positioned over the screen
- * by `className` (the canvas covers the whole screen). The click opens nothing until the scene is
- * ready, as on the part in the main view (`PartInCell`). Its overlay is its own: the part and the
- * veil are drawn in it, not in the main view. The card's height is what Monitor's left column leaves
- * room for (`ALT_CAMERA_ROOM`, `altCameraLayout.ts`): keep the two in step.
- *
- * Without a build plate (`plateEuid`), the camera shows the cell as it is.
- */
 export function AltCamera({
   cameraEntity,
   open,
@@ -40,20 +31,43 @@ export function AltCamera({
   cameraEntity: Entity | null;
   open: boolean;
   onToggle: () => void;
-  /** Opens the Part mode. */
   onOpen: () => void;
   plateEuid?: string;
   metric: PartMetric;
   theme: Theme;
   className?: string;
 }) {
-  // Its own controller: the part's orbit turns this view, not the main one.
   const [controller, setController] = useState<DefaultCameraController | null>(
     null,
   );
-  // While Livelink connects (its loading panel up) or after it dropped, there is no part to open.
+  // Mode XR propre à cette caméra
+  const [xrMode, setXRMode] = useState<XRMode | null>(null);
+
   const { isConnecting, isDisconnected } = useContext(LivelinkContext);
   const canOpen = !isConnecting && !isDisconnected;
+
+  // Contenu du viewport, partagé entre le mode normal et le mode XR
+  const viewportContent = (
+    <>
+      {/* En XR, c'est la pose du casque qui pilote la caméra */}
+      {!xrMode && <CameraController ref={(next) => setController(next ?? null)} />}
+      {plateEuid && (
+        <SharedOverlayProvider>
+          <PartInCell
+            plateEuid={plateEuid}
+            xray
+            metric={metric}
+            theme={theme}
+            shownLayer={Infinity}
+            focusLayer={null}
+            onHover={noHover}
+            cameraController={xrMode ? null : controller}
+            focusSignal={0}
+          />
+        </SharedOverlayProvider>
+      )}
+    </>
+  );
 
   return (
     <section
@@ -66,75 +80,98 @@ export function AltCamera({
         open ? "rounded-b-none" : "",
       )}
     >
-      <header className="w-full h-8 shrink-0 bg-ground/65 backdrop-blur-lg">
-        <button
-          aria-expanded={open}
-          title={
-            open ? "Fold the alternate camera" : "Show the alternate camera"
-          }
-          aria-label={
-            open ? "Fold the alternate camera" : "Show the alternate camera"
-          }
-          onClick={onToggle}
-          className="group flex justify-between items-center gap-2 w-full h-full px-3 cursor-pointer"
-          data-open={open}
-        >
-          <p className="flex items-center gap-1.5 text-2xs">
-            <Icon className="fas fa-video text-4xs text-tertiary" />
-            Piece details
-          </p>
-          <Icon
-            className={cn(
-              "fas fa-chevron-down text-5xs text-tertiary group-hover:text-primary transition-transform duration-200",
-              "group-data-[open=false]:rotate-180",
-            )}
-          />
-        </button>
+      <header className="flex items-center justify-between h-8 pl-3 pr-1 shrink-0 bg-ground/65 backdrop-blur-lg">
+        <h2 className="flex items-center gap-1.5 text-3xs font-bold tracking-wider uppercase">
+          <Icon className="fas fa-video text-4xs text-secondary" />
+          Piece details
+        </h2>
+
+        <div className="flex items-center gap-1">
+          {/* Entrées XR : seulement quand la carte est ouverte et aucune session active */}
+          {open && !xrMode && canOpen && (
+            <>
+              <XRButton mode="immersive-ar" text="Start" setXRMode={setXRMode} />
+              <XRButton mode="immersive-vr" text="Start" setXRMode={setXRMode} />
+            </>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-expanded={open}
+            title={open ? "Fold the alternate camera" : "Show the alternate camera"}
+            aria-label={open ? "Fold the alternate camera" : "Show the alternate camera"}
+            onClick={onToggle}
+          >
+            <Icon
+              className={cn(
+                "fas fa-chevron-down text-5xs transition-transform duration-200",
+                !open && "rotate-180",
+              )}
+            />
+          </Button>
+        </div>
       </header>
+
       {open && (
         <div className="group relative aspect-video border-t border-tertiary">
-          <Viewport cameraEntity={cameraEntity} className="size-full">
-            <CameraController ref={(next) => setController(next ?? null)} />
-            {plateEuid && (
-              <SharedOverlayProvider>
-                <PartInCell
-                  plateEuid={plateEuid}
-                  xray
-                  metric={metric}
-                  theme={theme}
-                  shownLayer={Infinity}
-                  focusLayer={null}
-                  onHover={noHover}
-                  cameraController={controller}
-                  focusSignal={0}
-                />
-              </SharedOverlayProvider>
-            )}
-          </Viewport>
-          {/* The whole view opens the Part mode: it takes the pointer, the camera turns by itself. */}
-          <button
-            type="button"
-            onClick={onOpen}
-            disabled={!canOpen}
-            title={canOpen ? "Open the Part mode" : undefined}
-            aria-label="Open the Part mode"
-            className={cn(
-              "absolute inset-0 grid place-items-center enabled:cursor-pointer",
-              "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
-            )}
-          >
-            {canOpen && (
-              <span
+          {xrMode ? (
+            /* --- MODE CASQUE / IMMERSIF ACTIF --- */
+            <>
+              <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
+                <Viewport cameraEntity={cameraEntity} className="size-full">
+                  {viewportContent}
+                </Viewport>
+              </WebXR>
+
+              <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
+                <Button
+                  variant="overlay-outline"
+                  className="before:opacity-100 before:backdrop-blur-xl"
+                  onClick={() => setXRMode(null)}
+                >
+                  Exit XR
+                </Button>
+
+                {xrMode !== "immersive-ar" && (
+                  <XRButton mode="immersive-ar" text="Switch to" setXRMode={setXRMode} />
+                )}
+                {xrMode !== "immersive-vr" && (
+                  <XRButton mode="immersive-vr" text="Switch to" setXRMode={setXRMode} />
+                )}
+              </div>
+            </>
+          ) : (
+            /* --- MODE NORMAL --- */
+            <>
+              <Viewport cameraEntity={cameraEntity} className="size-full">
+                {viewportContent}
+              </Viewport>
+
+              <button
+                type="button"
+                onClick={onOpen}
+                disabled={!canOpen}
+                title={canOpen ? "Open the Part mode" : undefined}
+                aria-label="Open the Part mode"
                 className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
-                  "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
+                  "absolute inset-0 grid place-items-center enabled:cursor-pointer",
+                  "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
                 )}
               >
-                <Icon className="fas fa-cube text-4xs" />
-                Open piece details
-              </span>
-            )}
-          </button>
+                {canOpen && (
+                  <span
+                    className={cn(
+                      "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
+                      "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
+                    )}
+                  >
+                    <Icon className="fas fa-cube text-4xs" />
+                    Open piece details
+                  </span>
+                )}
+              </button>
+            </>
+          )}
         </div>
       )}
     </section>

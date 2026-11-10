@@ -443,8 +443,8 @@ function AppLayout({
       <AssistProvider
         active={isAssist}
         cameraController={cameraController}
-        pickInterceptor={pickInterceptor}
-      >
+        pickInterceptor={pickInterceptor}>
+
         <IncidentDigestRecorder sceneId={sceneId} />
         {/* In every mode: welding while the machine runs, and the bead it lays. */}
         <AutoWeld />
@@ -599,7 +599,6 @@ function AppLayout({
             />
           )}
         </EntityProvider>
-
         <CameraEventListener />
 
         <Canvas className="w-full h-screen">
@@ -668,7 +667,6 @@ function AppLayout({
                 className="absolute left-4 bottom-toolbar z-40 w-64 xl:w-72"
               />
             )}
-
             {isTraining && showPipCamera && (
               <div className="absolute bottom-3 max-lg:bottom-navbar right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
                 <Viewport cameraEntity={pipCamera} className="w-full h-full">
@@ -696,7 +694,7 @@ function AppLayout({
               cellHidden={mode === "part"}
               theme={theme}
               onToggleTheme={toggleTheme}
-            />
+              />
             <span
               aria-hidden
               className="h-full mx-0.5 border-l border-secondary"
