@@ -178,7 +178,7 @@ export function RemoteActions({
             <Button
               variant="link"
               size="xs"
-              className="ml-1 text-4xs"
+              className="px-0 text-4xs"
               onClick={simulateOnSiteStart}
             >
               Simulate NC Start at the machine

@@ -56,8 +56,8 @@ export function ProcessPanel({ className }: { className?: string }) {
           </span>
         </PanelTitle>
         <span className="inline-flex items-center gap-1.5 text-3xs font-bold">
-          <SourceBadge source={process.source} />
           <span className={state.className}>{state.label}</span>
+          <SourceBadge source={process.source} />
         </span>
       </header>
       <div className="min-h-0 overflow-y-auto scroll-fade-y divide-y divide-tertiary">

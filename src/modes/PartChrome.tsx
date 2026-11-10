@@ -29,7 +29,8 @@ import {
 
 /** Layers a second while the build replays. */
 // "Live" and "Back to Live" share a width, so the bar does not shift when one becomes the other.
-const LIVE_BUTTON_WIDTH = "w-32 shrink-0 justify-start gap-2 pl-3 text-white!";
+const LIVE_BUTTON_WIDTH =
+  "w-24 [height:stretch] align-self-stretch shrink-0 justify-start items-center content-center gap-2 pl-3";
 
 const PLAY_LAYERS_PER_S = 8;
 
@@ -245,24 +246,10 @@ export function PartChrome({
         {/* The build, layer by layer. */}
         <Panel
           className={cn(
-            "w-full lg:w-[46rem] max-w-full",
-            "flex items-center gap-2 px-3 py-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+            "w-full lg:w-184 max-w-full",
+            "flex items-center gap-3 p-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
           )}
         >
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            title={
-              isPlaying ? "Stop the replay (Space)" : "Replay the build (Space)"
-            }
-            aria-label={isPlaying ? "Stop the replay" : "Replay the build"}
-            onClick={() => (isPlaying ? setIsPlaying(false) : play())}
-            disabled={built < 2}
-          >
-            <Icon
-              className={cn("fas text-2xs", isPlaying ? "fa-stop" : "fa-play")}
-            />
-          </Button>
           <BuildTimeline
             build={build}
             pinnedLayer={pinnedLayer}
@@ -271,20 +258,26 @@ export function PartChrome({
               setIsPlaying(false);
               setPinnedLayer(layer);
             }}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
+            play={play}
             className="grow min-w-0"
           />
           {pinnedLayer === null ? (
             // Live: a quiet indicator, the dot beating while the arc burns.
             <Button
-              variant="accent"
+              variant="ghost"
               size="sm"
-              className={LIVE_BUTTON_WIDTH}
+              className={cn(
+                LIVE_BUTTON_WIDTH,
+                "justify-center text-accent-300",
+              )}
               title="Following the build as it is laid"
               aria-pressed
             >
               <span
                 className={cn(
-                  "size-1.5 rounded-full",
+                  "size-2.5 rounded-full",
                   build.arcOn ? "bg-current animate-pulse" : "bg-secondary/60",
                 )}
               />
@@ -297,7 +290,7 @@ export function PartChrome({
               size="sm"
               className={cn(
                 LIVE_BUTTON_WIDTH,
-                "text-white! whitespace-nowrap shadow-[0_0_14px_var(--color-accent)]",
+                "text-white! text-4xs shadow-[0_0_14px_var(--color-accent)] flex-wrap",
               )}
               title="Back to the build as it is laid"
               onClick={() => {

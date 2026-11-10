@@ -47,31 +47,31 @@ export function AssistPins() {
   );
 }
 
-function Stem({ color }: { color: string }) {
+/** From the card down to the point the note is on, in the notes' colour: the informative one. */
+function Stem() {
   return (
     <>
-      <span className="w-px h-4" style={{ background: color }} />
-      <span
-        className="size-2.5 rounded-full ring-2 ring-white/80"
-        style={{ background: color }}
-      />
+      <span className="w-px h-4 bg-informative" />
+      <span className="size-2.5 rounded-full bg-informative ring-2 ring-white/80" />
     </>
   );
 }
 
 function PinMarker({ pin }: { pin: Pin }) {
   const { store } = useAssist();
-  const color = colorOf(pin.by);
   return (
     <div className="group flex flex-col items-center pointer-events-auto">
-      <div
-        className="relative max-w-56 rounded-lg border-2 bg-ground/85 backdrop-blur-md px-2.5 py-1.5 shadow-lg"
-        style={{ borderColor: color }}
-      >
+      <div className="relative max-w-56 rounded-lg border-2 border-informative bg-ground/85 backdrop-blur-md px-2.5 py-1.5 shadow-lg">
         <p className="text-2xs whitespace-pre-wrap break-words pr-3">
           {pin.text}
         </p>
-        <p className="text-5xs text-secondary whitespace-nowrap">
+        <p className="flex items-center gap-1 text-5xs text-secondary whitespace-nowrap">
+          {/* Who wrote it, in their colour (`participantLook`). */}
+          <span
+            aria-hidden
+            className="size-1.5 shrink-0 rounded-full"
+            style={{ background: colorOf(pin.by) }}
+          />
           {pin.by.role === "expert" ? EXPERT_NAME : pin.by.name}
           {pin.by.role === "operator" && ` · ${ROLE_LABELS.operator}`} ·{" "}
           <TimeAgo at={pin.at} />
@@ -82,14 +82,14 @@ function PinMarker({ pin }: { pin: Pin }) {
             "absolute top-0.5 right-0.5 size-4 grid place-items-center rounded text-secondary",
             "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:text-primary",
           )}
-          title="Remove the note, for everyone"
+          title="Remove the note"
           aria-label="Remove the note"
           onClick={() => void store?.removePin(pin)}
         >
           <Icon className="fas fa-xmark text-5xs" />
         </button>
       </div>
-      <Stem color={color} />
+      <Stem />
     </div>
   );
 }
@@ -97,7 +97,6 @@ function PinMarker({ pin }: { pin: Pin }) {
 function PinComposer() {
   const { store, me, incident, pinDraft, cancelPin } = useAssist();
   const [text, setText] = useState("");
-  const color = me ? colorOf(me) : "white";
 
   const submit = () => {
     const trimmed = text.trim();
@@ -119,20 +118,17 @@ function PinComposer() {
         submit();
       }}
     >
-      <div
-        className="flex flex-col gap-1.5 w-60 rounded-lg border-2 bg-ground/90 backdrop-blur-md p-2 shadow-lg"
-        style={{ borderColor: color }}
-      >
+      <div className="flex flex-col gap-1.5 w-60 rounded-lg border-2 border-informative bg-ground/90 backdrop-blur-md p-1 shadow-lg">
         <input
           autoFocus
           value={text}
           maxLength={200}
           onChange={(event) => setText(event.target.value)}
-          placeholder="The note, for everyone"
+          placeholder="Write a note..."
           aria-label="The note"
-          className="w-full px-2 py-1 border border-secondary bg-ground text-xs rounded-lg focus:outline-hidden focus:ring-2 focus:ring-accent"
+          className="w-full px-2 py-1 text-xs outline-none border-none"
         />
-        <div className="flex justify-end gap-1">
+        <div className="flex justify-end gap-1 p-1 pt-0">
           <Button type="button" variant="ghost" size="xs" onClick={cancelPin}>
             Cancel
           </Button>
@@ -140,14 +136,14 @@ function PinComposer() {
             type="submit"
             variant="accent"
             size="xs"
-            className="text-white!"
+            className="bg-informative hover:bg-informative/90"
             disabled={!text.trim()}
           >
-            Pin
+            Add note
           </Button>
         </div>
       </div>
-      <Stem color={color} />
+      <Stem />
     </form>
   );
 }

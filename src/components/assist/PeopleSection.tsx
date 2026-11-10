@@ -63,7 +63,7 @@ export function PeopleSection() {
         })}
       </ul>
       {clients.length === 0 && (
-        <p className="mt-1 text-3xs text-secondary">No one else yet.</p>
+        <p className="mt-1 text-3xs text-tertiary">No one else yet.</p>
       )}
     </section>
   );

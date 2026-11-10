@@ -5,6 +5,7 @@ jspm_packages/
 # Production build output
 build/
 public/build/
+dist/
 
 # Environment variables
 .env

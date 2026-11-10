@@ -50,7 +50,7 @@ function CameraTile({ label, url }: { label: string; url?: string }) {
       {url ? (
         <img src={url} alt={label} className="size-full object-cover" />
       ) : (
-        <div className="size-full grid place-items-center text-tertiary">
+        <div className="size-full grid place-items-center text-tertiary pt-4">
           <Icon className="fas fa-video-slash text-xs" />
         </div>
       )}

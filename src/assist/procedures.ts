@@ -89,7 +89,7 @@ const RESUME: ProcedureStep = {
 export const INCIDENT_KINDS: Record<IncidentKind, IncidentKindInfo> = {
   "torch-collision": {
     label: "Torch collision",
-    icon: "fa-fire",
+    icon: "fa-explosion",
     alarm: "Collision detected on the torch: axes stopped",
     steps: [
       {

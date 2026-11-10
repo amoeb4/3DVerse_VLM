@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@3dverse/ui-lib";
 
 /**
@@ -8,6 +8,9 @@ import { cn } from "@3dverse/ui-lib";
  *
  * Below `lg`, the bottom centre belongs to the modes' sheets: it docks on the right instead, in the
  * row the secondary toolbar takes on the left, over the navbar.
+ *
+ * Its width follows its entries with a transition, as they come and go from one mode to the next:
+ * an `auto` width cannot be animated, so the entries' own width is measured and set.
  */
 export function TertiaryToolbar({
   children,
@@ -24,6 +27,17 @@ export function TertiaryToolbar({
   inFlow?: boolean;
   className?: string;
 }) {
+  const content = useRef<HTMLDivElement>(null);
+  // `null` until measured: `auto` the first time, so it does not grow in from nothing.
+  const [width, setWidth] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const element = content.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setWidth(element.offsetWidth));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <nav
       aria-label={ariaLabel}
@@ -40,7 +54,15 @@ export function TertiaryToolbar({
         className,
       )}
     >
-      {children}
+      {/* Clips the entries while it narrows; they keep their own width inside. */}
+      <div
+        className="h-full max-w-full overflow-hidden transition-[width] duration-300 ease-out motion-reduce:transition-none"
+        style={width === null ? undefined : { width }}
+      >
+        <div ref={content} className="flex items-center gap-0.5 h-full w-max">
+          {children}
+        </div>
+      </div>
     </nav>
   );
 }

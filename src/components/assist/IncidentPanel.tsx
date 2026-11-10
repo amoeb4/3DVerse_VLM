@@ -137,14 +137,14 @@ function IncidentSections() {
               key={feed.id}
               className="relative aspect-video overflow-hidden rounded border border-tertiary bg-ground/70 grid place-items-center"
             >
-              <Icon className="fas fa-clock-rotate-left text-xs text-tertiary" />
+              <Icon className="fas fa-clock-rotate-left pt-3 text-xs text-tertiary" />
               <figcaption className="absolute inset-x-1 top-1 truncate text-5xs text-secondary">
                 {feed.label}
               </figcaption>
             </figure>
           ))}
         </div>
-        <p className="mt-1.5 text-3xs text-tertiary">
+        <p className="mt-1.5 text-5xs leading-tight text-tertiary text-balance">
           The replay shows here once the cameras are recorded.
         </p>
       </section>
@@ -174,7 +174,6 @@ function CloseIncident() {
       <footer className="shrink-0 px-4 py-3 border-t border-tertiary">
         <Button
           variant="accent"
-          size="sm"
           className="w-full justify-center text-white!"
           onClick={() => setIsCloseOpen(true)}
         >
@@ -193,14 +192,10 @@ function CloseIncident() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCloseOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsCloseOpen(false)}>
               Keep it open
             </Button>
-            <Button variant="outline" size="sm" onClick={close}>
+            <Button variant="accent" onClick={close} className="text-white!">
               Close the incident
             </Button>
           </DialogFooter>

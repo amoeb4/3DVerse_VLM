@@ -32,7 +32,7 @@ export function WeldPanel({ className }: { className?: string }) {
         <span
           className={cn(
             "inline-flex items-center gap-1.5 text-3xs font-bold",
-            welds.welding ? "text-accent" : "text-secondary",
+            welds.welding ? "text-accent-300" : "text-secondary",
           )}
         >
           {welds.welding ? "WELDING" : "IDLE"}
@@ -53,7 +53,7 @@ export function WeldPanel({ className }: { className?: string }) {
           max={WELD_SCALE.max}
           label={`Temperature of the last ${welds.recent.length} weld points`}
           emptyText="No weld points yet"
-          className="h-10 text-accent"
+          className="h-10 text-accent-300"
         />
         {welds.startedAt !== null && (
           <p className="mt-1 text-3xs text-secondary">

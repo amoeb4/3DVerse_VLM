@@ -6,7 +6,7 @@ import {
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { cn, Icon } from "@3dverse/ui-lib";
 
 import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
@@ -66,14 +66,8 @@ export function AltCamera({
         open ? "rounded-b-none" : "",
       )}
     >
-      <header className="flex items-center justify-between h-8 pl-3 pr-1 shrink-0 bg-ground/65 backdrop-blur-lg">
-        <h2 className="flex items-center gap-1.5 text-3xs font-bold tracking-wider uppercase">
-          <Icon className="fas fa-video text-4xs text-secondary" />
-          Piece details
-        </h2>
-        <Button
-          variant="ghost"
-          size="icon-xs"
+      <header className="w-full h-8 shrink-0 bg-ground/65 backdrop-blur-lg">
+        <button
           aria-expanded={open}
           title={
             open ? "Fold the alternate camera" : "Show the alternate camera"
@@ -82,14 +76,20 @@ export function AltCamera({
             open ? "Fold the alternate camera" : "Show the alternate camera"
           }
           onClick={onToggle}
+          className="group flex justify-between items-center gap-2 w-full h-full px-3 cursor-pointer"
+          data-open={open}
         >
+          <p className="flex items-center gap-1.5 text-2xs">
+            <Icon className="fas fa-video text-4xs text-tertiary" />
+            Piece details
+          </p>
           <Icon
             className={cn(
-              "fas fa-chevron-down text-5xs transition-transform duration-200",
-              !open && "rotate-180",
+              "fas fa-chevron-down text-5xs text-tertiary group-hover:text-primary transition-transform duration-200",
+              "group-data-[open=false]:rotate-180",
             )}
           />
-        </Button>
+        </button>
       </header>
       {open && (
         <div className="group relative aspect-video border-t border-tertiary">

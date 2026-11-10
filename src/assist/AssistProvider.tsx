@@ -10,7 +10,10 @@ import {
   LivelinkContext,
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
-import type { Vec3 } from "@3dverse/livelink";
+import type { Entity, Vec3 } from "@3dverse/livelink";
+
+/** What a click on the 3D view hit: the entity, and the point on it in world space. */
+export type PickedPoint = { entity: Entity; ws_position: Vec3 };
 
 import { logEvent } from "../live/eventLog";
 import { holdSimulation, simulateOnSiteStart } from "../live/processFeed";
@@ -48,7 +51,7 @@ const emptySnapshot = () => EMPTY_SNAPSHOT;
  * role, is published, and it can follow someone's camera.
  *
  * `pickInterceptor` is set to a function the viewport's picking calls first: it takes the click
- * while a note is being placed.
+ * while a note is being placed, and the entity clicked stays selected while the note is written.
  */
 export function AssistProvider({
   active,
@@ -58,7 +61,7 @@ export function AssistProvider({
 }: {
   active: boolean;
   cameraController: DefaultCameraController | null;
-  pickInterceptor: React.RefObject<((position: Vec3) => boolean) | null>;
+  pickInterceptor: React.RefObject<((picked: PickedPoint) => boolean) | null>;
   children: React.ReactNode;
 }) {
   const { instance } = useContext(LivelinkContext);
@@ -130,18 +133,23 @@ export function AssistProvider({
   // Notes.
   const [isPlacingPin, setIsPlacingPin] = useState(false);
   const [pinDraft, setPinDraft] = useState<Vec3 | null>(null);
+  // The entity the note is being pinned on, selected while the note is written.
+  const [pinTarget, setPinTarget] = useState<Entity | null>(null);
   const startPin = useCallback(() => {
     setPinDraft(null);
+    setPinTarget(null);
     setIsPlacingPin(true);
   }, []);
   const cancelPin = useCallback(() => {
     setIsPlacingPin(false);
     setPinDraft(null);
+    setPinTarget(null);
   }, []);
   useEffect(() => {
-    pickInterceptor.current = (position) => {
+    pickInterceptor.current = ({ entity, ws_position }) => {
       if (!isPlacingPin) return false;
-      setPinDraft(position);
+      setPinDraft(ws_position);
+      setPinTarget(entity);
       setIsPlacingPin(false);
       return true;
     };
@@ -149,6 +157,13 @@ export function AssistProvider({
       pickInterceptor.current = null;
     };
   }, [pickInterceptor, isPlacingPin]);
+  useEffect(() => {
+    if (!scene || !pinTarget) return;
+    void scene.highlightEntities({ entities: [pinTarget] });
+    return () => {
+      void scene.highlightEntities({ entities: [] });
+    };
+  }, [scene, pinTarget]);
   // While a note waits for its place, the pointer is a pin (`.is-placing-pin`, index.css).
   useEffect(() => {
     if (!isPlacingPin) return;

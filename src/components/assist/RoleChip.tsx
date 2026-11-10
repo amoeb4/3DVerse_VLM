@@ -17,8 +17,8 @@ export function RoleChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 h-4 px-1.5 rounded-sm border shrink-0",
-        "text-5xs font-bold tracking-wider uppercase whitespace-nowrap",
+        "inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-sm border shrink-0",
+        "text-[10px] font-bold tracking-wider uppercase whitespace-nowrap",
         role === "expert"
           ? "text-accent-300 border-accent/40 bg-accent/10"
           : "text-primary border-secondary",

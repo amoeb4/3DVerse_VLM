@@ -46,7 +46,7 @@ import { EntityCreator, WeldBeads } from "./weldBead";
 import { EntityStatusPanel } from "./components/EntityPicking";
 import { WebXR } from "@3dverse/livelink-webxr";
 import { XRButton } from "./webXR";
-import type { Entity, Vec3 } from "@3dverse/livelink";
+import type { Entity } from "@3dverse/livelink";
 import { MACHINES, PUBLIC_TOKEN } from "./config";
 import { Toolbar } from "./components/Toolbar";
 import { ResetPositionButton } from "./components/ResetPositionButton";
@@ -61,6 +61,7 @@ import {
   type ViewerScene,
 } from "./routing";
 import { useResetCamera } from "./hooks/useResetCamera";
+import { useWasDragged } from "./hooks/useWasDragged";
 import { useKeyboardShortcuts } from "./shortcuts/useKeyboardShortcuts";
 import { SHORTCUTS } from "./shortcuts/shortcuts";
 import { useSceneTheme, useSceneThemeWatcher } from "./hooks/useSceneTheme";
@@ -76,7 +77,7 @@ import { PartChrome } from "./modes/PartChrome";
 import { usePartViewState } from "./modes/partViewState";
 import { PartInCell } from "./components/part/PartInCell";
 import { SharedOverlayProvider } from "./components/holo/SharedOverlayProvider";
-import { AssistProvider } from "./assist/AssistProvider";
+import { AssistProvider, type PickedPoint } from "./assist/AssistProvider";
 import { IncidentDigestRecorder } from "./assist/IncidentDigestRecorder";
 import { AssistChrome } from "./modes/AssistChrome";
 import { AssistPins } from "./components/assist/AssistPins";
@@ -286,23 +287,49 @@ function AppLayout({
 
   const { instance } = useContext(LivelinkContext);
 
+  // Selecting entities (a click, the pointer over them) is Training's. Read through a ref, so the
+  // viewport's picking is not torn down and set up again at each mode switch.
+  const isTrainingRef = useRef(isTraining);
+  useEffect(() => {
+    isTrainingRef.current = isTraining;
+  }, [isTraining]);
+
   const [pickedEntity, setPickedEntity] = useState<{ entity: Entity } | null>(
     null,
   );
   // Assistance takes the click while a note is being placed on the cell (`AssistProvider`).
-  const pickInterceptor = useRef<((position: Vec3) => boolean) | null>(null);
+  const pickInterceptor = useRef<((picked: PickedPoint) => boolean) | null>(
+    null,
+  );
+  // Turning the camera ends with a click too: that one picks nothing.
+  const wasDragged = useWasDragged();
   const onPick = useCallback(
-    (picked: { entity: Entity; ws_position: Vec3 } | null) => {
-      if (picked && pickInterceptor.current?.(picked.ws_position)) {
+    (picked: PickedPoint | null) => {
+      if (wasDragged.current) {
         return;
       }
-      setPickedEntity(picked);
+      if (picked && pickInterceptor.current?.(picked)) {
+        return;
+      }
+      if (isTrainingRef.current) {
+        setPickedEntity(picked);
+      }
     },
-    [],
+    [wasDragged],
   );
   const [hoveredEntity, setHoveredEntity] = useState<{ entity: Entity } | null>(
     null,
   );
+  const onHover = useCallback((hovered: { entity: Entity } | null) => {
+    setHoveredEntity(isTrainingRef.current ? hovered : null);
+  }, []);
+  // Out of Training, nothing stays selected.
+  useEffect(() => {
+    if (!isTraining) {
+      setPickedEntity(null);
+      setHoveredEntity(null);
+    }
+  }, [isTraining]);
 
   useEffect(() => {
     document.body.style.cursor = hoveredEntity ? "pointer" : "default";
@@ -579,7 +606,7 @@ function AppLayout({
           <Viewport
             cameraEntity={cameraEntity}
             className="w-full h-full"
-            setHoveredEntity={setHoveredEntity}
+            setHoveredEntity={onHover}
             setPickedEntity={onPick}
           >
             {/* Under every other overlay, so they stay crisp over it. */}
@@ -590,9 +617,10 @@ function AppLayout({
             />
 
             <Avatars cameraController={cameraController} />
-            {isAssist && <AssistPins />}
             {/* The points of the robot the operator checks. */}
             {isAssist && <AssistCheckpoints />}
+            {/* After the checkpoints: the notes go over them. */}
+            {isAssist && <AssistPins />}
 
             {/* One overlay over the stream, for the HUD and the part. */}
             <SharedOverlayProvider>

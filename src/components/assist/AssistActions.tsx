@@ -36,13 +36,13 @@ export function AssistActions() {
   if (isPlacingPin) {
     return (
       <>
-        <span className="flex items-center gap-1.5 px-2 text-2xs whitespace-nowrap text-accent-200">
+        <span className="flex items-center gap-1.5 px-2 text-2xs whitespace-nowrap text-informative">
           <Icon className="fas fa-thumbtack" />
-          <span className="hidden sm:inline">Click on a cell</span>
-          <span className="sm:hidden">Click on the cell</span>
+          Click anywhere
         </span>
-        <Button variant="ghost" size="2xs" onClick={cancelPin}>
-          Cancel <Kbd className="hidden lg:inline-flex">Esc</Kbd>
+        <Button variant="ghost" size="3xs" onClick={cancelPin}>
+          Cancel
+          <Kbd className="hidden lg:inline-flex h-min self-center">Esc</Kbd>
         </Button>
         <ToolbarDivider />
       </>
@@ -56,9 +56,10 @@ export function AssistActions() {
         size="sm"
         onClick={startPin}
         disabled={pinDraft !== null}
-        title="Pin a note on the cell, for everyone"
+        title="Pin a note on the cel."
+        className="gap-2"
       >
-        <Icon className="fas fa-thumbtack text-2xs" />
+        <Icon className="fas fa-thumbtack text-4xs" />
         <span className="hidden sm:inline">Pin a note</span>
       </Button>
 

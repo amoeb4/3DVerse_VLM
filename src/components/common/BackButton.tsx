@@ -20,8 +20,8 @@ export function BackButton({
     <Button
       variant="ghost"
       className={cn(
-        "w-full h-[39px] gap-2.5 justify-start px-3 rounded-[9px]",
-        "bg-transparent! text-neutral-0! border border-neutral-400 shadow-none! backdrop-blur-[31px]",
+        "w-full h-10 gap-2.5 justify-start px-3 rounded-[9px]",
+        "bg-transparent! text-neutral-0! border border-neutral-400/50 shadow-none! backdrop-blur-[31px]",
         "hover:bg-white/10! hover:border-neutral-300 focus-visible:ring-2 focus-visible:ring-accent",
         className,
       )}

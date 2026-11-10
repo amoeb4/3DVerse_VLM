@@ -161,26 +161,26 @@ export function Diagnostic({
             />
           </div>
 
-          <ul className="mt-2 space-y-1 text-2xs">
+          <ul className="mt-2 space-y-1 text-3xs">
             {process.cn.alarms.length > 0 ? (
               process.cn.alarms.map((alarm) => (
                 <li
                   key={alarm}
                   className="flex items-start gap-1.5 text-negative"
                 >
-                  <Icon className="fas fa-triangle-exclamation mt-0.5 text-3xs" />
+                  <Icon className="fas fa-triangle-exclamation mt-0.5" />
                   {alarm}
                 </li>
               ))
             ) : (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-check text-3xs text-positive" />
+                <Icon className="fas fa-check text-positive" />
                 No alarm on the CN
               </li>
             )}
             {!process.arcOn ? (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-power-off text-3xs" />
+                <Icon className="fas fa-power-off" />
                 Arc off: no welding signal to read
               </li>
             ) : outOfWindow.length > 0 ? (
@@ -194,7 +194,7 @@ export function Diagnostic({
                 >
                   <Icon
                     className={cn(
-                      "fas text-3xs",
+                      "fas",
                       status === "alarm"
                         ? "fa-circle-exclamation"
                         : "fa-triangle-exclamation",
@@ -208,7 +208,7 @@ export function Diagnostic({
               ))
             ) : (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-check text-3xs text-positive" />
+                <Icon className="fas fa-check text-positive" />
                 Every signal in its WPS window
               </li>
             )}
@@ -311,20 +311,19 @@ export function Diagnostic({
                     ? "Run the diagnostic"
                     : resumeAt < CHECKPOINTS.length
                       ? "Resume the diagnostic"
-                      : "Run it again"}
+                      : "Run diagnostic again"}
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-center"
+                variant="secondary"
+                className="w-full justify-center text-primary"
                 title="Share the 3D session and what was found with a VLM expert"
                 onClick={() => onRequest(kind, askNote)}
               >
-                <Icon className="fas fa-headset text-2xs" />
+                <Icon className="fas fa-headset text-2xs!" />
                 Ask an expert
               </Button>
-              <p className="text-3xs text-secondary">
-                The expert joins this 3D session and sees what you found.
+              <p className="text-3xs text-secondary text-balance">
+                An expert can join this application to help you.
               </p>
             </div>
           ) : (

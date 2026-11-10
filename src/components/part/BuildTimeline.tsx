@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { cn } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import {
   LAYER_SAMPLES,
@@ -43,6 +43,9 @@ export function BuildTimeline({
   pinnedLayer,
   focusLayer,
   onScrub,
+  isPlaying,
+  setIsPlaying,
+  play,
   className,
 }: {
   build: BuildRecord;
@@ -51,6 +54,9 @@ export function BuildTimeline({
   /** The layer ringed on the part (a finding picked). */
   focusLayer: number | null;
   onScrub: (layer: number | null) => void;
+  isPlaying: boolean;
+  setIsPlaying: (isPlaying: boolean) => void;
+  play: () => void;
   className?: string;
 }) {
   const barRef = useRef<HTMLDivElement>(null);
@@ -133,15 +139,36 @@ export function BuildTimeline({
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {/* The values, above the graph. */}
-      <div className="flex items-baseline justify-between gap-3 text-3xs tabular-nums">
-        <span className="whitespace-nowrap">
-          <span className="text-secondary">Layer </span>
-          <b className="text-primary">{Math.max(1, shownLayer)}</b>
-          <span className="text-secondary">/{layers}</span>
-          {pinnedLayer === null && (
-            <span className="ml-1.5 text-accent-300 font-bold">LIVE</span>
-          )}
-        </span>
+      <div className="flex items-baseline justify-between gap-3 text-3xs">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="2xs"
+            title={
+              isPlaying ? "Stop the replay (Space)" : "Replay the build (Space)"
+            }
+            aria-label={isPlaying ? "Stop the replay" : "Replay the build"}
+            onClick={() => (isPlaying ? setIsPlaying(false) : play())}
+            disabled={built < 2}
+            className="w-18 justify-start gap-1"
+          >
+            <Icon
+              className={cn(
+                "fas text-[9px]",
+                isPlaying ? "fa-pause" : "fa-play",
+              )}
+            />
+            {isPlaying ? "Pause" : "Replay"}
+          </Button>
+          <span className="whitespace-nowrap">
+            <span className="text-secondary">Layer </span>
+            <b className="text-primary">{Math.max(1, shownLayer)}</b>
+            <span className="text-secondary">/{layers}</span>
+            {pinnedLayer === null && (
+              <span className="ml-1.5 text-accent-300 font-bold">LIVE</span>
+            )}
+          </span>
+        </div>
         <span className="whitespace-nowrap">
           <b className="text-primary">{formatDuration(intoBuildS)}</b>
           <span className="text-secondary">
