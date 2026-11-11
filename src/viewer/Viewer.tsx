@@ -97,8 +97,7 @@ export function Viewer({
               layout
             )}
 
-            {/* The XR session's own controls, and the line confirming what was just done:
-                beside the swap above, so they survive it. */}
+            {/* The XR session's own controls: beside the swap above, so they survive it. */}
             <XRHud />
             {/* In a headset's browser: the way into AR first, over the page. */}
             {isHeadset && <HeadsetGate machineName={scene.name} />}

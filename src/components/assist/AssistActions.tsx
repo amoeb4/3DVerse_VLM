@@ -1,13 +1,15 @@
-import { Button, cn, Icon, Kbd } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import { useAssist } from "../../assist/assistContext";
-import { ToolbarDivider } from "../common/TertiaryToolbar";
 
 /**
  * What one does from the Assistance mode, as entries of the bottom-right toolbar
  * (`TertiaryToolbar`), beside the camera's reset: pin a note on the cell, follow the other side's
  * camera (the operator the expert's, the expert the operator's). An incident is opened from the
  * Diagnostic (`Diagnostic`), once the cell has been looked at.
+ *
+ * "Pin a note" stays as it is while the note waits for its place, lit: the confirming line says
+ * to click on the cell and how to cancel (`AssistProvider`), and the button itself cancels too.
  *
  * Nothing until a role is chosen.
  */
@@ -33,31 +35,20 @@ export function AssistActions() {
     ? snapshot.presences.find(({ clientId }) => clientId === following)
     : null;
 
-  if (isPlacingPin) {
-    return (
-      <>
-        <span className="flex items-center gap-1.5 px-2 text-2xs whitespace-nowrap text-informative">
-          <Icon className="fas fa-thumbtack" />
-          Click anywhere
-        </span>
-        <Button variant="ghost" size="3xs" onClick={cancelPin}>
-          Cancel
-          <Kbd className="hidden lg:inline-flex h-min self-center">Esc</Kbd>
-        </Button>
-        <ToolbarDivider />
-      </>
-    );
-  }
-
   return (
     <>
       <Button
         variant="ghost"
         size="sm"
-        onClick={startPin}
+        aria-pressed={isPlacingPin}
+        onClick={isPlacingPin ? cancelPin : startPin}
         disabled={pinDraft !== null}
-        title="Pin a note on the cel."
-        className="gap-2"
+        title={
+          isPlacingPin
+            ? "Click on the cell to place the note, or here to cancel"
+            : "Pin a note on the cell"
+        }
+        className={cn("gap-2", isPlacingPin && "text-informative!")}
       >
         <Icon className="fas fa-thumbtack text-2xs md:text-4xs" />
         <span className="hidden sm:inline">Pin a note</span>

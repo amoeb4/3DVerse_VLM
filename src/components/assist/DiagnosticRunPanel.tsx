@@ -34,7 +34,8 @@ const RESULT_STYLE: Record<CheckResult | "todo", string> = {
  * centered under it — to validate it or skip it, then on to the next. What is found is shared at
  * once (check records), so a remote expert follows along. At any step, "Ask an expert" opens the
  * request with what was found so far; the session itself is what the expert joins. After the last
- * point, a summary. Done, Stop or Esc end the run, and the camera goes back to the default view.
+ * point, a summary. Done, Stop or Esc end the run, and the camera goes back to the Diagnostic's
+ * view: the scene's point of interest for it, or the default view (`useModeCamera`).
  */
 export function DiagnosticRunPanel({
   cameraController,
@@ -44,7 +45,7 @@ export function DiagnosticRunPanel({
   cameraController: DefaultCameraController | null;
   /** Opens the request for an expert, with what happened and what was found. */
   onAskExpert: (kind: IncidentKind, note: string) => void;
-  /** The run ended here (Done, Stop, Esc): the camera back to the default point of view. */
+  /** The run ended here (Done, Stop, Esc): the camera back to the Diagnostic's view. */
   onEnd: () => void;
 }) {
   const run = useDiagnosticRun();
@@ -80,7 +81,7 @@ export function DiagnosticRunPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run?.index, run !== null, entity, cameraController]);
 
-  // Done, Stop or Esc: the run ends, and the camera leaves the last point for the default view.
+  // Done, Stop or Esc: the run ends, and the camera leaves the last point for the Diagnostic's view.
   const onEndRef = useRef(onEnd);
   useEffect(() => {
     onEndRef.current = onEnd;

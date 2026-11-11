@@ -83,6 +83,8 @@ type MiniToastState = {
   // on it can retrigger even when the text is unchanged.
   nonce: number;
   showMiniToast: (message: string, shortcut?: string, icon?: ReactNode) => void;
+  // Takes the line away before its time: what it said no longer holds.
+  hideMiniToast: () => void;
 };
 
 let miniToastTimeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -109,5 +111,14 @@ export const useMiniToastStore = createStore<MiniToastState>((set) => ({
         })),
       3000,
     );
+  },
+  hideMiniToast: () => {
+    clearTimeout(miniToastTimeoutId);
+    set((state) => ({
+      message: null,
+      shortcut: null,
+      icon: null,
+      nonce: state.nonce + 1,
+    }));
   },
 }));

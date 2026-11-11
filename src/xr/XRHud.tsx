@@ -4,7 +4,6 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useViewMode } from "../modes/useViewMode";
 import { AnchorControls } from "./AnchorControls";
 import { ARStartingOverlay } from "./ARStartingOverlay";
-import { MiniToast } from "./MiniToast";
 import { useMiniToastStore, useWebXRStore, useXRSettingsStore } from "./stores";
 import { useIdleControlsVisibility } from "./useIdleControlsVisibility";
 import { XRToolbar } from "./XRToolbar";
@@ -16,8 +15,8 @@ import { XRToolbar } from "./XRToolbar";
  * after a spell without a touch, on small screens. A headset shows none of it: it has its own
  * menu, drawn in the session (`XRHeadsetUI`).
  *
- * Out of XR too, the line confirming what was just done (`MiniToast`), which is also where a
- * session that could not start says so.
+ * The line confirming what was just done (`MiniToast`), which is also where a session that could
+ * not start says so, is the footer's (`ViewerFooter`), in and out of XR.
  *
  * Mounted once, beside the `<WebXR>`/flat swap rather than in it, so it survives the transition.
  */
@@ -34,9 +33,9 @@ export function XRHud() {
   const isMediumScreen = useMediaQuery("(min-width: 768px)");
   useIdleControlsVisibility(!xrMode || isMediumScreen);
 
-  // Part has its timeline at the bottom centre: over it. Elsewhere, out of XR, over the camera's
-  // toolbar (`TertiaryToolbar`): the confirming line would be written across its entries. During a
-  // session, where it has always been, under the session's own controls.
+  // The session's controls stand over what the mode has at the bottom centre: the camera's toolbar
+  // (`TertiaryToolbar`), or in Part its bottom stack, the toolbar over the timeline, taller on a
+  // phone. Where they stood when the confirming line was under them.
   const { mode } = useViewMode();
   const isPartMode = mode === "part";
 
@@ -48,43 +47,35 @@ export function XRHud() {
       />
       <ARStartingOverlay />
 
-      <div
-        className={cn(
-          "fixed z-50 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none",
-          isPartMode
-            ? "bottom-[calc(var(--spacing-navbar)+8.5rem)]"
-            : xrMode
-              ? "bottom-[calc(var(--spacing-navbar)+1rem)]"
-              : "bottom-[calc(var(--spacing-navbar)+3.5rem)]",
-        )}
-      >
-        {webXRUtils && (
-          <div
-            className={cn(
-              "flex items-center gap-3 pointer-events-auto transition-opacity ease-in-out",
-              areControlsVisible ? "duration-150" : "duration-1000",
-            )}
-            style={{
-              opacity: areControlsVisible ? undefined : 0,
-              pointerEvents: areControlsVisible ? undefined : "none",
+      {webXRUtils && (
+        <div
+          className={cn(
+            "fixed z-50 left-1/2 -translate-x-1/2 flex items-center gap-3",
+            isPartMode
+              ? "bottom-[calc(var(--spacing-navbar)+11.25rem)]"
+              : "bottom-[calc(var(--spacing-navbar)+3.75rem)]",
+            "pointer-events-auto transition-opacity ease-in-out",
+            areControlsVisible ? "duration-150" : "duration-1000",
+          )}
+          style={{
+            opacity: areControlsVisible ? undefined : 0,
+            pointerEvents: areControlsVisible ? undefined : "none",
+          }}
+        >
+          <AnchorControls />
+          <Button
+            onClick={() => {
+              setXrMode(null);
+              showMiniToast("Exited XR mode");
             }}
+            variant="default"
+            round
           >
-            <AnchorControls />
-            <Button
-              onClick={() => {
-                setXrMode(null);
-                showMiniToast("Exited XR mode");
-              }}
-              variant="default"
-              round
-            >
-              <Icon className="fas fa-xmark" />
-              Leave {xrMode === "immersive-vr" ? "VR" : "AR"}
-            </Button>
-          </div>
-        )}
-        <MiniToast className="w-72" />
-      </div>
+            <Icon className="fas fa-xmark" />
+            Leave {xrMode === "immersive-vr" ? "VR" : "AR"}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

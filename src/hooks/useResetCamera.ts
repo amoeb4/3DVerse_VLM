@@ -4,6 +4,8 @@ import {
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 
+import type { PointOfView } from "../camera/labelCamera";
+
 type SceneSettings = ReturnType<typeof useSceneSettings>["sceneSettings"];
 
 const FALLBACK_POINT_OF_VIEW = {
@@ -27,11 +29,13 @@ export function defaultPointOfView(
  * viewer).
  *
  * `isAtDefaultPosition` lets the button dim itself as a no-op: the camera sits at the default
- * transform from mount until the user grabs it.
+ * transform from mount until the user grabs it, or it is sent to another point of view
+ * (`travelToPointOfView`: a point of interest of the scene).
  *
  * The camera also starts there. The controller's orbital preset otherwise turns it, on creation,
  * to look at the world origin rather than along the default orientation, so the first view and the
- * reset one differed.
+ * reset one differed. `isStarted` says once that is done: whoever starts the camera elsewhere
+ * (`useModeCamera`) goes after it.
  */
 export function useResetCamera(
   cameraController: DefaultCameraController | null,
@@ -51,6 +55,8 @@ export function useResetCamera(
 
   // Once per controller, as soon as the scene's settings are known: no transition, it is the start.
   const startedController = useRef<DefaultCameraController | null>(null);
+  // The same, as state: for `isStarted`.
+  const [started, setStarted] = useState<DefaultCameraController | null>(null);
   useEffect(() => {
     if (
       !cameraController ||
@@ -60,6 +66,7 @@ export function useResetCamera(
       return;
     }
     startedController.current = cameraController;
+    setStarted(cameraController);
     const { position, orientation } = defaultPointOfView(
       sceneSettings,
       isPending,
@@ -83,5 +90,30 @@ export function useResetCamera(
     await cameraController.travelToPointOfView({ position, orientation });
   }, [cameraController, sceneSettings, isPending]);
 
-  return { resetCamera, isAtDefaultPosition };
+  // Elsewhere than the default: resetting is no longer a no-op. `transition: false` puts the
+  // camera there at once, as the start does.
+  const travelToPointOfView = useCallback(
+    async (
+      { position, orientation }: PointOfView,
+      { transition = true }: { transition?: boolean } = {},
+    ) => {
+      if (!cameraController) {
+        return;
+      }
+      setIsAtDefaultPosition(false);
+      await cameraController.travelToPointOfView({
+        position,
+        orientation,
+        enable_transition: transition,
+      });
+    },
+    [cameraController],
+  );
+
+  return {
+    resetCamera,
+    travelToPointOfView,
+    isAtDefaultPosition,
+    isStarted: cameraController !== null && started === cameraController,
+  };
 }

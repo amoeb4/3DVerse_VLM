@@ -3,11 +3,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Kbd, cn } from "@3dverse/ui-lib";
 
 //------------------------------------------------------------------------------
+import { hasKeyboard } from "../utils/hasKeyboard";
 import { useMiniToastStore } from "./stores";
-
-//------------------------------------------------------------------------------
-/** A keyboard hint is no use where there is no keyboard. */
-const hasKeyboard = () => !window.matchMedia("(pointer: coarse)").matches;
 
 //------------------------------------------------------------------------------
 type MiniToastEntry = {

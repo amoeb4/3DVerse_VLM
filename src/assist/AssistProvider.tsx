@@ -39,10 +39,19 @@ import { INCIDENT_KINDS } from "./procedures";
 import { useAssistRole } from "./useAssistRole";
 import { EXPERT_NAME } from "./participantLook";
 import { useFollow } from "./useFollow";
+import { hasKeyboard } from "../utils/hasKeyboard";
 import { useMiniToastStore } from "../xr/stores";
 
-/** Said (`MiniToast`) when the click that places a note hits nothing. */
+/**
+ * Said (`MiniToast`) as a note waits for its place. Where there is a keyboard, with the key that
+ * cancels; on a touch screen, the button that started it cancels (`AssistActions`).
+ */
+const PIN_HINT = "Click anywhere";
+const PIN_HINT_WITH_CANCEL = "Click anywhere. Cancel";
+const PIN_CANCEL_KEY = "Esc";
+/** Said when the click that places a note hits nothing. */
 const NO_PIN_TARGET_MESSAGE = "Nothing there: click on a part of the cell";
+const PIN_MESSAGES = [PIN_HINT, PIN_HINT_WITH_CANCEL, NO_PIN_TARGET_MESSAGE];
 
 const EMPTY_SNAPSHOT: AssistSnapshot = {
   ready: false,
@@ -180,11 +189,25 @@ export function AssistProvider({
       void scene.highlightEntities({ entities: [] });
     };
   }, [scene, pinTarget]);
-  // While a note waits for its place, the pointer is a pin (`.is-placing-pin`, index.css).
+  // While a note waits for its place, the pointer is a pin (`.is-placing-pin`, index.css), and a
+  // line says what to do. Placed or cancelled, the line no longer holds: it goes, if it is still
+  // one of the note's own.
   useEffect(() => {
     if (!isPlacingPin) return;
     document.body.classList.add("is-placing-pin");
-    return () => document.body.classList.remove("is-placing-pin");
+    const { showMiniToast } = useMiniToastStore.getState();
+    if (hasKeyboard()) {
+      showMiniToast(PIN_HINT_WITH_CANCEL, PIN_CANCEL_KEY);
+    } else {
+      showMiniToast(PIN_HINT);
+    }
+    return () => {
+      document.body.classList.remove("is-placing-pin");
+      const { message, hideMiniToast } = useMiniToastStore.getState();
+      if (message !== null && PIN_MESSAGES.includes(message)) {
+        hideMiniToast();
+      }
+    };
   }, [isPlacingPin]);
   useEffect(() => {
     if (!isPlacingPin && !pinDraft) return;

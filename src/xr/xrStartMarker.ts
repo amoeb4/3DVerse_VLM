@@ -3,6 +3,8 @@ import { useEntity } from "@3dverse/livelink-react";
 import type { Transform } from "@3dverse/livelink";
 import { quat, vec3 } from "gl-matrix";
 
+import { labelCamera } from "../camera/labelCamera";
+
 /**
  * The name of the scene entity that says where an XR session starts.
  *
@@ -15,11 +17,6 @@ import { quat, vec3 } from "gl-matrix";
  * Without such an entity in the scene, the session starts at the scene's origin, as before.
  */
 export const XR_START_MARKER = "xr_start";
-
-/**
- * What `label.camera` holds before a camera is saved on the label: the scene origin, unrotated.
- */
-const UNSET_LABEL_CAMERA = [0, 0, 0, 0, 0, 0, 1];
 
 /**
  * The `originTransform` of `<WebXR>` from the scene's {@link XR_START_MARKER}, or `undefined` when
@@ -52,25 +49,6 @@ export function useXRStartTransform():
     },
     source: saved ? "label camera" : "entity transform",
   };
-}
-
-/**
- * The pose saved on a `label`, `[x, y, z, qx, qy, qz, qw]` in world space (as livelink-react's
- * `useLabelPointsOfView` reads it), or `null` when none was saved.
- */
-function labelCamera(camera: ReadonlyArray<number> | undefined): {
-  position: [number, number, number];
-  orientation: [number, number, number, number];
-} | null {
-  if (
-    !camera ||
-    camera.length < 7 ||
-    camera.every((value, index) => value === UNSET_LABEL_CAMERA[index])
-  ) {
-    return null;
-  }
-  const [x, y, z, qx, qy, qz, qw] = camera;
-  return { position: [x, y, z], orientation: [qx, qy, qz, qw] };
 }
 
 /**

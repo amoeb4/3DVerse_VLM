@@ -5,6 +5,7 @@ import { AssistProvider } from "../assist/AssistProvider";
 import { IncidentDigestRecorder } from "../assist/IncidentDigestRecorder";
 import { CameraEntityContext } from "../camera/cameraControl";
 import CameraEventListener from "../camera/CameraEventListener";
+import { usePointOfInterest } from "../camera/usePointOfInterest";
 import { useViewerCameras } from "../camera/useViewerCameras";
 import { ProductionStrip } from "../components/monitor/ProductionStrip";
 import { PartCameraToolbar } from "../components/part/PartCameraToolbar";
@@ -20,8 +21,11 @@ import { MonitorChrome } from "../modes/MonitorChrome";
 import { PartChrome } from "../modes/PartChrome";
 import { usePartViewState } from "../modes/partViewState";
 import { TrainingChrome } from "../modes/TrainingChrome";
-import { useCameraOnModeChange } from "../modes/useCameraOnModeChange";
 import { useModeAttribute } from "../modes/useModeAttribute";
+import {
+  DIAGNOSTIC_POINT_OF_INTEREST,
+  useModeCamera,
+} from "../modes/useModeCamera";
 import { useViewMode } from "../modes/useViewMode";
 import { useKeyboardShortcuts } from "../shortcuts/useKeyboardShortcuts";
 import { WeldBeads } from "../weldBead";
@@ -88,7 +92,16 @@ export function ViewerLayout({
   // light while welding is an entity of the shared scene, for everyone.
   const { view, toggleView } = useViewSettings();
   const { cameraEntity, pipCameraEntity } = useViewerCameras(view);
-  const { resetCamera, isAtDefaultPosition } = useResetCamera(cameraController);
+  const {
+    resetCamera,
+    travelToPointOfView,
+    isAtDefaultPosition,
+    isStarted: isCameraStarted,
+  } = useResetCamera(cameraController);
+  // Where the Diagnostic looks at the cell from, in the scenes that say so.
+  const diagnosticPointOfInterest = usePointOfInterest(
+    DIAGNOSTIC_POINT_OF_INTEREST,
+  );
   const { theme, toggleTheme } = useSceneTheme();
   const sceneTheme = theme ?? "light";
   // Selecting entities (a click, the pointer over them) is Training's.
@@ -120,9 +133,13 @@ export function ViewerLayout({
   useSceneThemeWatcher();
   // The cell welds: the Fronius torch on the arm, not the milling spindle.
   useFroniusTorchByDefault();
-  useCameraOnModeChange({
+  const { goToModeView } = useModeCamera({
     mode,
     resetCamera,
+    travelToPointOfView,
+    isCameraStarted,
+    isAtDefaultPosition,
+    diagnosticPointOfInterest,
     setPartCloseUp: partView.setCloseUp,
   });
   useKeyboardShortcuts({
@@ -176,7 +193,7 @@ export function ViewerLayout({
             <AssistChrome
               onBack={backToMonitor}
               cameraController={cameraController}
-              onResetCamera={resetCamera}
+              onRunEnd={goToModeView}
             />
           )}
           {/* The job, under the header, in every mode but Training. Below `lg`, all of it on one

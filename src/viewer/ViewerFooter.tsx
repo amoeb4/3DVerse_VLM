@@ -15,10 +15,13 @@ import { ModeSwitcher } from "../modes/ModeSwitcher";
 import type { ViewMode } from "../modes/modes";
 import { isHeadset } from "../utils/isHeadset";
 import { XRButton } from "../webXR";
+import { MiniToast } from "../xr/MiniToast";
 
 /**
  * The viewer's footer, in every mode: bottom left, what the view shows, then XR; at the bottom
- * centre, the camera and what one does on the cell, over the modes (`ModeSwitcher`).
+ * centre, a column in the flow, at every screen width: the camera and what one does on the cell
+ * (`TertiaryToolbar`), the line confirming what was just done (`MiniToast`), then the modes
+ * (`ModeSwitcher`). Nothing in the column is placed by itself, so nothing in it can overlap.
  */
 export function ViewerFooter({
   mode,
@@ -60,7 +63,9 @@ export function ViewerFooter({
   const isTrainingMode = mode === "training";
 
   return (
-    <footer className="absolute bottom-0 left-0 right-0 pointer-events-none z-50">
+    // Fixed, as its corner toolbars are: docked to the viewport's bottom, and what spills out of it
+    // (the confirming line's halo, wider than a phone) does not widen the page.
+    <footer className="fixed bottom-0 inset-x-0 z-50 flex flex-col items-center pointer-events-none">
       {/* In every mode, docked in the bottom-left corner: what the view shows, then XR. */}
       <SecondaryToolbar aria-label="View and extended reality">
         <ViewMenu
@@ -95,8 +100,8 @@ export function ViewerFooter({
       </SecondaryToolbar>
       {!isLargeScreen && !isXR && !isHeadset && <XRSheet />}
 
-      {/* At the bottom centre, over the modes: the camera, and what one does on the cell. Part
-          has its own, over its timeline (`PartCameraToolbar`). */}
+      {/* The top of the column: the camera, and what one does on the cell. Part has its own, over
+          its timeline (`PartCameraToolbar`). */}
       {!isPartMode && (
         <TertiaryToolbar aria-label="Camera and notes">
           {/* Assistance: pin a note, follow the other side's camera. */}
@@ -131,10 +136,15 @@ export function ViewerFooter({
         </TertiaryToolbar>
       )}
 
-      {/* Docked at the bottom centre: what else stands there goes above it (`bottom-navbar`). */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
-        <ModeSwitcher mode={mode} onSelect={onSelectMode} />
-      </div>
+      {/* Between the toolbar and the modes: the line confirming what was just done. Its row is
+          always there, so the toolbar does not move as a line comes and goes. In Part it is the
+          room left under the timeline, which stands on the navbar's spacing (`bottom-navbar`). */}
+      <MiniToast
+        className={cn("w-72 max-w-full", isPartMode ? "h-7" : "h-10")}
+      />
+
+      {/* The foot of the column: what else stands at the bottom centre goes above it. */}
+      <ModeSwitcher mode={mode} onSelect={onSelectMode} />
     </footer>
   );
 }
