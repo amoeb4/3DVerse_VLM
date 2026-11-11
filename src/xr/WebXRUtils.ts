@@ -4,7 +4,6 @@ import {
   XRLivelink,
   LXRScaleUp,
   LXRScaleDown,
-  LXR_DEFAULT_ACTION_MAP,
   type LXRButtonActionState,
 } from "@3dverse/livelink-webxr";
 
@@ -13,7 +12,6 @@ import type { SceneAABB } from "./sceneAABB";
 import { XRReticle } from "./XRReticle";
 import { XRHeadsetUI } from "./XRHeadsetUI";
 import { waitForCameras } from "./utils";
-import { controllerBindings } from "./controllerBindings";
 import { isVlaunchClipApp, xrHudForced } from "./searchParams";
 import { useXRSettingsStore } from "./stores";
 
@@ -109,11 +107,6 @@ export class WebXRUtils {
     await waitForCameras(this.livelink);
 
     await this.setDefaultCameraSettings();
-    // This app's own map, before anything reads it: no grip control (`controllerBindings`).
-    this.livelinkXR.actions.bindings = controllerBindings(
-      LXR_DEFAULT_ACTION_MAP,
-      this.livelinkXR.xr_mode,
-    );
     this.initPlacement();
     this.initHeadsetUI();
 
@@ -266,11 +259,25 @@ export class WebXRUtils {
     // and speeds the virtual joysticks go through.
     const { actions } = this.livelinkXR;
 
+    // What moves the viewer up and down, as it starts and stops: a button held without meaning
+    // to (the Index's grip) shows up here.
+    for (const action of ["rise", "sink"] as const) {
+      const { event, value, source } = actions.getButton(action);
+      if (event) {
+        console.info(
+          `[xr] ${action} ${event === "down" ? "on" : "off"}`,
+          source
+            ? `(${source.handedness} hand, value ${value.toFixed(2)})`
+            : "",
+        );
+      }
+    }
+
     if (actions.getButton("speed-up").event === "down") {
-      this.speedUp(2);
+      this.speedUp(WebXRUtils.SPEED_STEP);
     }
     if (actions.getButton("speed-down").event === "down") {
-      this.speedDown(2);
+      this.speedDown(WebXRUtils.SPEED_STEP);
     }
 
     this._applyScaleHold("up", actions.getButton("scale-up"));
@@ -293,6 +300,10 @@ export class WebXRUtils {
     action: Readonly<LXRButtonActionState>,
   ) {
     if (action.event === "down") {
+      // A press is a step, whatever its length: the mobile viewer's hold alone leaves a short
+      // press without any effect. Held, it then keeps scaling.
+      const scale = direction === "up" ? this.scaleUp() : this.scaleDown();
+      console.info(`[xr] world scale ×${scale}`);
       this.startScaleHold(direction);
     } else if (action.event === "up") {
       this.stopScaleHold();
@@ -357,15 +368,30 @@ export class WebXRUtils {
   }
 
   //--------------------------------------------------------------------------
+  /** Each speed button press multiplies or divides the movement speed by this. */
+  static readonly SPEED_STEP = 1.5;
+  static readonly MIN_MOVE_FACTOR = 0.25;
+  static readonly MAX_MOVE_FACTOR = 8;
+
+  //--------------------------------------------------------------------------
   speedUp(factor: number) {
-    this.moveFactor *= factor;
-    this.updateSpeedScale();
+    this.setMoveFactor(this.moveFactor * factor);
   }
 
   //--------------------------------------------------------------------------
   speedDown(factor: number) {
-    this.moveFactor /= factor;
+    this.setMoveFactor(this.moveFactor / factor);
+  }
+
+  //--------------------------------------------------------------------------
+  /** Within bounds: a few presses too many must not leave the viewer stuck, or flung away. */
+  private setMoveFactor(value: number) {
+    this.moveFactor = Math.min(
+      WebXRUtils.MAX_MOVE_FACTOR,
+      Math.max(WebXRUtils.MIN_MOVE_FACTOR, value),
+    );
     this.updateSpeedScale();
+    console.info(`[xr] movement speed ×${this.moveFactor.toFixed(2)}`);
   }
 
   //--------------------------------------------------------------------------

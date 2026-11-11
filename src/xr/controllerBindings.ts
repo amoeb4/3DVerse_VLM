@@ -12,7 +12,9 @@ const TRIGGER = "xr-standard-trigger";
  * right trigger, sink on the left one: both deliberate pulls. Not in AR, where the left trigger
  * places the content and sinking on it too would fight that.
  *
- * What the actions do (scale, speed, place) is `WebXRUtils`'s. Applying it twice changes nothing.
+ * Applied as the session starts (`CameraControllerWebXR`), and again under the in-headset menu's
+ * own binding (`XRHeadsetUI`). What the actions do (scale, speed, place) is `WebXRUtils`'s.
+ * Applying it twice changes nothing.
  */
 export function controllerBindings(
   bindings: readonly LXRBinding[],

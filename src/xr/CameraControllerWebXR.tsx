@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { WebXRContext } from "@3dverse/livelink-webxr";
 
+import { controllerBindings } from "./controllerBindings";
 import { EMPTY_SCENE_AABB, getSceneAABB, type SceneAABB } from "./sceneAABB";
 import { useWebXRStore } from "./stores";
 import { WebXRUtils } from "./WebXRUtils";
@@ -18,6 +19,19 @@ export function CameraControllerWebXR(): null {
   const { xrLivelink } = useContext(WebXRContext);
   const setWebXRUtils = useWebXRStore((state) => state.setWebXRUtils);
   const [sceneAABB, setSceneAABB] = useState<SceneAABB | null>(null);
+
+  // This app's own controller map, as soon as there is a session, well before `WebXRUtils` is
+  // ready (it waits for the scene's bounding box and the cameras): no grip control, which on a
+  // Valve Index would sink the viewer through the floor meanwhile (`controllerBindings`).
+  useEffect(() => {
+    if (!xrLivelink) {
+      return;
+    }
+    xrLivelink.actions.bindings = controllerBindings(
+      xrLivelink.actions.bindings,
+      xrLivelink.xr_mode,
+    );
+  }, [xrLivelink]);
 
   const sceneId = instance?.session.scene_id;
   useEffect(() => {
