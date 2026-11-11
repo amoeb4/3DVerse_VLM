@@ -177,7 +177,7 @@ export function WeldBeads() {
 
 //------------------------------------------------------------------------------
 /** Training's weld demo: the bead's temperature, a single bead, and Start / Stop Weld. */
-export function EntityCreator() {
+export function EntityCreator({ className }: { className?: string }) {
   const { instance } = useContext(LivelinkContext);
 
   const [temperature, setTemperature] = useState<number>(() => beadTemperature);
@@ -220,6 +220,7 @@ export function EntityCreator() {
         "backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
         "origin-top-left transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
         "starting:opacity-0 starting:-translate-x-4 starting:scale-95 starting:invisible",
+        className,
       )}
     >
       <div className="flex flex-col gap-2 px-4 py-3 text-3xs">

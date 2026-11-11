@@ -54,6 +54,7 @@ const ENTRIES: readonly NavEntry[] = [
 /**
  * The viewer's main sections, docked at the bottom centre of the screen: Monitor (with Part, opened
  * from it), Diagnostic (the `assistance` mode), Security and Documentation (not built yet, disabled), and Training.
+ * Below `md`, the ones not built yet are left out: on a phone, only what opens.
  */
 export function ModeSwitcher({
   mode,
@@ -73,6 +74,7 @@ export function ModeSwitcher({
             label={entry.label}
             isActive={entry.activeIn.includes(mode)}
             disabled={!target}
+            className={target ? undefined : "max-md:hidden"}
             title={
               target
                 ? `${entry.label} (${MODE_SHORTCUTS[target]}): ${entry.description}`

@@ -28,10 +28,7 @@ import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import { Button, cn, Icon, Tabs, TabsList, TabsTrigger } from "@3dverse/ui-lib";
 import KeyboardHandler from "./keyBindings";
 import CameraEventListener from "./camera/CameraEventListener";
-import TrainingPanel, {
-  SpeedProvider,
-  EntityProvider,
-} from "./components/TrainingPanel";
+import { SpeedProvider, EntityProvider } from "./components/TrainingPanel";
 import { CameraEntityContext } from "./camera/cameraControl";
 import { WebSocketProvider } from "./webSockets";
 import { PartEntitiesProvider } from "./partEntitiesContext";
@@ -42,8 +39,7 @@ import { Atmosphere } from "./components/Atmosphere";
 import { WeldArc } from "./components/weld/WeldArc";
 import { AutoWeld } from "./components/weld/AutoWeld";
 import { useFroniusTorchByDefault } from "./components/weld/useFroniusTorchByDefault";
-import { EntityCreator, WeldBeads } from "./weldBead";
-import { EntityStatusPanel } from "./components/EntityPicking";
+import { WeldBeads } from "./weldBead";
 import { WebXR } from "@3dverse/livelink-webxr";
 import { XRButton } from "./webXR";
 import { XRStartMarker } from "./xr/xrStartMarker";
@@ -75,6 +71,9 @@ import { ModeSwitcher } from "./modes/ModeSwitcher";
 import { SecondaryToolbar } from "./components/common/SecondaryToolbar";
 import { ViewMenu } from "./components/ViewMenu";
 import { MonitorChrome } from "./modes/MonitorChrome";
+import { WelcomePanel } from "./components/WelcomePanel";
+import { XRSheet } from "./components/xr/XRSheet";
+import { TrainingChrome } from "./modes/TrainingChrome";
 import { PartChrome } from "./modes/PartChrome";
 import { usePartViewState } from "./modes/partViewState";
 import { PartInCell } from "./components/part/PartInCell";
@@ -135,11 +134,15 @@ function ViewerRoute() {
   }
   // Keyed, so going to another machine or session starts over with a fresh connection and state.
   return (
-    <Viewer
-      key={`${scene.sceneId}/${sessionId ?? ""}`}
-      scene={scene}
-      sessionId={sessionId}
-    />
+    <>
+      {/* On a phone, as the machine opens. */}
+      <WelcomePanel scene={scene} />
+      <Viewer
+        key={`${scene.sceneId}/${sessionId ?? ""}`}
+        scene={scene}
+        sessionId={sessionId}
+      />
+    </>
   );
 }
 
@@ -214,30 +217,15 @@ function Viewer({
                     buildPlate={buildPlate}
                     setXRMode={setXRMode}
                   />
-                  <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
+                  <div className="fixed bottom-30 left-1/2 -translate-x-1/2">
                     <Button
-                      variant="overlay-outline"
-                      className="before:opacity-100 before:backdrop-blur-xl"
+                      size="lg"
+                      variant="accent"
+                      className="px-6 text-white!"
                       onClick={() => setXRMode(null)}
                     >
                       Exit XR
                     </Button>
-
-                    {xrMode !== "immersive-ar" && (
-                      <XRButton
-                        mode="immersive-ar"
-                        text="Switch to"
-                        setXRMode={setXRMode}
-                      />
-                    )}
-
-                    {xrMode !== "immersive-vr" && (
-                      <XRButton
-                        mode="immersive-vr"
-                        text="Switch to"
-                        setXRMode={setXRMode}
-                      />
-                    )}
                   </div>
                 </WebXR>
               ) : (
@@ -463,8 +451,8 @@ function AppLayout({
       <AssistProvider
         active={isAssist}
         cameraController={cameraController}
-        pickInterceptor={pickInterceptor}>
-
+        pickInterceptor={pickInterceptor}
+      >
         <IncidentDigestRecorder sceneId={sceneId} />
         {/* In every mode: welding while the machine runs, and the bead it lays. */}
         <AutoWeld />
@@ -473,46 +461,46 @@ function AppLayout({
           {/* Below `lg`, it wraps before the toolbar on the right. */}
           <header
             className={cn(
-              "absolute top-4 left-4 flex flex-wrap items-center gap-x-1 gap-y-2 z-50",
-              "max-w-[calc(100%-12rem)] lg:max-w-none",
+              // A container: on a phone, its live badge is the dot alone (`LiveBadge`).
+              "@container absolute top-0 left-0 px-3 py-4 md:px-4 flex justify-between items-center gap-x-1 w-full z-50",
               "starting:opacity-0 starting:-translate-y-4 transition-all duration-500",
             )}
           >
-            <Button
-              as={Link}
-              to={HOME_PATH}
-              variant="ghost"
-              size="icon-lg"
-              className="text-primary"
-              title="Back to Home"
-              aria-label="Back to Home"
-            >
-              <Icon className="fas fa-arrow-left text-2xs" />
-            </Button>
-            <h1 className="font-orbitron text-xl font-bold mr-2 truncate">
-              {machineName}
-            </h1>
-            {!isTraining && <LiveBadge />}
-            {!isAssist && (
-              <AssistAlert
-                onOpen={() => setMode("assistance")}
-                className="lg:ml-2"
-              />
-            )}
-          </header>
-          <Toolbar
-            cameraController={cameraController}
-            onOpenAssistance={openAssistance}
-          />
-          {isTraining && (
-            <div className="fixed top-15 lg:top-17 left-4 z-50 flex flex-col gap-1 w-full max-w-md">
-              <TrainingPanel />
-              <EntityCreator />
-              <EntityStatusPanel
-                hoveredEntity={hoveredEntity?.entity ?? null}
-                pickedEntity={pickedEntity?.entity ?? null}
-              />
+            <div className="flex items-center gap-2 md:gap-3 min-w-0 starting:opacity-0 starting:-translate-y-4 transition-all duration-500">
+              <Button
+                as={Link}
+                to={HOME_PATH}
+                variant="ghost"
+                size="icon-lg"
+                className="text-primary"
+                title="Back to Home"
+                aria-label="Back to Home"
+              >
+                <Icon className="fas fa-arrow-left text-2xs" />
+              </Button>
+              <h1 className="font-orbitron text-xl font-bold mr-2 min-w-0 truncate">
+                {machineName}
+              </h1>
+              {!isTraining && <LiveBadge collapsible />}
+
+              {!isAssist && (
+                <AssistAlert
+                  onOpen={() => setMode("assistance")}
+                  className="lg:ml-2"
+                />
+              )}
             </div>
+            <Toolbar
+              cameraController={cameraController}
+              onOpenAssistance={openAssistance}
+            />
+          </header>
+
+          {isTraining && (
+            <TrainingChrome
+              hoveredEntity={hoveredEntity?.entity ?? null}
+              pickedEntity={pickedEntity?.entity ?? null}
+            />
           )}
           {hasRightColumn && (
             <div
@@ -557,19 +545,14 @@ function AppLayout({
               onResetCamera={resetCamera}
             />
           )}
-          {/* The job, under the header, in every mode but Training. Below `lg`, Monitor has it in
-              its sheet. */}
-          {!isTraining &&
-            (isLargeScreen ? (
-              <ProductionStrip className="fixed top-16 left-4 right-4 z-40 starting:opacity-0 transition-opacity duration-500" />
-            ) : (
-              mode !== "monitor" && (
-                <ProductionStrip
-                  compact
-                  className="fixed top-28 left-4 z-40 max-w-[calc(100%-2rem)]"
-                />
-              )
-            ))}
+          {/* The job, under the header, in every mode but Training. Below `lg`, all of it on one
+              line, swiped sideways. */}
+          {!isTraining && (
+            <ProductionStrip
+              swipeable
+              className="fixed top-16 left-4 right-4 z-40 starting:opacity-0 transition-opacity duration-500"
+            />
+          )}
           {isPart && (
             <PartChrome
               theme={sceneTheme}
@@ -606,14 +589,19 @@ function AppLayout({
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
-                  <ToolbarDivider />
-                  <XRButton
-                    mode="immersive-ar"
-                    text="Open in"
-                    variant="ghost"
-                    icon="fa-cube"
-                    setXRMode={setXRMode}
-                  />
+                  {/* Below `lg`, AR is entered from the XR button (`XRSheet`). */}
+                  {isLargeScreen && (
+                    <>
+                      <ToolbarDivider />
+                      <XRButton
+                        mode="immersive-ar"
+                        text="Open in"
+                        variant="ghost"
+                        icon="fa-cube"
+                        setXRMode={setXRMode}
+                      />
+                    </>
+                  )}
                 </TertiaryToolbar>
               }
             />
@@ -622,7 +610,7 @@ function AppLayout({
         <CameraEventListener />
 
         {!isXR && (
-          <Canvas className="w-full h-screen">
+          <Canvas className="w-full h-dvh">
             <Viewport
               cameraEntity={cameraEntity}
               className="w-full h-full"
@@ -718,24 +706,28 @@ function AppLayout({
               cellHidden={mode === "part"}
               theme={theme}
               onToggleTheme={toggleTheme}
-              />
+            />
+            {/* VR and AR: large screens only. Below `lg`, the XR button on the right (`XRSheet`). */}
             <span
               aria-hidden
-              className="h-full mx-0.5 border-l border-secondary"
+              className="max-lg:hidden h-full mx-0.5 border-l border-secondary"
             />
             <XRButton
               mode="immersive-vr"
               text=""
               variant="ghost"
               setXRMode={setXRMode}
+              className="max-lg:hidden"
             />
             <XRButton
               mode="immersive-ar"
               text=""
               variant="ghost"
               setXRMode={setXRMode}
+              className="max-lg:hidden"
             />
           </SecondaryToolbar>
+          {!isLargeScreen && <XRSheet setXRMode={setXRMode} />}
 
           {/* At the bottom centre, over the modes: the camera, and what one does on the cell. Part
               has its own, over its timeline (`PartChrome`). */}

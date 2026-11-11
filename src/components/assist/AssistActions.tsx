@@ -59,7 +59,7 @@ export function AssistActions() {
         title="Pin a note on the cel."
         className="gap-2"
       >
-        <Icon className="fas fa-thumbtack text-4xs" />
+        <Icon className="fas fa-thumbtack text-2xs md:text-4xs" />
         <span className="hidden sm:inline">Pin a note</span>
       </Button>
 
@@ -90,7 +90,6 @@ export function AssistActions() {
           </Button>
         )
       )}
-      <ToolbarDivider />
     </>
   );
 }

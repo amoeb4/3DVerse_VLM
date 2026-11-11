@@ -47,6 +47,7 @@ export function MainNavbarItem({
   disabled = false,
   title,
   onClick,
+  className,
 }: {
   /** A Font Awesome icon class, without the `fas` prefix. */
   icon: string;
@@ -55,6 +56,7 @@ export function MainNavbarItem({
   disabled?: boolean;
   title?: string;
   onClick: () => void;
+  className?: string;
 }) {
   //--------------------------------------------------------------------------
   return (
@@ -72,6 +74,7 @@ export function MainNavbarItem({
           ? "text-accent-300"
           : "text-secondary enabled:hover:text-primary",
         "disabled:opacity-40 disabled:cursor-not-allowed",
+        className,
       )}
     >
       <span

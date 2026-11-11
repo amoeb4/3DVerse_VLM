@@ -5,16 +5,12 @@
    * What the mode navbar (`MainNavbar`) takes at the bottom of the screen: its height and a gap.
    * `bottom-navbar`, `pb-navbar`… lift what stands at the bottom centre above it.
    */
-  --spacing-navbar: 5.5rem;
+  --spacing-navbar: 4rem;
   /*
    * What the secondary toolbar (`SecondaryToolbar`) takes at the bottom left: its height and a gap.
-   * `bottom-toolbar` lifts what stands at the bottom left above it. Below `lg` the toolbar stands
-   * over the navbar, and `bottom-navbar-toolbar` lifts what stands there above both.
+   * `bottom-toolbar` lifts what stands at the bottom left above it.
    */
   --spacing-toolbar: 3rem;
-  --spacing-navbar-toolbar: calc(
-    var(--spacing-navbar) + var(--spacing-toolbar)
-  );
 }
 
 @font-face {

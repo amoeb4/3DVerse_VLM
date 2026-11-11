@@ -9,15 +9,30 @@ const ips = Object.values(networkInterfaces())
   .flat()
   .filter((a) => a && a.family === "IPv4")
   .map((a) => a.address);
-const san = ["DNS:localhost", ...new Set(ips)].map((n) => (n.startsWith("DNS:") ? n : `IP:${n}`));
+const san = ["DNS:localhost", ...new Set(ips)].map((n) =>
+  n.startsWith("DNS:") ? n : `IP:${n}`,
+);
 
 mkdirSync("ssl", { recursive: true });
 execFileSync(
   "openssl",
-  ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "825",
-    "-subj", "/CN=3dverse-vlm-dev",
-    "-keyout", "ssl/key.pem", "-out", "ssl/cert.pem",
-    "-addext", `subjectAltName=${san.join(",")}`],
+  [
+    "req",
+    "-x509",
+    "-newkey",
+    "rsa:2048",
+    "-nodes",
+    "-days",
+    "825",
+    "-subj",
+    "/CN=3dverse-vlm-dev",
+    "-keyout",
+    "ssl/key.pem",
+    "-out",
+    "ssl/cert.pem",
+    "-addext",
+    `subjectAltName=${san.join(",")}`,
+  ],
   { stdio: "inherit" },
 );
 console.log(`ssl/cert.pem covers: ${san.join(", ")}`);

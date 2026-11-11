@@ -6,8 +6,8 @@ import { cn } from "@3dverse/ui-lib";
  * modes' navbar (`bottom-navbar`) — where the camera's reset always stood: reset the camera, and in
  * Assistance pin a note or follow someone.
  *
- * Below `lg`, the bottom centre belongs to the modes' sheets: it docks on the right instead, in the
- * row the secondary toolbar takes on the left, over the navbar.
+ * Below `lg` it docks on the right instead, over the navbar, facing the button of the mode's sheet
+ * on the left (`ModeSheet`).
  *
  * Its width follows its entries with a transition, as they come and go from one mode to the next:
  * an `auto` width cannot be animated, so the entries' own width is measured and set.

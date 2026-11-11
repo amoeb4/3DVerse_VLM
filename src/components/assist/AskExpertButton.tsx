@@ -26,9 +26,8 @@ export function AskExpertButton({
       <Button
         variant="accent"
         round
-        // VLM's purple whatever the mode: Training's accent does not reach it (index.css).
         data-accent="brand"
-        className="relative pr-4 text-white! outline-none"
+        className="relative md:pr-4 text-white! outline-none"
         title={
           incident
             ? "An expert has been asked: open the incident's recovery"
@@ -37,7 +36,7 @@ export function AskExpertButton({
         onClick={() => (incident ? onOpenAssistance() : setIsOpen(true))}
       >
         <Icon className="fas fa-headset text-2xs translate-y-px" />
-        <span className="hidden lg:block">Ask an expert</span>
+        <span className="hidden md:block">Ask an expert</span>
       </Button>
       <RequestDialog
         open={isOpen}

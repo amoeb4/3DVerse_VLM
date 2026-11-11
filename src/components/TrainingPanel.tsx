@@ -64,7 +64,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default function TrainingPanel() {
+export default function TrainingPanel({ className }: { className?: string }) {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
     ["material"],
@@ -99,6 +99,7 @@ export default function TrainingPanel() {
         "divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
         "origin-top-left transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
         "starting:opacity-0 starting:-translate-x-4 starting:scale-95 starting:invisible",
+        className,
       )}
     >
       <PanelHeader className="flex justify-between items-center">

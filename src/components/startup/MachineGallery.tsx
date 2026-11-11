@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import Dtext from "../Dtext";
-import { MACHINES, type Machine, type MachineStatus } from "../../config";
+import { MACHINES, type Machine } from "../../config";
+import { MACHINE_STATUS } from "./machineStatus";
 import { displayNameOf, initialsOf } from "../../utils/clientName";
 import { useLiveSessions, type LiveSession } from "./useLiveSessions";
 import { MachinePreview, type PreviewStatus } from "./MachinePreview";
@@ -23,21 +24,6 @@ const PREVIEW_IDLE_MS = 5 * 60_000;
  * is opened from this page, and every tile shows its picture. Set back to `true` to bring them back.
  */
 const SHOW_3D_PREVIEWS = false;
-
-const STATUS: Record<MachineStatus, { label: string; className: string }> = {
-  operational: {
-    label: "Operational",
-    className: "bg-positive/15 text-positive border-positive/30",
-  },
-  "in-progress": {
-    label: "In progress",
-    className: "bg-warning/15 text-warning-800 border-warning/40",
-  },
-  deprecated: {
-    label: "Deprecated",
-    className: "bg-secondary/10 text-secondary border-tertiary",
-  },
-};
 
 //------------------------------------------------------------------------------
 /**
@@ -63,7 +49,7 @@ export function MachineGallery() {
   ).length;
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto bg-underground">
+    <div className="min-h-dvh w-full overflow-y-auto bg-underground">
       <div className="mx-auto max-w-6xl px-4 md:px-8 py-8 md:py-12">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <Dtext />
@@ -277,10 +263,10 @@ function MachineTile({
             <span
               className={cn(
                 "inline-flex items-center h-6 px-2 rounded-full border text-3xs font-medium backdrop-blur-sm",
-                STATUS[status].className,
+                MACHINE_STATUS[status].className,
               )}
             >
-              {STATUS[status].label}
+              {MACHINE_STATUS[status].label}
             </span>
           )}
           {liveSession && <LiveBadge />}

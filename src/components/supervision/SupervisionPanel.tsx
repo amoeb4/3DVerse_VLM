@@ -39,6 +39,12 @@ type JointReading = {
 const wrap = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180;
 
 /**
+ * Whether the robot is moving, for every `useJointTelemetry` at once: its starts and stops are
+ * logged once, however many of them run, and not again when one is mounted while it moves.
+ */
+let isMoving = false;
+
+/**
  * The robot's joints, sampled every `SAMPLE_MS`: angles and speeds, and whether it is moving.
  *
  * Runs all the time, so the event log records the robot starting and stopping even while the
@@ -66,7 +72,6 @@ function useJointTelemetry(active: boolean) {
     }
     let previous: Map<string, number> | null = null;
     let previousAt = performance.now();
-    let isMoving = false;
     let slowSince: number | null = null;
 
     const sample = () => {
@@ -112,6 +117,8 @@ function useJointTelemetry(active: boolean) {
 
       if (active) {
         setReadings(next);
+        // Another one may have seen it start or stop first.
+        setMoving(isMoving);
       }
     };
 
@@ -121,6 +128,15 @@ function useJointTelemetry(active: boolean) {
   }, [joints, active]);
 
   return { readings, moving };
+}
+
+/**
+ * Logs the robot starting and stopping where no `SupervisionPanel` is mounted: below `lg`, while
+ * Monitor's sheet is closed.
+ */
+export function JointTelemetryRecorder() {
+  useJointTelemetry(false);
+  return null;
 }
 
 /**

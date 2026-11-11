@@ -1,4 +1,4 @@
-import { Button, cn } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { Kbd } from "./common/Kbd";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 
@@ -6,8 +6,8 @@ const SHOW_KBD_SHORTCUTS = false;
 
 /**
  * Reset camera position (P). `overlay`: a button of its own over the 3D view; `toolbar`: an entry
- * of the bottom-right toolbar (`TertiaryToolbar`), its label hidden on small screens. Dimmed while
- * the camera is already there.
+ * of the bottom-right toolbar (`TertiaryToolbar`), an icon in place of its label below `sm`. Dimmed
+ * while the camera is already there.
  */
 export function ResetPositionButton({
   onReset,
@@ -37,7 +37,9 @@ export function ResetPositionButton({
       onClick={onReset}
       disabled={disabled}
     >
-      {/* {isToolbar && <Icon className="fas fa-arrows-to-dot text-2xs" />} */}
+      {isToolbar && (
+        <Icon className="fas fa-arrows-to-dot text-2xs sm:hidden" />
+      )}
       <p className={cn(isToolbar && "hidden sm:block")}>
         Reset camera{" "}
         <span className="underline underline-offset-2 decoration-current/40">

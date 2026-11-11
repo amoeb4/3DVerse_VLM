@@ -7,6 +7,8 @@ import fs from "node:fs";
 
 export default defineConfig({
   server: {
+    // Listen on the LAN too, not only on localhost: a phone or a headset joins by the Mac's IP.
+    host: true,
     // WebXR needs a secure context: over the LAN (e.g. a headset on http://192.168.x.x:5173)
     // plain http disables the XR buttons. `npm run cert` makes ssl/, and dev then serves https.
     https: fs.existsSync("ssl/cert.pem")

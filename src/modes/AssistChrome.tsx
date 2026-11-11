@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { cn } from "@3dverse/ui-lib";
 
 import { useAssist } from "../assist/assistContext";
 import type { IncidentKind } from "../assist/procedures";
-import { ButtonGroup } from "../components/common/ButtonGroup";
+import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
 import { IncidentPanel } from "../components/assist/IncidentPanel";
 import { PeopleSection } from "../components/assist/PeopleSection";
 import { Diagnostic } from "../components/assist/Diagnostic";
@@ -28,7 +28,8 @@ const stayHere = () => {};
  * bottom centre (`AssistActions`). All of it shared through the session (`assistStore.ts`).
  *
  * Everyone is the operator, unless their URL says `?role=expert` (`useAssistRole`). Below `lg`,
- * the panels share a sheet, a tab each.
+ * the panels share a sheet, a tab each, closed at first (`ModeSheet`); back to monitoring is the
+ * navbar's Monitor.
  */
 export function AssistChrome({
   onBack,
@@ -59,7 +60,7 @@ export function AssistChrome({
       {isLargeScreen ? (
         <AssistColumn onRequest={openRequest} onBack={onBack} />
       ) : (
-        <AssistSheet onRequest={openRequest} onBack={onBack} />
+        <AssistSheet onRequest={openRequest} />
       )}
       <DiagnosticRunPanel
         cameraController={cameraController}
@@ -102,14 +103,16 @@ function ActionsWithPeople({ className }: { className?: string }) {
 /** The Diagnostic, or the incident once one is open. */
 function MainPanel({
   onRequest,
+  className = "min-h-0",
 }: {
   onRequest: (kind: IncidentKind, note?: string) => void;
+  className?: string;
 }) {
   const { incident } = useAssist();
   return incident ? (
-    <IncidentPanel className="min-h-0" />
+    <IncidentPanel className={className} />
   ) : (
-    <Diagnostic onRequest={onRequest} className="min-h-0" />
+    <Diagnostic onRequest={onRequest} className={className} />
   );
 }
 
@@ -140,48 +143,34 @@ type SheetTab = "main" | "actions";
 
 function AssistSheet({
   onRequest,
-  onBack,
 }: {
   onRequest: (kind: IncidentKind, note?: string) => void;
-  onBack: () => void;
 }) {
   const { incident } = useAssist();
-  const [tab, setTab] = useState<SheetTab | null>("main");
+  const [tab, setTab] = useState<SheetTab>("main");
   // The first tab is the Diagnostic, or the incident once one is open.
-  const tabs: { id: SheetTab; label: string; icon: string }[] = [
-    incident
-      ? { id: "main", label: "Incident", icon: "fa-triangle-exclamation" }
-      : { id: "main", label: "Diagnostic", icon: "fa-stethoscope" },
+  const main: ModeSheetTab<SheetTab> = incident
+    ? { id: "main", label: "Incident", icon: "fa-triangle-exclamation" }
+    : { id: "main", label: "Diagnostic", icon: "fa-stethoscope" };
+  const tabs: ModeSheetTab<SheetTab>[] = [
+    main,
     { id: "actions", label: "Actions", icon: "fa-hand" },
   ];
 
   return (
-    // Above the toolbars, themselves over the modes: AR is for the operator at the machine, on a phone.
-    <div className="fixed inset-x-4 bottom-navbar-toolbar z-40 flex flex-col gap-2 max-h-[60vh]">
-      <BackToMonitoring onClick={onBack} />
-      <ButtonGroup className="self-start">
-        {tabs.map(({ id, label, icon }) => (
-          <Button
-            key={id}
-            variant="overlay-outline"
-            size="sm"
-            className={cn(
-              "gap-1.5 before:opacity-100 before:backdrop-blur-xl",
-              tab === id && "text-accent-300 before:bg-accent/15",
-            )}
-            aria-pressed={tab === id}
-            // The open tab again folds the sheet away, for the whole 3D view.
-            onClick={() => setTab((previous) => (previous === id ? null : id))}
-          >
-            <Icon className={cn("fas text-3xs", icon)} />
-            <span className="hidden sm:inline">{label}</span>
-          </Button>
-        ))}
-      </ButtonGroup>
-      {tab === "main" && <MainPanel onRequest={onRequest} />}
-      {tab === "actions" && (
-        <ActionsWithPeople className="min-h-0 overflow-y-auto" />
-      )}
-    </div>
+    <ModeSheet
+      label={main.label}
+      icon={main.icon}
+      tabs={tabs}
+      tab={tab}
+      onTabChange={setTab}
+    >
+      {/* Both stay mounted: what is typed in the Diagnostic is kept from one tab to the other. */}
+      <MainPanel
+        onRequest={onRequest}
+        className={cn(tab !== "main" && "hidden")}
+      />
+      <ActionsWithPeople className={cn(tab !== "actions" && "hidden")} />
+    </ModeSheet>
   );
 }

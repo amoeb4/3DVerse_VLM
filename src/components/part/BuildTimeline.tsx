@@ -139,7 +139,7 @@ export function BuildTimeline({
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {/* The values, above the graph. */}
-      <div className="flex items-baseline justify-between gap-3 text-3xs">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-3xs">
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
@@ -165,9 +165,37 @@ export function BuildTimeline({
             <b className="text-primary">{Math.max(1, shownLayer)}</b>
             <span className="text-secondary">/{layers}</span>
             {pinnedLayer === null && (
-              <span className="ml-1.5 text-accent-300 font-bold">LIVE</span>
+              // Live: the dot beats while the arc burns.
+              <span
+                className="ml-1.5 inline-flex items-center gap-1 text-accent-300 font-bold"
+                title="Following the build as it is laid"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    build.arcOn
+                      ? "bg-current animate-pulse"
+                      : "bg-secondary/60",
+                  )}
+                />
+                LIVE
+              </span>
             )}
           </span>
+          {pinnedLayer !== null && (
+            // Rewound: the way back stands out.
+            <Button
+              variant="accent"
+              size="2xs"
+              className="gap-1 text-white! shadow-[0_0_10px_var(--color-accent)]"
+              title="Back to the build as it is laid"
+              onClick={() => onScrub(null)}
+            >
+              <Icon className="fas fa-forward-step text-[9px]" />
+              Back to Live
+            </Button>
+          )}
         </div>
         <span className="whitespace-nowrap">
           <b className="text-primary">{formatDuration(intoBuildS)}</b>

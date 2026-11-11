@@ -6,6 +6,7 @@ import { PanelTitle } from "../components/common/PanelTitle";
 import { ButtonGroup } from "../components/common/ButtonGroup";
 import { SourceBadge } from "../components/common/SourceBadge";
 import { BackButton } from "../components/common/BackButton";
+import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
 import { findingOf, type LayerFinding } from "../components/part/layerFindings";
 import {
   legendFor,
@@ -28,9 +29,13 @@ import {
 } from "../live/processFeed";
 
 /** Layers a second while the build replays. */
-// "Live" and "Back to Live" share a width, so the bar does not shift when one becomes the other.
-const LIVE_BUTTON_WIDTH =
-  "w-24 [height:stretch] align-self-stretch shrink-0 justify-start items-center content-center gap-2 pl-3";
+type SheetTab = "findings" | "actions";
+
+/** Below `lg`: what the right column holds on large screens, in the mode's sheet. */
+const SHEET_TABS: ModeSheetTab<SheetTab>[] = [
+  { id: "findings", label: "Out of WPS", icon: "fa-triangle-exclamation" },
+  { id: "actions", label: "Actions", icon: "fa-hand" },
+];
 
 const PLAY_LAYERS_PER_S = 8;
 
@@ -81,10 +86,8 @@ export function PartChrome({
   } = state;
   const [isPlaying, setIsPlaying] = useState(false);
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
-  // Below `lg`: which of the two right-hand panels is opened over the layer bar.
-  const [sheet, setSheet] = useState<"findings" | "actions" | null>(null);
-  const toggleSheet = (panel: "findings" | "actions") =>
-    setSheet((open) => (open === panel ? null : panel));
+  // Below `lg`: which of the two right-hand panels the sheet shows.
+  const [sheetTab, setSheetTab] = useState<SheetTab>("findings");
 
   const built = build.records.length;
   const findings = useFindings(build);
@@ -157,7 +160,7 @@ export function PartChrome({
       {/* The left sidebar: back to the robot, then colour by, and the scale. */}
       <div
         className={cn(
-          "fixed z-40 top-36 lg:top-28 left-4 w-[calc(100%-2rem)] max-w-96 flex flex-col gap-2",
+          "fixed z-40 top-30 lg:top-28 left-0 w-full md:max-w-96 px-4 flex flex-col gap-2",
           "starting:opacity-0 starting:-translate-y-2 transition-all duration-500",
         )}
       >
@@ -165,6 +168,8 @@ export function PartChrome({
           label="Back to Robot"
           title="Back to the robot: the Monitor mode, the camera on the cell"
           onClick={onBack}
+          // Below `lg`, the navbar's Monitor does it.
+          className="max-lg:hidden"
         />
         <Panel
           className={cn(
@@ -185,7 +190,8 @@ export function PartChrome({
                 variant="outline"
                 size="xs"
                 className={cn(
-                  "grow text-2xs",
+                  // On a phone, the five of them in the panel's width.
+                  "grow min-w-0 text-2xs max-sm:px-1",
                   metric === id && "text-accent-300 bg-accent/15",
                 )}
                 aria-pressed={metric === id}
@@ -220,34 +226,43 @@ export function PartChrome({
           rightSlot,
         )}
 
-      {/* The bottom stack, at the centre, laid out as a column so nothing in it overlaps: below
-          `lg` the panel opened from the timeline, then the toolbar, then the timeline itself.
-          Below `lg`, above the XR toolbar, itself over the modes. Only what is in it takes the
-          pointer, not the column around. */}
-      <div className="fixed z-40 inset-x-4 bottom-navbar max-lg:bottom-navbar-toolbar flex flex-col items-center gap-2 pointer-events-none *:pointer-events-auto">
-        {!isLargeScreen && sheet && (
-          <div className="w-full max-h-[40vh] flex flex-col">
-            {sheet === "actions" ? (
-              <RemoteActions onOpenAssistance={onOpenAssistance} />
-            ) : (
-              <FindingsPanel
-                findings={findings}
-                built={built}
-                focusLayer={focusLayer}
-                onSelect={selectFinding}
-                className="flex min-h-0"
-              />
-            )}
-          </div>
-        )}
+      {/* The bottom stack, at the centre, over the modes, laid out as a column so nothing in it
+          overlaps: the toolbar, then the timeline. Only what is in it takes the pointer, not the
+          column around. */}
+      <div className="fixed z-40 inset-x-4 bottom-navbar flex flex-col items-center gap-2 pointer-events-none *:pointer-events-auto">
+        {/* The camera's toolbar; below `lg`, the button of the mode's sheet beside it. */}
+        <div className="w-full flex items-center justify-between lg:justify-center gap-2 pointer-events-none! *:pointer-events-auto">
+          {!isLargeScreen && (
+            <ModeSheet
+              label="Part"
+              icon="fa-cube"
+              tabs={SHEET_TABS}
+              tab={sheetTab}
+              onTabChange={setSheetTab}
+              badge={findings.length}
+              inFlow
+            >
+              {sheetTab === "findings" ? (
+                <FindingsPanel
+                  findings={findings}
+                  built={built}
+                  focusLayer={focusLayer}
+                  onSelect={selectFinding}
+                  className="flex"
+                />
+              ) : (
+                <RemoteActions onOpenAssistance={onOpenAssistance} />
+              )}
+            </ModeSheet>
+          )}
+          {toolbar}
+        </div>
 
-        {toolbar}
-
-        {/* The build, layer by layer. */}
+        {/* The build, layer by layer, the panel's full width: back to live is in its header. */}
         <Panel
           className={cn(
             "w-full lg:w-184 max-w-full",
-            "flex items-center gap-3 p-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+            "p-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
           )}
         >
           <BuildTimeline
@@ -261,74 +276,7 @@ export function PartChrome({
             isPlaying={isPlaying}
             setIsPlaying={setIsPlaying}
             play={play}
-            className="grow min-w-0"
           />
-          {pinnedLayer === null ? (
-            // Live: a quiet indicator, the dot beating while the arc burns.
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                LIVE_BUTTON_WIDTH,
-                "justify-center text-accent-300",
-              )}
-              title="Following the build as it is laid"
-              aria-pressed
-            >
-              <span
-                className={cn(
-                  "size-2.5 rounded-full",
-                  build.arcOn ? "bg-current animate-pulse" : "bg-secondary/60",
-                )}
-              />
-              Live
-            </Button>
-          ) : (
-            // Rewound: the way back stands out.
-            <Button
-              variant="accent"
-              size="sm"
-              className={cn(
-                LIVE_BUTTON_WIDTH,
-                "text-white! text-4xs shadow-[0_0_14px_var(--color-accent)] flex-wrap",
-              )}
-              title="Back to the build as it is laid"
-              onClick={() => {
-                setIsPlaying(false);
-                setPinnedLayer(null);
-              }}
-            >
-              <Icon className="fas fa-forward-step text-2xs" />
-              Back to Live
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="lg:hidden"
-            title="Actions: adjust, stop, assistance"
-            aria-label="Actions"
-            aria-pressed={sheet === "actions"}
-            onClick={() => toggleSheet("actions")}
-          >
-            <Icon className="fas fa-hand text-2xs" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="lg:hidden relative"
-            title="Layers out of WPS"
-            aria-label="Layers out of WPS"
-            aria-pressed={sheet === "findings"}
-            onClick={() => toggleSheet("findings")}
-          >
-            <Icon className="fas fa-triangle-exclamation text-2xs" />
-            {findings.length > 0 && (
-              <span className="absolute -top-1 -right-1 text-5xs font-bold tabular-nums">
-                {findings.length}
-              </span>
-            )}
-          </Button>
         </Panel>
       </div>
 

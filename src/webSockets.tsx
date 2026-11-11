@@ -27,9 +27,7 @@ export function useWebSocket() {
 //Fonction principale websocket
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const [selectedEntityName] = useState<string | null>(
-    null
-  );
+  const [selectedEntityName] = useState<string | null>(null);
   const { speed } = useSpeed();
   const delayMs = Math.max(10, 1000 / speed);
   const { entity: selectedEntity } = useEntity(
@@ -82,14 +80,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-//        if(parsed.name === "part_1") {
-//          const now = performance.now();
-//          const deltaTime = now - lastPart1MessageTime;
-//          lastPart1MessageTime = now;
-//          if(deltaTime > 100) {
-//            console.warn("Warnning, delta time gap:", deltaTime);
-//          }
-//        }
+        //        if(parsed.name === "part_1") {
+        //          const now = performance.now();
+        //          const deltaTime = now - lastPart1MessageTime;
+        //          lastPart1MessageTime = now;
+        //          if(deltaTime > 100) {
+        //            console.warn("Warnning, delta time gap:", deltaTime);
+        //          }
+        //        }
         const [x, y, z] = parsed.location;
         //console.debug("WS message orientation:", parsed.name, [x, y, z]);
         rotateHierarchy(parsed.name, [x, y, z], entitiesMap);

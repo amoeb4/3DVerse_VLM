@@ -10,7 +10,7 @@ export const StartupPanel = () => {
   const [customSceneId, setCustomSceneId] = useState("");
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center">
+    <div className="h-dvh w-screen flex items-center justify-center">
       <div className="w-full max-w-md mx-2 px-4 md:px-10 py-4 md:py-6 border border-tertiary bg-ground rounded-3xl [corner-shape:squircle]">
         <Dtext />
 

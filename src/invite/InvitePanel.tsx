@@ -107,14 +107,14 @@ export const InvitePanel = () => {
       />
       <span
         className={cn(
-          "hidden lg:block pr-2 text-sm text-primary",
+          "hidden lg:block px-1 text-sm text-primary",
           isTextCopied && "invisible",
         )}
       >
         Share
       </span>
       {isTextCopied && (
-        <span className="absolute inset-0 text-white bg-accent/60 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
+        <span className="absolute inset-0 text-white bg-accent/80 rounded-full flex items-center justify-center gap-1.5 starting:scale-95 starting:opacity-0 transition-all duration-400 ease-out">
           <Icon
             className={cn(
               "fas fa-check text-sm lg:text-xs",
@@ -135,7 +135,7 @@ export const InvitePanel = () => {
   );
 
   const triggerClassName = cn(
-    "relative px-2 py-1 h-full gap-2 before:opacity-100 before:backdrop-blur-xl outline-none",
+    "relative px-2 py-1 h-full gap-2 outline-none",
     isTextCopied && "border-accent",
   );
 

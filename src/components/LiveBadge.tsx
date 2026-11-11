@@ -25,13 +25,18 @@ const LABELS: Record<LinkStatus, string> = {
  * Says whether what is on screen is the real robot, now: `● LIVE` while its data flows, with the
  * feed's rate and, when the feed is timestamped, its end-to-end latency. The dot beats with the
  * incoming messages, so it stops the moment they do — something a canned animation cannot fake.
+ *
+ * `collapsible`: the dot alone while its container (`@container`) is narrower than `xl`, the
+ * viewer's header on a phone. The label stays there for screen readers.
  */
 export function LiveBadge({
   className,
   showDetail = true,
+  collapsible = false,
 }: {
   className?: string;
   showDetail?: boolean;
+  collapsible?: boolean;
 }) {
   const link = useLiveLink(500);
   const dot = useRef<HTMLSpanElement>(null);
@@ -82,7 +87,10 @@ export function LiveBadge({
       <div
         className={cn(
           // Solid and tinted by its state, so it reads over any picture.
-          "inline-flex items-center gap-2 min-h-6 pl-2 pr-3 rounded-full border",
+          "inline-flex items-center min-h-6 rounded-full border",
+          collapsible
+            ? "px-1.5 @xl:gap-2 @xl:pl-2 @xl:pr-3"
+            : "gap-2 pl-2 pr-3",
           "bg-ground/90 backdrop-blur-xl text-3xs tabular-nums whitespace-nowrap",
           status === "live" && "border-accent-300/60 bg-accent/20",
           (status === "idle" || status === "connecting") &&
@@ -107,6 +115,7 @@ export function LiveBadge({
           role="status"
           className={cn(
             "font-bold tracking-wider",
+            collapsible && "sr-only @xl:not-sr-only",
             status === "live" && "text-accent-300",
             status === "offline" && "text-secondary",
             status === "connecting" &&
@@ -122,7 +131,7 @@ export function LiveBadge({
             size="icon-xs"
             title="Reconnect to the robot feed"
             onClick={reconnectLiveLink}
-            className="-mr-1.5"
+            className={collapsible ? "@xl:-mr-1.5" : "-mr-1.5"}
           >
             <Icon className="fas fa-rotate-right text-5xs" />
           </Button>
@@ -131,7 +140,7 @@ export function LiveBadge({
       {showDetail && detail && (
         <span
           className={cn(
-            "ml-1 text-4xs text-tertiary",
+            "hidden md:block ml-1 text-4xs text-tertiary",
             status === "live" && "w-[10ex] text-right tabular-nums",
           )}
         >

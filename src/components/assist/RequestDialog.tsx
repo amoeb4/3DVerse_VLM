@@ -140,7 +140,7 @@ export function RequestDialog({
           </Button>
           <Button
             variant="accent"
-            size="sm"
+            size="lg"
             className="text-white!"
             disabled={!store || !me || isSending}
             onClick={() => void submit()}

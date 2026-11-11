@@ -124,7 +124,6 @@ export function DiagnosticRunPanel({
       className={cn(
         // Centered, under the point the camera is on, over the toolbar at the bottom.
         "fixed z-50 left-1/2 -translate-x-1/2 bottom-[calc(var(--spacing-navbar)+3.5rem)]",
-        "max-lg:bottom-[calc(var(--spacing-navbar-toolbar)+1rem)]",
         "w-[min(30rem,calc(100%-2rem))]",
         "starting:opacity-0 starting:translate-y-4 transition-all duration-300",
       )}
