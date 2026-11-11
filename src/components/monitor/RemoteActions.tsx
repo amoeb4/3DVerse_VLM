@@ -32,6 +32,7 @@ import {
   type Corrections,
 } from "../../live/processFeed";
 import { SourceBadge } from "../common/SourceBadge";
+import { HAPTIC_STOP, triggerHapticFeedback } from "../../utils/haptics";
 
 const CORRECTION_KEYS = Object.keys(CORRECTION_LIMITS) as (keyof Corrections)[];
 
@@ -81,6 +82,7 @@ export function RemoteActions({
   const isHeld = process.cn.state === "hold";
 
   const confirmStop = () => {
+    triggerHapticFeedback(HAPTIC_STOP);
     logEvent(
       "warn",
       "action",

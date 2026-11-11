@@ -1,6 +1,7 @@
 import { MainNavbar, MainNavbarItem } from "../components/common/MainNavbar";
 import { MODE_SHORTCUTS } from "../shortcuts/shortcuts";
 import { MODES, type ViewMode } from "./modes";
+import { triggerHapticFeedback } from "../utils/haptics";
 
 type NavEntry = {
   label: string;
@@ -80,7 +81,12 @@ export function ModeSwitcher({
                 ? `${entry.label} (${MODE_SHORTCUTS[target]}): ${entry.description}`
                 : `${entry.label}: coming soon. ${entry.description}`
             }
-            onClick={() => target && onSelect(target)}
+            onClick={() => {
+              if (target) {
+                triggerHapticFeedback();
+                onSelect(target);
+              }
+            }}
           />
         );
       })}

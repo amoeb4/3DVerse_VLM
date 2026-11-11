@@ -9,6 +9,7 @@ import { colorFromClientId } from "../../utils/clientColor";
 import { EXPERT_COLOR, EXPERT_NAME } from "../../assist/participantLook";
 import type { Author } from "../../assist/assistStore";
 import { TimeAgo } from "../common/TimeAgo";
+import { triggerHapticFeedback } from "../../utils/haptics";
 
 /** An author's colour: an expert's is the accent (`participantLook`). */
 const colorOf = (author: Pick<Author, "clientId" | "role">) =>
@@ -101,6 +102,7 @@ function PinComposer() {
   const submit = () => {
     const trimmed = text.trim();
     if (!store || !me || !pinDraft || !trimmed) return;
+    triggerHapticFeedback();
     void store.addPin(pinDraft, {
       incidentId: incident?.id ?? null,
       text: trimmed,

@@ -11,6 +11,7 @@ import { DOM3DAvatar } from "@3dverse/livelink-react-ui";
 
 import { ParticipantMark } from "../assist/ParticipantMark";
 import { useParticipantLook } from "../assist/participantLook";
+import { triggerHapticFeedback } from "../utils/haptics";
 
 //------------------------------------------------------------------------------
 // Must be rendered inside a `Viewport`, since `DOM3DOverlay` projects onto it.
@@ -28,6 +29,7 @@ export function Avatars({
       }
       const { position, orientation } = entity.global_transform;
       cameraController.travelToPointOfView({ position, orientation });
+      triggerHapticFeedback();
     },
     [cameraController],
   );
@@ -116,6 +118,7 @@ export const AvatarList = ({
       }
       const { position, orientation } = entity.global_transform;
       cameraController.travelToPointOfView({ position, orientation });
+      triggerHapticFeedback();
     },
     [cameraController],
   );

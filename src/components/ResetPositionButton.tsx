@@ -1,6 +1,7 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { Kbd } from "./common/Kbd";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
+import { triggerHapticFeedback } from "../utils/haptics";
 
 const SHOW_KBD_SHORTCUTS = false;
 
@@ -34,7 +35,10 @@ export function ResetPositionButton({
       round={!isToolbar}
       title={`Reset camera position (${SHORTCUTS.reset.toUpperCase()})`}
       aria-label="Reset camera position"
-      onClick={onReset}
+      onClick={() => {
+        triggerHapticFeedback();
+        onReset();
+      }}
       disabled={disabled}
     >
       {isToolbar && (

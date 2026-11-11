@@ -72,6 +72,7 @@ import { SecondaryToolbar } from "./components/common/SecondaryToolbar";
 import { ViewMenu } from "./components/ViewMenu";
 import { MonitorChrome } from "./modes/MonitorChrome";
 import { WelcomePanel } from "./components/WelcomePanel";
+import { DisconnectedModal } from "./components/DisconnectedModal";
 import { XRSheet } from "./components/xr/XRSheet";
 import { TrainingChrome } from "./modes/TrainingChrome";
 import { PartChrome } from "./modes/PartChrome";
@@ -185,9 +186,36 @@ function Viewer({
     };
   }, []);
 
+  // Once the session is lost, the viewer's next action reconnects (`DisconnectedModal`): bumping
+  // `Livelink`'s key remounts it, the only way to run its connection again. Out of XR first: a
+  // session there only starts from a tap, not from a remount.
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
+  const retryConnection = useCallback(() => {
+    setXRMode(null);
+    setConnectionAttempt((attempt) => attempt + 1);
+  }, []);
+  // Memoized: it is a component type, a new one each render would remount the modal mid-retry.
+  const ConnectionErrorPanel = useCallback(
+    ({ error }: { error: unknown }) => (
+      <DisconnectedModal
+        error={
+          typeof error === "string"
+            ? error
+            : error instanceof Error
+              ? error.message
+              : "The session was lost."
+        }
+        onRetry={retryConnection}
+      />
+    ),
+    [retryConnection],
+  );
+
   // Unmounting `Livelink` (Back to Home, browser back) disconnects from the session.
   return (
     <Livelink
+      key={connectionAttempt}
+      ConnectionErrorPanel={ConnectionErrorPanel}
       {...(sessionId
         ? { sessionId }
         : { sceneId: scene.sceneId, isTransient: false })}
@@ -208,6 +236,12 @@ function Viewer({
                   // A copy: the rig writes `orientation` into the object it is given.
                   originTransform={xrOrigin && { ...xrOrigin }}
                   onSessionEnd={() => setXRMode(null)}
+                  // The session could not start (permission refused, mode unavailable): back to
+                  // the flat viewer, or this branch stays up with no 3D behind it.
+                  onError={(error) => {
+                    console.error("Could not start the XR session:", error);
+                    setXRMode(null);
+                  }}
                 >
                   <XRControllerActions mode={xrMode} />
                   <AppLayout
