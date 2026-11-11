@@ -46,7 +46,9 @@ import { EntityCreator, WeldBeads } from "./weldBead";
 import { EntityStatusPanel } from "./components/EntityPicking";
 import { WebXR } from "@3dverse/livelink-webxr";
 import { XRButton } from "./webXR";
-import type { Entity } from "@3dverse/livelink";
+import { XRStartMarker } from "./xr/xrStartMarker";
+import { XRControllerActions } from "./xr/XRControllerActions";
+import type { Entity, Transform } from "@3dverse/livelink";
 import { MACHINES, PUBLIC_TOKEN } from "./config";
 import { Toolbar } from "./components/Toolbar";
 import { ResetPositionButton } from "./components/ResetPositionButton";
@@ -149,6 +151,8 @@ function Viewer({
   sessionId?: string;
 }) {
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
+  // Where an XR session starts, from the scene's `xr_start` entity (`xrStartMarker.ts`).
+  const [xrOrigin, setXROrigin] = useState<Partial<Transform>>();
   const buildPlate = MACHINES.find(
     (machine) => machine.sceneId === scene.sceneId,
   )?.buildPlate;
@@ -192,11 +196,19 @@ function Viewer({
           <SpeedProvider>
             <WebSocketProvider>
               <KeyboardHandler />
+              <XRStartMarker onChange={setXROrigin} />
 
               {xrMode ? (
                 /* --- MODE CASQUE / IMMERSIF ACTIF --- */
-                <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
+                <WebXR
+                  mode={xrMode}
+                  // A copy: the rig writes `orientation` into the object it is given.
+                  originTransform={xrOrigin && { ...xrOrigin }}
+                  onSessionEnd={() => setXRMode(null)}
+                >
+                  <XRControllerActions mode={xrMode} />
                   <AppLayout
+                    isXR
                     machineName={scene.name}
                     sceneId={scene.sceneId}
                     buildPlate={buildPlate}
@@ -250,6 +262,7 @@ function AppLayout({
   sceneId,
   buildPlate,
   setXRMode,
+  isXR = false,
 }: {
   machineName: string;
   /** For the startup page's tile: the machine's last incident (`IncidentDigestRecorder`). */
@@ -257,6 +270,13 @@ function AppLayout({
   /** Where the part in construction stands in the cell (`Machine.buildPlate`). */
   buildPlate?: string;
   setXRMode: (mode: XRSessionMode) => void;
+  /**
+   * Inside `<WebXR>`: the DOM around the view only, no desktop `<Canvas>`. Livelink packs every
+   * rendering surface into one streamed frame by its page rect, and the XR surface's rect is
+   * always at (0, 0): a canvas left mounted lands on the eyes' image, as a second viewport
+   * floating in the top left of the headset.
+   */
+  isXR?: boolean;
 }) {
   // What the viewer is for (`modes.ts`). The 3D view is the same in every mode; what is around it
   // is not. Training keeps every tool the viewer has had, mocks included.
@@ -601,89 +621,93 @@ function AppLayout({
         </EntityProvider>
         <CameraEventListener />
 
-        <Canvas className="w-full h-screen">
-          <Viewport
-            cameraEntity={cameraEntity}
-            className="w-full h-full"
-            setHoveredEntity={onHover}
-            setPickedEntity={onPick}
-          >
-            {/* Under every other overlay, so they stay crisp over it. */}
-            {view.atmosphere && <Atmosphere theme={sceneTheme} />}
+        {!isXR && (
+          <Canvas className="w-full h-screen">
+            <Viewport
+              cameraEntity={cameraEntity}
+              className="w-full h-full"
+              setHoveredEntity={onHover}
+              setPickedEntity={onPick}
+            >
+              {/* Under every other overlay, so they stay crisp over it. */}
+              {view.atmosphere && <Atmosphere theme={sceneTheme} />}
 
-            <CameraController
-              ref={(controller) => setCameraController(controller ?? null)}
-            />
+              <CameraController
+                ref={(controller) => setCameraController(controller ?? null)}
+              />
 
-            <Avatars cameraController={cameraController} />
-            {/* The points of the robot the operator checks. */}
-            {isAssist && <AssistCheckpoints />}
-            {/* After the checkpoints: the notes go over them. */}
-            {isAssist && <AssistPins />}
+              <Avatars cameraController={cameraController} />
+              {/* The points of the robot the operator checks. */}
+              {isAssist && <AssistCheckpoints />}
+              {/* After the checkpoints: the notes go over them. */}
+              {isAssist && <AssistPins />}
 
-            {/* One overlay over the stream, for the HUD and the part. */}
-            <SharedOverlayProvider>
-              {/* Not in Part, where the arm fades away. Their View settings stay as they are. */}
-              {view.holo && !isPart && <HoloHud />}
+              {/* One overlay over the stream, for the HUD and the part. */}
+              <SharedOverlayProvider>
+                {/* Not in Part, where the arm fades away. Their View settings stay as they are. */}
+                {view.holo && !isPart && <HoloHud />}
 
-              {buildPlate && showPart && (
-                <PartInCell
+                {buildPlate && showPart && (
+                  <PartInCell
+                    plateEuid={buildPlate}
+                    xray={isPart}
+                    // Monitor shows where the build left its window, at a glance.
+                    metric={isPart ? partView.metric : "deviation"}
+                    theme={sceneTheme}
+                    shownLayer={
+                      isPart ? (partView.pinnedLayer ?? Infinity) : Infinity
+                    }
+                    focusLayer={isPart ? partView.focusLayer : null}
+                    onHover={partView.setHover}
+                    cameraController={cameraController}
+                    focusSignal={partView.focusSignal}
+                    // Held still while the build replays, or a past layer is shown.
+                    orbitPaused={isPart && partView.pinnedLayer !== null}
+                    closeUp={isPart && partView.closeUp}
+                    onOpen={mode === "monitor" ? openPart : undefined}
+                  />
+                )}
+              </SharedOverlayProvider>
+
+              {/* The welding arc at the torch tip, while the machine runs or "Start Weld" is on. */}
+              <WeldArc showEffect={view.weldArc} />
+
+              {view.jointAngles && !isPart && <JointAnglesOverlay />}
+
+              {/* Monitor's alternate camera: under the left column, large screens only. */}
+              {mode === "monitor" && isLargeScreen && (
+                <AltCamera
+                  cameraEntity={pipCamera}
+                  open={isAltCameraOpen}
+                  onToggle={() => setIsAltCameraOpen((open) => !open)}
+                  // The part as Part mode shows it, turning; a click opens Part.
+                  onOpen={openPart}
                   plateEuid={buildPlate}
-                  xray={isPart}
-                  // Monitor shows where the build left its window, at a glance.
-                  metric={isPart ? partView.metric : "deviation"}
+                  metric={partView.metric}
                   theme={sceneTheme}
-                  shownLayer={
-                    isPart ? (partView.pinnedLayer ?? Infinity) : Infinity
-                  }
-                  focusLayer={isPart ? partView.focusLayer : null}
-                  onHover={partView.setHover}
-                  cameraController={cameraController}
-                  focusSignal={partView.focusSignal}
-                  // Held still while the build replays, or a past layer is shown.
-                  orbitPaused={isPart && partView.pinnedLayer !== null}
-                  closeUp={isPart && partView.closeUp}
-                  onOpen={mode === "monitor" ? openPart : undefined}
+                  // The viewer's session: one of the card's own would keep this Canvas in XR.
+                  setXRMode={setXRMode}
+                  className="absolute left-4 bottom-toolbar z-40 w-64 xl:w-72"
                 />
               )}
-            </SharedOverlayProvider>
-
-            {/* The welding arc at the torch tip, while the machine runs or "Start Weld" is on. */}
-            <WeldArc showEffect={view.weldArc} />
-
-            {view.jointAngles && !isPart && <JointAnglesOverlay />}
-
-            {/* Monitor's alternate camera: under the left column, large screens only. */}
-            {mode === "monitor" && isLargeScreen && (
-              <AltCamera
-                cameraEntity={pipCamera}
-                open={isAltCameraOpen}
-                onToggle={() => setIsAltCameraOpen((open) => !open)}
-                // The part as Part mode shows it, turning; a click opens Part.
-                onOpen={openPart}
-                plateEuid={buildPlate}
-                metric={partView.metric}
-                theme={sceneTheme}
-                className="absolute left-4 bottom-toolbar z-40 w-64 xl:w-72"
-              />
-            )}
-            {isTraining && showPipCamera && (
-              <div className="absolute bottom-3 max-lg:bottom-navbar right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
-                <Viewport cameraEntity={pipCamera} className="w-full h-full">
-                  <CameraController />
-                </Viewport>
-                <Button
-                  variant="overlay"
-                  size="icon-xs"
-                  className="absolute top-1 left-1"
-                  onClick={() => setShowPipCamera(false)}
-                >
-                  <Icon className="fas fa-angles-down -rotate-45 opacity-60" />
-                </Button>
-              </div>
-            )}
-          </Viewport>
-        </Canvas>
+              {isTraining && showPipCamera && (
+                <div className="absolute bottom-3 max-lg:bottom-navbar right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+                  <Viewport cameraEntity={pipCamera} className="w-full h-full">
+                    <CameraController />
+                  </Viewport>
+                  <Button
+                    variant="overlay"
+                    size="icon-xs"
+                    className="absolute top-1 left-1"
+                    onClick={() => setShowPipCamera(false)}
+                  >
+                    <Icon className="fas fa-angles-down -rotate-45 opacity-60" />
+                  </Button>
+                </div>
+              )}
+            </Viewport>
+          </Canvas>
+        )}
 
         <footer className="absolute bottom-0 left-0 right-0 pointer-events-none z-50">
           {/* In every mode, docked in the bottom-left corner: what the view shows, then XR. */}

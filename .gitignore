@@ -58,3 +58,6 @@ dist/
 # Python virtualenv (make python)
 .venv/
 env/
+
+# Local dev https cert (npm run cert)
+ssl/

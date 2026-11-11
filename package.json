@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "cert": "node scripts/dev-cert.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc -b",

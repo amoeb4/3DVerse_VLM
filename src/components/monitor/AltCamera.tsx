@@ -11,9 +11,6 @@ import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";
 import { XRButton } from "../../webXR";
-import { WebXR } from "@3dverse/livelink-webxr";
-
-type XRMode = "immersive-ar" | "immersive-vr";
 
 const noHover = () => {};
 
@@ -25,6 +22,7 @@ export function AltCamera({
   plateEuid,
   metric,
   theme,
+  setXRMode,
   className,
 }: {
   cameraEntity: Entity | null;
@@ -34,41 +32,21 @@ export function AltCamera({
   plateEuid?: string;
   metric: PartMetric;
   theme: Theme;
+  /**
+   * Starts the viewer's XR session (`Viewer` in `App.tsx`). Not one of this card's own: a
+   * `<WebXR>` mounted here sits inside the main `<Canvas>`, which then stays mounted and is drawn
+   * over the headset's image, a floating frame in its top left. The part overlay of this card
+   * does not follow into the headset: livelink.webxr 0.8.4 cannot composite a viewport overlay
+   * into an XR frame.
+   */
+  setXRMode: (mode: XRSessionMode) => void;
   className?: string;
 }) {
   const [controller, setController] = useState<DefaultCameraController | null>(
     null,
   );
-  // Mode XR propre à cette caméra
-  const [xrMode, setXRMode] = useState<XRMode | null>(null);
-
   const { isConnecting, isDisconnected } = useContext(LivelinkContext);
   const canOpen = !isConnecting && !isDisconnected;
-
-  // Contenu du viewport, partagé entre le mode normal et le mode XR
-  const viewportContent = (
-    <>
-      {/* En XR, c'est la pose du casque qui pilote la caméra */}
-      {!xrMode && (
-        <CameraController ref={(next) => setController(next ?? null)} />
-      )}
-      {plateEuid && (
-        <SharedOverlayProvider>
-          <PartInCell
-            plateEuid={plateEuid}
-            xray
-            metric={metric}
-            theme={theme}
-            shownLayer={Infinity}
-            focusLayer={null}
-            onHover={noHover}
-            cameraController={xrMode ? null : controller}
-            focusSignal={0}
-          />
-        </SharedOverlayProvider>
-      )}
-    </>
-  );
 
   return (
     <section
@@ -88,8 +66,8 @@ export function AltCamera({
         </h2>
 
         <div className="flex items-center gap-1">
-          {/* Entrées XR : seulement quand la carte est ouverte et aucune session active */}
-          {open && !xrMode && canOpen && (
+          {/* Entrées XR : seulement quand la carte est ouverte */}
+          {open && canOpen && (
             <>
               <XRButton
                 mode="immersive-ar"
@@ -127,73 +105,49 @@ export function AltCamera({
 
       {open && (
         <div className="group relative aspect-video border-t border-tertiary">
-          {xrMode ? (
-            /* --- MODE CASQUE / IMMERSIF ACTIF --- */
-            <>
-              <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
-                <Viewport cameraEntity={cameraEntity} className="size-full">
-                  {viewportContent}
-                </Viewport>
-              </WebXR>
+          <Viewport cameraEntity={cameraEntity} className="size-full">
+            <CameraController ref={(next) => setController(next ?? null)} />
+            {plateEuid && (
+              <SharedOverlayProvider>
+                <PartInCell
+                  plateEuid={plateEuid}
+                  xray
+                  metric={metric}
+                  theme={theme}
+                  shownLayer={Infinity}
+                  focusLayer={null}
+                  onHover={noHover}
+                  cameraController={controller}
+                  focusSignal={0}
+                />
+              </SharedOverlayProvider>
+            )}
+          </Viewport>
 
-              <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-99999">
-                <Button
-                  variant="overlay-outline"
-                  className="before:opacity-100 before:backdrop-blur-xl"
-                  onClick={() => setXRMode(null)}
-                >
-                  Exit XR
-                </Button>
-
-                {xrMode !== "immersive-ar" && (
-                  <XRButton
-                    mode="immersive-ar"
-                    text="Switch to"
-                    setXRMode={setXRMode}
-                  />
-                )}
-                {xrMode !== "immersive-vr" && (
-                  <XRButton
-                    mode="immersive-vr"
-                    text="Switch to"
-                    setXRMode={setXRMode}
-                  />
-                )}
-              </div>
-            </>
-          ) : (
-            /* --- MODE NORMAL --- */
-            <>
-              <Viewport cameraEntity={cameraEntity} className="size-full">
-                {viewportContent}
-              </Viewport>
-
-              {/* Toute la vue ouvre le Part mode : elle prend le pointeur, la caméra tourne d'elle-même. */}
-              <button
-                type="button"
-                onClick={onOpen}
-                disabled={!canOpen}
-                title={canOpen ? "Open the Part mode" : undefined}
-                aria-label="Open the Part mode"
+          {/* Toute la vue ouvre le Part mode : elle prend le pointeur, la caméra tourne d'elle-même. */}
+          <button
+            type="button"
+            onClick={onOpen}
+            disabled={!canOpen}
+            title={canOpen ? "Open the Part mode" : undefined}
+            aria-label="Open the Part mode"
+            className={cn(
+              "absolute inset-0 grid place-items-center enabled:cursor-pointer",
+              "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
+            )}
+          >
+            {canOpen && (
+              <span
                 className={cn(
-                  "absolute inset-0 grid place-items-center enabled:cursor-pointer",
-                  "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
+                  "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
                 )}
               >
-                {canOpen && (
-                  <span
-                    className={cn(
-                      "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ground/80 backdrop-blur-sm text-3xs font-medium",
-                      "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200",
-                    )}
-                  >
-                    <Icon className="fas fa-cube text-4xs" />
-                    Open piece details
-                  </span>
-                )}
-              </button>
-            </>
-          )}
+                <Icon className="fas fa-cube text-4xs" />
+                Open piece details
+              </span>
+            )}
+          </button>
         </div>
       )}
     </section>

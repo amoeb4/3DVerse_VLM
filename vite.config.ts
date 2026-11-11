@@ -3,8 +3,16 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import fs from "node:fs";
 
 export default defineConfig({
+  server: {
+    // WebXR needs a secure context: over the LAN (e.g. a headset on http://192.168.x.x:5173)
+    // plain http disables the XR buttons. `npm run cert` makes ssl/, and dev then serves https.
+    https: fs.existsSync("ssl/cert.pem")
+      ? { cert: "ssl/cert.pem", key: "ssl/key.pem" }
+      : undefined,
+  },
   plugins: [
     react(),
     tailwindcss(),
