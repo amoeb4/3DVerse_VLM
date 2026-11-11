@@ -43,7 +43,17 @@ import { WeldBeads } from "./weldBead";
 import { WebXR } from "@3dverse/livelink-webxr";
 import { XRButton } from "./webXR";
 import { XRStartMarker } from "./xr/xrStartMarker";
-import { XRControllerActions } from "./xr/XRControllerActions";
+import { CameraControllerWebXR } from "./xr/CameraControllerWebXR";
+import { XRVirtualJoysticks } from "./xr/XRVirtualJoysticks";
+import { XRHud } from "./xr/XRHud";
+import { XRSupport } from "./xr/useXRSupport";
+import { getEnterXRErrorMessage } from "./xr/xrSupport";
+import { isVlaunchClipApp } from "./xr/searchParams";
+import {
+  useMiniToastStore,
+  useWebXRStore,
+  useXRSettingsStore,
+} from "./xr/stores";
 import type { Entity, Transform } from "@3dverse/livelink";
 import { MACHINES, PUBLIC_TOKEN } from "./config";
 import { Toolbar } from "./components/Toolbar";
@@ -154,7 +164,33 @@ function Viewer({
   scene: ViewerScene;
   sessionId?: string;
 }) {
-  const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
+  // The XR session, as 3dverse-mobile-viewer runs it (`xr/`): the mode is set optimistically by
+  // whoever asks for XR (`useEnterXR`), and the flat view is swapped for `<WebXR>` on the strength
+  // of it. In the store, not here: the session's own objects read it too.
+  const xrMode = useWebXRStore((state) => state.xrMode);
+  const setXRMode = useWebXRStore((state) => state.setXrMode);
+  const hasOverscan = useXRSettingsStore((state) => state.hasOverscan);
+  const hasLatencyCompensation = useXRSettingsStore(
+    (state) => state.hasLatencyCompensation,
+  );
+  // Leaving the viewer leaves XR: the store outlives it.
+  useEffect(() => () => setXRMode(null), [setXRMode]);
+  // Both callbacks below exist to put the mode back: without them a session that never started,
+  // or one the system ended, leaves the app rendering a `<WebXR>` with nothing behind it.
+  const handleXRError = useCallback(
+    (error: unknown) => {
+      console.error("Could not start the XR session:", error);
+      setXRMode(null);
+      useMiniToastStore.getState().showMiniToast(getEnterXRErrorMessage(error));
+    },
+    [setXRMode],
+  );
+  // Only ends we did not ask for are reported here — the library suppresses the ones it causes
+  // itself — so this can be wired unconditionally.
+  const handleXRSessionEnd = useCallback(() => {
+    console.debug("XR session ended externally, leaving XR mode.");
+    setXRMode(null);
+  }, [setXRMode]);
   // Where an XR session starts, from the scene's `xr_start` entity (`xrStartMarker.ts`).
   const [xrOrigin, setXROrigin] = useState<Partial<Transform>>();
   const buildPlate = MACHINES.find(
@@ -193,7 +229,7 @@ function Viewer({
   const retryConnection = useCallback(() => {
     setXRMode(null);
     setConnectionAttempt((attempt) => attempt + 1);
-  }, []);
+  }, [setXRMode]);
   // Memoized: it is a component type, a new one each render would remount the modal mid-retry.
   const ConnectionErrorPanel = useCallback(
     ({ error }: { error: unknown }) => (
@@ -228,39 +264,43 @@ function Viewer({
             <WebSocketProvider>
               <KeyboardHandler />
               <XRStartMarker onChange={setXROrigin} />
+              {/* Which immersive modes this device can enter, and the `?xr=` deep link. */}
+              <XRSupport />
 
               {xrMode ? (
                 /* --- MODE CASQUE / IMMERSIF ACTIF --- */
                 <WebXR
                   mode={xrMode}
-                  // A copy: the rig writes `orientation` into the object it is given.
+                  optionalFeatures={[
+                    "hit-test",
+                    "anchors",
+                    "plane-detection",
+                    "local",
+                    "local-floor",
+                  ]}
+                  // The whole page: what the app portals to `<body>` (sheets, menus, dialogs) is
+                  // then composited into a handheld session with the rest. A headset grants no
+                  // DOM overlay at all, hence its own menu (`XRHeadsetUI`).
+                  domOverlayRoot={document.body}
+                  forceSingleView={isVlaunchClipApp}
+                  overscan={hasOverscan}
+                  latencyCompensation={hasLatencyCompensation}
+                  // Where the scene's `xr_start` entity says (`xrStartMarker.ts`). A copy: the rig
+                  // writes `orientation` into the object it is given.
                   originTransform={xrOrigin && { ...xrOrigin }}
-                  onSessionEnd={() => setXRMode(null)}
-                  // The session could not start (permission refused, mode unavailable): back to
-                  // the flat viewer, or this branch stays up with no 3D behind it.
-                  onError={(error) => {
-                    console.error("Could not start the XR session:", error);
-                    setXRMode(null);
-                  }}
+                  onError={handleXRError}
+                  onSessionEnd={handleXRSessionEnd}
                 >
-                  <XRControllerActions mode={xrMode} />
+                  {/* Only what reads `WebXRContext`, then the app's own layout, over the
+                      joysticks so it keeps its taps. */}
+                  <CameraControllerWebXR />
+                  <XRVirtualJoysticks />
                   <AppLayout
                     isXR
                     machineName={scene.name}
                     sceneId={scene.sceneId}
                     buildPlate={buildPlate}
-                    setXRMode={setXRMode}
                   />
-                  <div className="fixed bottom-30 left-1/2 -translate-x-1/2">
-                    <Button
-                      size="lg"
-                      variant="accent"
-                      className="px-6 text-white!"
-                      onClick={() => setXRMode(null)}
-                    >
-                      Exit XR
-                    </Button>
-                  </div>
                 </WebXR>
               ) : (
                 /* --- MODE NORMAL (Navigateur Classique) --- */
@@ -268,9 +308,12 @@ function Viewer({
                   machineName={scene.name}
                   sceneId={scene.sceneId}
                   buildPlate={buildPlate}
-                  setXRMode={setXRMode}
                 />
               )}
+
+              {/* The XR session's own controls, and the line confirming what was just done:
+                  beside the swap above, so they survive it. */}
+              <XRHud />
             </WebSocketProvider>
           </SpeedProvider>
         </PartEntitiesProvider>
@@ -283,7 +326,6 @@ function AppLayout({
   machineName,
   sceneId,
   buildPlate,
-  setXRMode,
   isXR = false,
 }: {
   machineName: string;
@@ -291,7 +333,6 @@ function AppLayout({
   sceneId: string;
   /** Where the part in construction stands in the cell (`Machine.buildPlate`). */
   buildPlate?: string;
-  setXRMode: (mode: XRSessionMode) => void;
   /**
    * Inside `<WebXR>`: the DOM around the view only, no desktop `<Canvas>`. Livelink packs every
    * rendering surface into one streamed frame by its page rect, and the XR surface's rect is
@@ -624,7 +665,7 @@ function AppLayout({
                     </TabsList>
                   </Tabs>
                   {/* Below `lg`, AR is entered from the XR button (`XRSheet`). */}
-                  {isLargeScreen && (
+                  {isLargeScreen && !isXR && (
                     <>
                       <ToolbarDivider />
                       <XRButton
@@ -632,7 +673,6 @@ function AppLayout({
                         text="Open in"
                         variant="ghost"
                         icon="fa-cube"
-                        setXRMode={setXRMode}
                       />
                     </>
                   )}
@@ -707,8 +747,6 @@ function AppLayout({
                   plateEuid={buildPlate}
                   metric={partView.metric}
                   theme={sceneTheme}
-                  // The viewer's session: one of the card's own would keep this Canvas in XR.
-                  setXRMode={setXRMode}
                   className="absolute left-4 bottom-toolbar z-40 w-64 xl:w-72"
                 />
               )}
@@ -741,27 +779,30 @@ function AppLayout({
               theme={theme}
               onToggleTheme={toggleTheme}
             />
-            {/* VR and AR: large screens only. Below `lg`, the XR button on the right (`XRSheet`). */}
-            <span
-              aria-hidden
-              className="max-lg:hidden h-full mx-0.5 border-l border-secondary"
-            />
-            <XRButton
-              mode="immersive-vr"
-              text=""
-              variant="ghost"
-              setXRMode={setXRMode}
-              className="max-lg:hidden"
-            />
-            <XRButton
-              mode="immersive-ar"
-              text=""
-              variant="ghost"
-              setXRMode={setXRMode}
-              className="max-lg:hidden"
-            />
+            {/* VR and AR: large screens only. Below `lg`, the XR button on the right (`XRSheet`).
+                Neither during a session, which has its own controls (`XRHud`). */}
+            {!isXR && (
+              <>
+                <span
+                  aria-hidden
+                  className="max-lg:hidden h-full mx-0.5 border-l border-secondary"
+                />
+                <XRButton
+                  mode="immersive-vr"
+                  text=""
+                  variant="ghost"
+                  className="max-lg:hidden"
+                />
+                <XRButton
+                  mode="immersive-ar"
+                  text=""
+                  variant="ghost"
+                  className="max-lg:hidden"
+                />
+              </>
+            )}
           </SecondaryToolbar>
-          {!isLargeScreen && <XRSheet setXRMode={setXRMode} />}
+          {!isLargeScreen && !isXR && <XRSheet />}
 
           {/* At the bottom centre, over the modes: the camera, and what one does on the cell. Part
               has its own, over its timeline (`PartChrome`). */}

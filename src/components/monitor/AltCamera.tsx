@@ -22,7 +22,6 @@ export function AltCamera({
   plateEuid,
   metric,
   theme,
-  setXRMode,
   className,
 }: {
   cameraEntity: Entity | null;
@@ -32,14 +31,6 @@ export function AltCamera({
   plateEuid?: string;
   metric: PartMetric;
   theme: Theme;
-  /**
-   * Starts the viewer's XR session (`Viewer` in `App.tsx`). Not one of this card's own: a
-   * `<WebXR>` mounted here sits inside the main `<Canvas>`, which then stays mounted and is drawn
-   * over the headset's image, a floating frame in its top left. The part overlay of this card
-   * does not follow into the headset: livelink.webxr 0.8.4 cannot composite a viewport overlay
-   * into an XR frame.
-   */
-  setXRMode: (mode: XRSessionMode) => void;
   className?: string;
 }) {
   const [controller, setController] = useState<DefaultCameraController | null>(
@@ -66,19 +57,16 @@ export function AltCamera({
         </h2>
 
         <div className="flex items-center gap-1">
-          {/* Entrées XR : seulement quand la carte est ouverte */}
+          {/* Entrées XR : seulement quand la carte est ouverte. They start the viewer's XR session
+              (`Viewer` in `App.tsx`), not one of this card's own: a `<WebXR>` mounted here sits
+              inside the main `<Canvas>`, which then stays mounted and is drawn over the headset's
+              image, a floating frame in its top left. The part overlay of this card does not
+              follow into the headset: livelink.webxr 0.8.4 cannot composite a viewport overlay
+              into an XR frame. */}
           {open && canOpen && (
             <>
-              <XRButton
-                mode="immersive-ar"
-                text="Start"
-                setXRMode={setXRMode}
-              />
-              <XRButton
-                mode="immersive-vr"
-                text="Start"
-                setXRMode={setXRMode}
-              />
+              <XRButton mode="immersive-ar" text="Start" />
+              <XRButton mode="immersive-vr" text="Start" />
             </>
           )}
           <Button

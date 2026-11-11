@@ -4,7 +4,6 @@ import {
   BottomSheetContent,
   Button,
   cn,
-  Icon,
 } from "@3dverse/ui-lib";
 
 import { MACHINES } from "../config";

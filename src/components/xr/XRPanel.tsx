@@ -2,7 +2,8 @@ import { cn, EmptyState, Icon } from "@3dverse/ui-lib";
 
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { ARIcon } from "./ARIcon";
-import type { XRImmersiveMode, XRSupport } from "./useXRSupport";
+import { useWebXRStore } from "../../xr/stores";
+import type { XRImmersiveMode } from "../../xr/xrSupport";
 
 const buttons: {
   mode: XRImmersiveMode;
@@ -32,15 +33,16 @@ const buttons: {
  * an empty state saying so. Laid out for the sheet it is shown in (`XRSheet`).
  */
 export function XRPanel({
-  isPending,
-  support,
   onEnter,
 }: {
-  isPending: boolean;
-  support: XRSupport;
   onEnter: (mode: XRImmersiveMode) => void;
 }) {
-  const isXrSupported = support["immersive-ar"] || support["immersive-vr"];
+  // Detected as the viewer mounts, not here: known by the time the sheet opens.
+  const xrSupport = useWebXRStore((state) => state.xrSupport);
+  const isPending = useWebXRStore((state) => state.isXRSupportPending);
+  const isXrSupported =
+    xrSupport["immersive-ar"].isSupported ||
+    xrSupport["immersive-vr"].isSupported;
 
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const isMobileLandscape =
@@ -76,7 +78,7 @@ export function XRPanel({
       )}
     >
       {buttons
-        .filter((button) => support[button.mode])
+        .filter((button) => xrSupport[button.mode].isSupported)
         .map((button) => (
           <button
             key={button.mode}
@@ -99,7 +101,9 @@ export function XRPanel({
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium">{button.title}</span>
               <span className="text-3xs leading-tight text-tertiary">
-                {button.description}
+                {xrSupport[button.mode].needsSafari
+                  ? "Open this page in Safari to start AR."
+                  : button.description}
               </span>
             </div>
           </button>
