@@ -84,7 +84,7 @@ export function HeadsetGate({ machineName }: { machineName: string }) {
         )}
       >
         <div className="flex flex-col md:flex-row items-center md:items-start gap-y-4 w-full">
-          <ARIcon className="w-24 h-min md:w-90 md:h-40 opacity-50 fill-accent text-accent" />
+          <ARIcon className="w-24 h-min md:w-90 md:h-40 light:opacity-50 fill-accent-400 text-accent-400" />
           <div className="flex flex-col gap-1.5 grow text-pretty">
             <p className="text-sm font-bold tracking-wider uppercase text-secondary">
               {machineName}
