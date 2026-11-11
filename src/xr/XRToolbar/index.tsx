@@ -8,6 +8,7 @@ import {
 } from "../stores";
 import { formatScale } from "../utils";
 import { WebXRUtils } from "../WebXRUtils";
+import { AdvancedXRSettings } from "./AdvancedXRSettings";
 import { GhostControl, MAX_GHOST_OPACITY_PERCENT } from "./GhostControl";
 import { ScaleControl, type ScaleOption } from "./ScaleControl";
 
@@ -29,7 +30,7 @@ const SCALE_OPTIONS: ScaleOption[] = [
 
 /**
  * An XR session's own controls, on a screen that shows the DOM (a phone, a tablet): the scale of
- * the scene, and in AR its opacity over the room. From 3dverse-mobile-viewer; `className` places
+ * the scene, in AR its opacity over the room, and the advanced settings. From 3dverse-mobile-viewer; `className` places
  * it. A headset has the same in its own menu (`XRHeadsetUI`).
  */
 export const XRToolbar = ({ className }: { className?: string }) => {
@@ -48,8 +49,8 @@ export const XRToolbar = ({ className }: { className?: string }) => {
     MAX_GHOST_OPACITY_PERCENT,
   );
   // Only meaningful while the scene is composited over passthrough: the library turns fake alpha
-  // on for AR sessions by itself.
-  const [hasFakeAlpha, setHasFakeAlpha] = useState(false);
+  // on for AR sessions by itself, and Advanced can turn it off.
+  const hasFakeAlpha = useXRSettingsStore((state) => state.hasFakeAlpha);
   const [prevWebXRUtils, setPrevWebXRUtils] = useState(webXRUtils);
   if (webXRUtils !== prevWebXRUtils) {
     setPrevWebXRUtils(webXRUtils);
@@ -58,7 +59,6 @@ export const XRToolbar = ({ className }: { className?: string }) => {
       setGhostOpacityPercent(
         Math.round(webXRUtils.livelinkXR.fake_alpha_scale * 100),
       );
-      setHasFakeAlpha(webXRUtils.livelinkXR.enable_fake_alpha);
     }
   }
 
@@ -144,6 +144,7 @@ export const XRToolbar = ({ className }: { className?: string }) => {
           onChangeOpacityPercent={onChangeGhostOpacity}
         />
       )}
+      <AdvancedXRSettings />
     </div>
   );
 };

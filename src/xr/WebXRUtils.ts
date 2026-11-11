@@ -15,6 +15,7 @@ import { XRHeadsetUI } from "./XRHeadsetUI";
 import { waitForCameras } from "./utils";
 import { controllerBindings } from "./controllerBindings";
 import { isVlaunchClipApp, xrHudForced } from "./searchParams";
+import { useXRSettingsStore } from "./stores";
 
 //------------------------------------------------------------------------------
 /**
@@ -121,6 +122,28 @@ export class WebXRUtils {
     this.updateSpeedScale();
 
     this.startActionHandlers();
+
+    useXRSettingsStore
+      .getState()
+      .setHasFakeAlpha(this.livelinkXR.enable_fake_alpha);
+  }
+
+  //--------------------------------------------------------------------------
+  /**
+   * Composite the scene over the passthrough (the model fades into the room), or draw it opaque.
+   *
+   * Fake alpha lives on the XR session rather than on the camera; the store only mirrors it. The
+   * cameras' background goes with it: black is what the passthrough shows through.
+   */
+  setFakeAlpha(enabled: boolean) {
+    this.livelinkXR.enable_fake_alpha = enabled;
+    this.livelink.viewports.forEach((viewport) => {
+      const camera = viewport.camera_projection?.camera_entity;
+      if (camera?.camera) {
+        camera.camera.dataJSON.displayBackground = !enabled;
+      }
+    });
+    useXRSettingsStore.getState().setHasFakeAlpha(enabled);
   }
 
   //--------------------------------------------------------------------------

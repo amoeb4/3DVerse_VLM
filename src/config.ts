@@ -9,6 +9,15 @@ export const LIVE_FEED_URL =
   import.meta.env.VITE_LIVE_FEED_URL ?? "ws://localhost:8767";
 
 /**
+ * Variant Launch, which brings WebXR AR to iOS through an App Clip (`xr/xrSupport.ts`): its
+ * project key, and its SDK. Without a key, AR stays unavailable on iPhones and iPads.
+ */
+export const VARIANT_API_KEY: string =
+  import.meta.env.VITE_VARIANT_API_KEY || "";
+export const VARIANT_URL: string =
+  import.meta.env.VITE_VARIANT_URL || "https://launchar.app/sdk/v1";
+
+/**
  * The cell's two welding cameras, as image URLs (an MJPEG stream works), from the environment. Until
  * they are set, their tiles in Monitor say "not connected".
  */

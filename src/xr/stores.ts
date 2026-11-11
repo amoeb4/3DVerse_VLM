@@ -43,7 +43,13 @@ type XRSettingsState = {
   // Both default off, the handheld setting: on a phone they cost bandwidth for little comfort
   // gain, while in a headset the display fills the field of view and they earn it.
   hasOverscan: boolean;
+  setHasOverscan: (value: boolean) => void;
   hasLatencyCompensation: boolean;
+  setLatencyCompensation: (value: boolean) => void;
+  // Mirror of the session's `enable_fake_alpha`, which the library owns: it turns it on for AR
+  // sessions by itself, so this is only ever a copy of its value (`WebXRUtils`).
+  hasFakeAlpha: boolean;
+  setHasFakeAlpha: (value: boolean) => void;
   // Seeds the two render settings above from the device class, once, at start-up.
   applyXRDeviceDefaults: (isXRHeadset: boolean) => void;
   // Driven by the idle auto-hide (`useIdleControlsVisibility`); read by the XR controls, which
@@ -54,7 +60,12 @@ type XRSettingsState = {
 
 export const useXRSettingsStore = createStore<XRSettingsState>((set) => ({
   hasOverscan: false,
+  setHasOverscan: (hasOverscan) => set({ hasOverscan }),
   hasLatencyCompensation: false,
+  setLatencyCompensation: (hasLatencyCompensation) =>
+    set({ hasLatencyCompensation }),
+  hasFakeAlpha: false,
+  setHasFakeAlpha: (hasFakeAlpha) => set({ hasFakeAlpha }),
   applyXRDeviceDefaults: (isXRHeadset) =>
     set({ hasOverscan: isXRHeadset, hasLatencyCompensation: isXRHeadset }),
   areControlsVisible: true,
