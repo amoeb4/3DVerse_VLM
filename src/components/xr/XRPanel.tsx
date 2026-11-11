@@ -96,7 +96,9 @@ export function XRPanel({
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/5"
             >
               {button.icon && <Icon className={cn(button.icon, "text-xl")} />}
-              {button.image && <button.image className="w-48 h-48" />}
+              {button.image && (
+                <button.image className="w-48 h-48 stroke-1.5" />
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs font-medium">{button.title}</span>

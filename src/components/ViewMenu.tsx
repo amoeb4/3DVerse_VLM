@@ -112,7 +112,8 @@ export function ViewMenu({
       active={isOpen}
       title="View: what the 3D view shows"
       aria-label="View"
-      className="pl-7 md:pl-0"
+      // Note: pl-7 is used in case of strong rounded mobile corners.
+      className="pl-7 md:pl-2"
     />
   );
   const eye = (

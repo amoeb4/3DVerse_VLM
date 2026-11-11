@@ -49,10 +49,11 @@ export function DisconnectedModal({
         ) : (
           <div>
             {/* The original's `fad fa-cloud-xmark` is a Font Awesome Pro icon. */}
-            <Icon isSlash className="fas fa-cloud text-4xl text-accent drop-shadow-[0_12px_24px] drop-shadow-accent" />
-            <h1 className="mt-4 text-2xl font-semibold">
-              Disconnected
-            </h1>
+            <Icon
+              isSlash
+              className="fas fa-cloud text-4xl text-accent drop-shadow-[0_12px_24px] drop-shadow-accent"
+            />
+            <h1 className="mt-4 text-2xl font-semibold">Disconnected</h1>
             <p className="mt-1 text-xs text-secondary tracking-wide">
               Waiting for an action to reconnect.
             </p>

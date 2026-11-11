@@ -5,12 +5,27 @@
    * What the mode navbar (`MainNavbar`) takes at the bottom of the screen: its height and a gap.
    * `bottom-navbar`, `pb-navbar`… lift what stands at the bottom centre above it.
    */
-  --spacing-navbar: 4rem;
+  --spacing-navbar: 5rem;
   /*
    * What the secondary toolbar (`SecondaryToolbar`) takes at the bottom left: its height and a gap.
    * `bottom-toolbar` lifts what stands at the bottom left above it.
    */
   --spacing-toolbar: 3rem;
+
+  /*
+   * `animate-float`: slowly up and down, like something hovering in the air (the AR icon's cube).
+   * In an SVG the lengths are its own units: 6 of a 100-unit view box.
+   */
+  --animate-float: float 4s ease-in-out infinite;
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(3px);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
 }
 
 @font-face {

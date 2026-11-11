@@ -127,7 +127,6 @@ function themeOf(environment: Environment): SceneTheme | null {
     if (
       isColor(environment.ambientColorTop, color) &&
       isColor(environment.ambientColorBottom, color)
-      
     ) {
       return theme;
     }

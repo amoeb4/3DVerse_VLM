@@ -46,6 +46,8 @@ import { XRStartMarker } from "./xr/xrStartMarker";
 import { CameraControllerWebXR } from "./xr/CameraControllerWebXR";
 import { XRVirtualJoysticks } from "./xr/XRVirtualJoysticks";
 import { XRHud } from "./xr/XRHud";
+import { HeadsetGate } from "./components/HeadsetGate";
+import { isHeadset } from "./utils/isHeadset";
 import { XRSupport } from "./xr/useXRSupport";
 import { getEnterXRErrorMessage } from "./xr/xrSupport";
 import { isVlaunchClipApp } from "./xr/searchParams";
@@ -314,6 +316,8 @@ function Viewer({
               {/* The XR session's own controls, and the line confirming what was just done:
                   beside the swap above, so they survive it. */}
               <XRHud />
+              {/* In a headset's browser: the way into AR first, over the page. */}
+              {isHeadset && <HeadsetGate machineName={scene.name} />}
             </WebSocketProvider>
           </SpeedProvider>
         </PartEntitiesProvider>
@@ -354,6 +358,10 @@ function AppLayout({
     };
   }, [mode]);
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+  // Detected once for the viewer (`XRSupport`); false until it has answered.
+  const isARSupported = useWebXRStore(
+    (state) => state.xrSupport["immersive-ar"].isSupported,
+  );
 
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
@@ -638,7 +646,7 @@ function AppLayout({
               rightSlot={rightSlot}
               // Over the timeline: the camera on the part or on the bead, and the part in AR.
               toolbar={
-                <TertiaryToolbar aria-label="Camera and AR" inFlow>
+                <TertiaryToolbar aria-label="Camera and AR">
                   <Tabs
                     value={partView.closeUp ? "bead" : "part"}
                     onValueChange={(value) => {
@@ -664,8 +672,9 @@ function AppLayout({
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
-                  {/* Below `lg`, AR is entered from the XR button (`XRSheet`). */}
-                  {isLargeScreen && !isXR && (
+                  {/* Below `lg`, AR is entered from the XR button (`XRSheet`). Nothing where this
+                      device cannot enter AR, nor until that is known. */}
+                  {isLargeScreen && !isXR && isARSupported && (
                     <>
                       <ToolbarDivider />
                       <XRButton
@@ -781,7 +790,7 @@ function AppLayout({
             />
             {/* VR and AR: large screens only. Below `lg`, the XR button on the right (`XRSheet`).
                 Neither during a session, which has its own controls (`XRHud`). */}
-            {!isXR && (
+            {!isXR && !isHeadset && (
               <>
                 <span
                   aria-hidden
@@ -802,7 +811,7 @@ function AppLayout({
               </>
             )}
           </SecondaryToolbar>
-          {!isLargeScreen && !isXR && <XRSheet />}
+          {!isLargeScreen && !isXR && !isHeadset && <XRSheet />}
 
           {/* At the bottom centre, over the modes: the camera, and what one does on the cell. Part
               has its own, over its timeline (`PartChrome`). */}

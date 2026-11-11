@@ -24,3 +24,6 @@
 /* Scrollbars, and fades at the ends of what scrolls (from 3dverse-mobile-viewer). */
 @import "./scrollbar.css";
 @import "./scroll-fade.css";
+
+/* In a standalone XR headset's browser (`utils/isHeadset.ts`): `headset:flex-col`, … */
+@custom-variant headset (&:where([data-headset], [data-headset] *));

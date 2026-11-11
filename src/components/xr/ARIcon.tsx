@@ -18,7 +18,8 @@ export const ARIcon = ({ className }: { className?: string }) => (
       ry="17"
       stroke="currentColor"
       strokeWidth="1.5"
-      opacity={0.35}
+      opacity={0.1}
+      className="blur-xs"
     />
 
     {/* Ground-scan feature points */}
@@ -37,12 +38,12 @@ export const ARIcon = ({ className }: { className?: string }) => (
       <circle cx="50" cy="76" r="1.6" />
     </g>
 
-    {/* Isometric cube */}
+    {/* Isometric cube, hovering over the ground it is about to be placed on. */}
     <g
       stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinejoin="round"
       strokeOpacity={0.9}
+      className="animate-float motion-reduce:animate-none"
     >
       <path
         d="M50 26 L68 36 L50 46 L32 36 Z"

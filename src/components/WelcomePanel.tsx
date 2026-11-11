@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  BottomSheet,
-  BottomSheetContent,
-  Button,
-  cn,
-} from "@3dverse/ui-lib";
+import { BottomSheet, BottomSheetContent, Button, cn } from "@3dverse/ui-lib";
 
 import { MACHINES } from "../config";
 import { useProcessFeed } from "../live/processFeed";
