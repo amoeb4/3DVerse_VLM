@@ -36,7 +36,7 @@ export function XRHud() {
 
   // Part has its timeline at the bottom centre: over it.
   const { mode } = useViewMode();
-  const isPart = mode === "part";
+  const isPartMode = mode === "part";
 
   return (
     <>
@@ -49,7 +49,7 @@ export function XRHud() {
       <div
         className={cn(
           "fixed z-50 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none",
-          isPart
+          isPartMode
             ? "bottom-[calc(var(--spacing-navbar)+8.5rem)]"
             : "bottom-[calc(var(--spacing-navbar)+1rem)]",
         )}

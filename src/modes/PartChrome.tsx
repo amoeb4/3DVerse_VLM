@@ -67,11 +67,11 @@ export function PartChrome({
   /** Back to the robot: the Monitor mode, the camera back on the cell. */
   onBack: () => void;
   /**
-   * Large screens: under the app's actions, in the right column (`App`), where the layers out of
-   * WPS go.
+   * Large screens: under the app's actions, in the right column (`ViewerRightColumn`), where the
+   * layers out of WPS go.
    */
   rightSlot: HTMLElement | null;
-  /** The app's toolbar for Part (the camera on the part or the bead, AR), over the timeline. */
+  /** The app's toolbar for Part (`PartCameraToolbar`), over the timeline. */
   toolbar?: React.ReactNode;
 }) {
   const build = useBuildRecord(500);

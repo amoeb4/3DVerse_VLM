@@ -33,8 +33,8 @@ export function MonitorChrome({
   /** The alternate camera, under the left column (`AltCamera`): open, or folded to its title. */
   isAltCameraOpen: boolean;
   /**
-   * Large screens: under the app's actions, in the right column (`App`), where the cell panel goes.
-   * The actions themselves are the app's, kept from one mode to the next.
+   * Large screens: under the app's actions, in the right column (`ViewerRightColumn`), where the
+   * cell panel goes. The actions themselves are the app's, kept from one mode to the next.
    */
   rightSlot: HTMLElement | null;
 }) {

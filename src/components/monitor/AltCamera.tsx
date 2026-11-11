@@ -58,7 +58,7 @@ export function AltCamera({
 
         <div className="flex items-center gap-1">
           {/* Entrées XR : seulement quand la carte est ouverte. They start the viewer's XR session
-              (`Viewer` in `App.tsx`), not one of this card's own: a `<WebXR>` mounted here sits
+              (`XRSession`, in `Viewer`), not one of this card's own: a `<WebXR>` mounted here sits
               inside the main `<Canvas>`, which then stays mounted and is drawn over the headset's
               image, a floating frame in its top left. The part overlay of this card does not
               follow into the headset: livelink.webxr 0.8.4 cannot composite a viewport overlay

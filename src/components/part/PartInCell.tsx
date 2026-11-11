@@ -283,7 +283,7 @@ export function PartInCell({
     };
     const show = (hit: PartHit | null) => {
       setPeek(hit);
-      // Over the body's cursor (`App`), while over the part.
+      // Over the body's cursor (`useEntityPicking`), while over the part.
       element.style.cursor = hit ? "pointer" : "";
     };
     const peekNow = () => {

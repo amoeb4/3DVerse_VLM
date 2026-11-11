@@ -22,8 +22,9 @@ const stayHere = () => {};
  * production together. On the left, the Diagnostic (`Diagnostic`): an incident is opened, or an
  * expert asked for, from there only, once the cell has been looked at. Once an incident is open,
  * the incident (alarm, block, trace, cameras, and closing it) takes its place. On the right, the
- * app's actions (E-Stop, adjust) with who is in the session (`App`). "Run the diagnostic" goes
- * through the robot's checkpoints one at a time, in a panel at the centre (`DiagnosticRunPanel`).
+ * app's actions (E-Stop, adjust) with who is in the session (`ViewerRightColumn`). "Run the
+ * diagnostic" goes through the robot's checkpoints one at a time, in a panel at the centre
+ * (`DiagnosticRunPanel`).
  * Pinning a note, following the other's camera and the camera's reset are in the toolbar at the
  * bottom centre (`AssistActions`). All of it shared through the session (`assistStore.ts`).
  *
@@ -116,7 +117,7 @@ function MainPanel({
   );
 }
 
-/** Large screens: the left column. The right one is the app's (`App`). */
+/** Large screens: the left column. The right one is the app's (`ViewerRightColumn`). */
 function AssistColumn({
   onRequest,
   onBack,
