@@ -5,8 +5,8 @@ import { FRONIUS_TORCH_EUID, MILLING_SPINDLE_EUID } from "./torch";
 
 /**
  * The arm carries the Fronius torch: on joining the session, shows it and hides the milling spindle
- * mounted on the same flange. Once per session, so Training's tool buttons (`TorchExample`) can
- * switch them afterwards. Mount once, inside `Livelink`.
+ * mounted on the same flange. Once per session, so the View menu (`useToolHead`) and Training's
+ * tool buttons (`TorchExample`) can switch them afterwards. Mount once, inside `Livelink`.
  */
 export function useFroniusTorchByDefault() {
   const { entity: torch } = useEntity({ euid: FRONIUS_TORCH_EUID });

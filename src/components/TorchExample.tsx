@@ -3,7 +3,11 @@ import { useEntity } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { ButtonGroup } from "./common/ButtonGroup";
 import { IconSlashed } from "./common/IconSlashed";
-import { FRONIUS_TORCH_EUID, MILLING_SPINDLE_EUID } from "./weld/torch";
+import {
+  FRONIUS_TORCH_EUID,
+  HEAD_LIGHT_EUID,
+  MILLING_SPINDLE_EUID,
+} from "./weld/torch";
 
 function toggleEntity(entity?: Entity | null, entity2?: Entity | null) {
   if (entity && entity == entity2) {
@@ -16,9 +20,7 @@ function toggleEntity(entity?: Entity | null, entity2?: Entity | null) {
 }
 
 export default function TorchExample() {
-  const { entity: flame } = useEntity({
-    euid: "103acb9d-8d29-4281-ba7a-15b0114ffbcf",
-  });
+  const { entity: flame } = useEntity({ euid: HEAD_LIGHT_EUID });
   const { entity: fronius } = useEntity({ euid: FRONIUS_TORCH_EUID });
   const { entity: effecteur } = useEntity({ euid: MILLING_SPINDLE_EUID });
 

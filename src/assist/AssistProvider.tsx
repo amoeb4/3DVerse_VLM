@@ -15,6 +15,12 @@ import type { Entity, Vec3 } from "@3dverse/livelink";
 /** What a click on the 3D view hit: the entity, and the point on it in world space. */
 export type PickedPoint = { entity: Entity; ws_position: Vec3 };
 
+/**
+ * Takes a click on the 3D view before the selection does (`useEntityPicking`): what it hit, or
+ * `null` for a click that hit nothing. True once it has dealt with the click.
+ */
+export type PickInterceptor = (picked: PickedPoint | null) => boolean;
+
 import { logEvent } from "../live/eventLog";
 import { holdSimulation, simulateOnSiteStart } from "../live/processFeed";
 import { displayNameOf } from "../utils/clientName";
@@ -33,6 +39,10 @@ import { INCIDENT_KINDS } from "./procedures";
 import { useAssistRole } from "./useAssistRole";
 import { EXPERT_NAME } from "./participantLook";
 import { useFollow } from "./useFollow";
+import { useMiniToastStore } from "../xr/stores";
+
+/** Said (`MiniToast`) when the click that places a note hits nothing. */
+const NO_PIN_TARGET_MESSAGE = "Nothing there: click on a part of the cell";
 
 const EMPTY_SNAPSHOT: AssistSnapshot = {
   ready: false,
@@ -51,7 +61,8 @@ const emptySnapshot = () => EMPTY_SNAPSHOT;
  * role, is published, and it can follow someone's camera.
  *
  * `pickInterceptor` is set to a function the viewport's picking calls first: it takes the click
- * while a note is being placed, and the entity clicked stays selected while the note is written.
+ * while a note is being placed, and the entity clicked stays selected while the note is written. A
+ * click that hits no entity places nothing: a line says so, and the note is still to be placed.
  */
 export function AssistProvider({
   active,
@@ -61,7 +72,7 @@ export function AssistProvider({
 }: {
   active: boolean;
   cameraController: DefaultCameraController | null;
-  pickInterceptor: React.RefObject<((picked: PickedPoint) => boolean) | null>;
+  pickInterceptor: React.RefObject<PickInterceptor | null>;
   children: React.ReactNode;
 }) {
   const { instance } = useContext(LivelinkContext);
@@ -146,10 +157,15 @@ export function AssistProvider({
     setPinTarget(null);
   }, []);
   useEffect(() => {
-    pickInterceptor.current = ({ entity, ws_position }) => {
+    pickInterceptor.current = (picked) => {
       if (!isPlacingPin) return false;
-      setPinDraft(ws_position);
-      setPinTarget(entity);
+      // A click on the background: a note is pinned on an entity. Still placing, to try again.
+      if (!picked) {
+        useMiniToastStore.getState().showMiniToast(NO_PIN_TARGET_MESSAGE);
+        return true;
+      }
+      setPinDraft(picked.ws_position);
+      setPinTarget(picked.entity);
       setIsPlacingPin(false);
       return true;
     };

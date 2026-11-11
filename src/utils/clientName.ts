@@ -23,6 +23,14 @@ export type ClientName = {
 /** What a client without a name — a guest, say — is called. */
 export const GUEST_NAME = "Guest";
 
+/** What the platform calls whoever joins with a public token, and what the app shows instead. */
+const PUBLIC_USERNAME = "public_user";
+export const PUBLIC_USER_NAME = "User";
+
+/** A person's name as the app shows it: the platform's `public_user` is `User`. */
+export const shownName = (name: string): string =>
+  name.toLowerCase() === PUBLIC_USERNAME ? PUBLIC_USER_NAME : name;
+
 const SEPARATOR = "_";
 /** `org`, `project` and `environment`: everything after them is the username. */
 const PREFIX_LENGTH = 3;
@@ -50,10 +58,16 @@ function splitClientName(raw: string): ClientName {
   const parts = raw.split(SEPARATOR);
   const username = parts.slice(PREFIX_LENGTH).join(SEPARATOR);
   if (!username) {
-    return { raw, org: "", project: "", environment: "", username: raw };
+    return {
+      raw,
+      org: "",
+      project: "",
+      environment: "",
+      username: shownName(raw),
+    };
   }
   const [org = "", project = "", environment = ""] = parts;
-  return { raw, org, project, environment, username };
+  return { raw, org, project, environment, username: shownName(username) };
 }
 
 //------------------------------------------------------------------------------

@@ -14,25 +14,17 @@ export function ResetPositionButton({
   onReset,
   isAtDefaultPosition,
   disabled,
-  variant = "overlay",
 }: {
   onReset: () => void;
   isAtDefaultPosition: boolean;
   disabled?: boolean;
-  variant?: "overlay" | "toolbar";
 }) {
-  const isToolbar = variant === "toolbar";
   return (
     <Button
-      variant={isToolbar ? "ghost" : "overlay-outline"}
-      size={isToolbar ? "sm" : "xs"}
-      className={cn(
-        isToolbar
-          ? "gap-1.5"
-          : "px-4 py-2 gap-2 before:opacity-100 before:backdrop-blur-xl",
-        isAtDefaultPosition && "text-primary/50",
-      )}
-      round={!isToolbar}
+      variant="ghost"
+      size="xs"
+      className={cn("gap-2", isAtDefaultPosition && "text-primary/50")}
+      round
       title={`Reset camera position (${SHORTCUTS.reset.toUpperCase()})`}
       aria-label="Reset camera position"
       onClick={() => {
@@ -41,10 +33,9 @@ export function ResetPositionButton({
       }}
       disabled={disabled}
     >
-      {isToolbar && (
-        <Icon className="fas fa-arrows-to-dot text-2xs sm:hidden" />
-      )}
-      <p className={cn(isToolbar && "hidden sm:block")}>
+      <Icon className="fas fa-arrows-to-dot text-3xs sm:hidden" />
+
+      <p className="hidden sm:block">
         Reset camera{" "}
         <span className="underline underline-offset-2 decoration-current/40">
           p

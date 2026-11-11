@@ -91,7 +91,7 @@ function Person({
       </span>
       <span className="min-w-0 grow truncate">
         {look.name}
-        {isMe && <span className="text-secondary"> · you</span>}
+        {isMe && <span className="font-normal text-tertiary"> (you)</span>}
       </span>
       {role ? (
         <RoleChip role={role} />

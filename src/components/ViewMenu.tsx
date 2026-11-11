@@ -20,6 +20,7 @@ import type { ViewSetting, ViewSettings } from "../hooks/useViewSettings";
 import type { SceneTheme } from "../hooks/useSceneTheme";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { TOOL_LABELS, useToolHead } from "./weld/useToolHead";
 
 type ViewItem = {
   setting: ViewSetting;
@@ -37,7 +38,7 @@ type ViewGroup = { label: string; items: ViewItem[] };
  */
 const GROUPS: ViewGroup[] = [
   {
-    label: "Over the 3D",
+    label: "3D overlays",
     items: [
       {
         setting: "holo",
@@ -54,14 +55,14 @@ const GROUPS: ViewGroup[] = [
       { setting: "atmosphere", label: "Atmosphere", icon: "fa-smog" },
       // The blue glare and the sparks at the torch while it welds. Over the part too, in Part.
       {
-        setting: "weldArc",
-        label: "Arc light",
+        setting: "arcSparkles",
+        label: "Arc sparkles",
         icon: "fa-wand-magic-sparkles",
       },
     ],
   },
   {
-    label: "Render · your view",
+    label: "Render",
     items: [
       { setting: "outlines", label: "Edge outlines", icon: "fa-border-none" },
       { setting: "grid", label: "Floor grid", icon: "fa-table-cells" },
@@ -69,12 +70,20 @@ const GROUPS: ViewGroup[] = [
   },
 ];
 
+/**
+ * The arm's tool head (`useToolHead`): unlike the options above, entities of the shared scene,
+ * switched for everyone in the session. Only in the scenes that have them.
+ */
+const TOOL_HEAD_LABEL = "Tool head";
+const HEAD_LIGHT = { label: "Head light", icon: "fa-lightbulb" };
+const SWITCH_TOOL_ICON = "fa-right-left";
+
 /** What the eye on the button says: something is drawn over or into the picture. */
 const SHOWN_SETTINGS: ViewSetting[] = [
   "holo",
   "jointAngles",
   "atmosphere",
-  "weldArc",
+  "arcSparkles",
 ];
 
 /**
@@ -82,7 +91,8 @@ const SHOWN_SETTINGS: ViewSetting[] = [
  * while nothing is drawn over the picture, for the secondary toolbar beside VR and AR. The menu
  * stays open while toggling, so several can be set in one go. `cellHidden`: the mode shows
  * something else than the cell (Part), so the options about the cell have no effect there and are
- * disabled. Last, after a divider, the theme (light or dark, `T`).
+ * disabled. Then the arm's tool head, where the scene has one: its light, and one tool for the
+ * other. Last, after a divider, the theme (light or dark, `T`).
  *
  * It opens below its button, as `MenuContent` places it, and flips above it in the bottom corner.
  * Below `lg`, the same options come up in a sheet from the bottom of the screen (`BottomSheet`).
@@ -104,6 +114,11 @@ export function ViewMenu({
   const [isOpen, setIsOpen] = useState(false);
   const anyShown = SHOWN_SETTINGS.some((setting) => view[setting]);
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+  const toolHead = useToolHead();
+  const hasToolHead = toolHead.hasHeadLight || toolHead.tool !== null;
+  const switchToolLabel = toolHead.otherTool
+    ? `Switch to ${TOOL_LABELS[toolHead.otherTool]}`
+    : null;
 
   const trigger = (
     <Button
@@ -157,6 +172,30 @@ export function ViewMenu({
                 ))}
               </section>
             ))}
+            {hasToolHead && (
+              <section className="mb-2">
+                <h3 className="px-3 py-1.5 text-3xs text-tertiary">
+                  {TOOL_HEAD_LABEL}
+                </h3>
+                {toolHead.hasHeadLight && (
+                  <ViewSheetRow
+                    icon={HEAD_LIGHT.icon}
+                    label={HEAD_LIGHT.label}
+                    checked={toolHead.isHeadLightOn}
+                    disabledReason={cellHidden ? cellHiddenReason : undefined}
+                    onClick={toolHead.toggleHeadLight}
+                  />
+                )}
+                {switchToolLabel && (
+                  <ViewSheetRow
+                    icon={SWITCH_TOOL_ICON}
+                    label={switchToolLabel}
+                    disabledReason={cellHidden ? cellHiddenReason : undefined}
+                    onClick={toolHead.switchTool}
+                  />
+                )}
+              </section>
+            )}
             <div className="pt-2 border-t border-tertiary/40">
               <ViewSheetRow
                 icon={theme === "dark" ? "fa-sun" : "fa-moon"}
@@ -197,6 +236,35 @@ export function ViewMenu({
             </MenuGroup>
           </Fragment>
         ))}
+        {hasToolHead && (
+          <>
+            <MenuSeparator className="bg-tertiary/20" />
+            <MenuGroup>
+              <MenuGroupLabel>{TOOL_HEAD_LABEL}</MenuGroupLabel>
+              {toolHead.hasHeadLight && (
+                <ViewMenuItem
+                  {...HEAD_LIGHT}
+                  checked={toolHead.isHeadLightOn}
+                  onToggle={toolHead.toggleHeadLight}
+                  disabledReason={cellHidden ? cellHiddenReason : undefined}
+                />
+              )}
+              {switchToolLabel && (
+                <MenuItem
+                  closeOnClick={false}
+                  disabled={cellHidden}
+                  title={cellHidden ? cellHiddenReason : undefined}
+                  onClick={toolHead.switchTool}
+                >
+                  <Icon
+                    className={cn("text-secondary fas", SWITCH_TOOL_ICON)}
+                  />
+                  {switchToolLabel}
+                </MenuItem>
+              )}
+            </MenuGroup>
+          </>
+        )}
         <MenuSeparator className="bg-tertiary/20" />
         <MenuItem
           closeOnClick={false}
@@ -226,7 +294,7 @@ function ViewMenuItem({
   checked,
   onToggle,
   disabledReason,
-}: ViewItem & {
+}: Pick<ViewItem, "label" | "icon"> & {
   checked: boolean;
   onToggle: () => void;
   /** Why it is unavailable, when it is. */
@@ -260,7 +328,7 @@ function ViewMenuItem({
 
 /**
  * One of the sheet's options, a row the height of a finger. `checked`: a setting, ticked while on;
- * left out for an action (the theme).
+ * left out for an action (the tool, the theme).
  */
 function ViewSheetRow({
   icon,

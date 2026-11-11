@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
 
-import type { PickedPoint } from "../assist/AssistProvider";
+import type { PickedPoint, PickInterceptor } from "../assist/AssistProvider";
 import { useWasDragged } from "../hooks/useWasDragged";
 
 /**
@@ -11,8 +11,8 @@ import { useWasDragged } from "../hooks/useWasDragged";
  *
  * `enabled` is Training's: out of it nothing is selected, and nothing stays selected.
  *
- * `pickInterceptor` is for whoever takes the click before the selection does: Assistance, while a
- * note is being placed on the cell (`AssistProvider`).
+ * `pickInterceptor` is for whoever takes the click before the selection does, a click that hit
+ * nothing included: Assistance, while a note is being placed on the cell (`AssistProvider`).
  */
 export function useEntityPicking({ enabled }: { enabled: boolean }) {
   const { instance } = useContext(LivelinkContext);
@@ -28,9 +28,7 @@ export function useEntityPicking({ enabled }: { enabled: boolean }) {
   // Read through a ref, so the viewport's picking is not torn down and set up again at each mode
   // switch.
   const isEnabledRef = useRef(enabled);
-  const pickInterceptor = useRef<((picked: PickedPoint) => boolean) | null>(
-    null,
-  );
+  const pickInterceptor = useRef<PickInterceptor | null>(null);
   // Turning the camera ends with a click too: that one picks nothing.
   const wasDragged = useWasDragged();
 
@@ -39,7 +37,8 @@ export function useEntityPicking({ enabled }: { enabled: boolean }) {
       if (wasDragged.current) {
         return;
       }
-      if (picked && pickInterceptor.current?.(picked)) {
+      // A click that hit nothing too: the interceptor may have something to say about it.
+      if (pickInterceptor.current?.(picked)) {
         return;
       }
       if (isEnabledRef.current) {

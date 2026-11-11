@@ -34,7 +34,9 @@ export function XRHud() {
   const isMediumScreen = useMediaQuery("(min-width: 768px)");
   useIdleControlsVisibility(!xrMode || isMediumScreen);
 
-  // Part has its timeline at the bottom centre: over it.
+  // Part has its timeline at the bottom centre: over it. Elsewhere, out of XR, over the camera's
+  // toolbar (`TertiaryToolbar`): the confirming line would be written across its entries. During a
+  // session, where it has always been, under the session's own controls.
   const { mode } = useViewMode();
   const isPartMode = mode === "part";
 
@@ -51,7 +53,9 @@ export function XRHud() {
           "fixed z-50 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none",
           isPartMode
             ? "bottom-[calc(var(--spacing-navbar)+8.5rem)]"
-            : "bottom-[calc(var(--spacing-navbar)+1rem)]",
+            : xrMode
+              ? "bottom-[calc(var(--spacing-navbar)+1rem)]"
+              : "bottom-[calc(var(--spacing-navbar)+3.5rem)]",
         )}
       >
         {webXRUtils && (

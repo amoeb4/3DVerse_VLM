@@ -25,7 +25,7 @@ export function ViewerRightColumn({
   return (
     <div
       className={cn(
-        "fixed right-4 top-28 z-40 w-80 xl:w-96 flex flex-col gap-3",
+        "fixed right-4 top-28 z-40 w-80 xl:w-96 flex flex-col gap-3 pointer-events-none",
         // Part: above its timeline, which runs under this column on most screens.
         isPartMode
           ? "bottom-[calc(var(--spacing-navbar)+5.5rem)]"
@@ -45,7 +45,10 @@ export function ViewerRightColumn({
         {/* The Diagnostic: who is in the session, with the expert to ask for. */}
         {isAssistMode && <PeopleSection />}
       </RemoteActions>
-      <div ref={slotRef} className="min-h-0 grow flex flex-col gap-3" />
+      <div
+        ref={slotRef}
+        className="empty:hidden min-h-0 grow flex flex-col gap-3"
+      />
     </div>
   );
 }

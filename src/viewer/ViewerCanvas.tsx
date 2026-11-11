@@ -5,7 +5,7 @@ import {
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
-import { Button, Icon } from "@3dverse/ui-lib";
+import { Button, Icon, cn } from "@3dverse/ui-lib";
 
 import type { PickedPoint } from "../assist/AssistProvider";
 import { AssistCheckpoints } from "../components/assist/AssistCheckpoints";
@@ -82,7 +82,7 @@ export function ViewerCanvas({
   const isAssistMode = mode === "assistance";
   const isTrainingMode = mode === "training";
   // The part in construction: shown in the cell in Monitor, Part and Assistance.
-  const isPartShown = isMonitorMode || isPartMode || isAssistMode;
+  const isPartShown = !isTrainingMode;
 
   return (
     <Canvas className="w-full h-dvh">
@@ -133,7 +133,7 @@ export function ViewerCanvas({
         </SharedOverlayProvider>
 
         {/* The welding arc at the torch tip, while the machine runs or "Start Weld" is on. */}
-        <WeldArc showEffect={view.weldArc} />
+        <WeldArc showEffect={view.arcSparkles} />
 
         {view.jointAngles && !isPartMode && <JointAnglesOverlay />}
 
@@ -171,7 +171,12 @@ function PipCamera({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute bottom-3 max-lg:bottom-navbar right-3 z-50 w-1/4 aspect-video border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+    <div
+      className={cn(
+        "absolute bottom-0 md:bottom-3 md:max-lg:bottom-navbar right-0 md:right-3 z-50 w-full md:w-1/4 aspect-video",
+        "border-t md:border border-tertiary shadow-[0_10px_30px_rgba(0,0,0,0.1)]",
+      )}
+    >
       <Viewport cameraEntity={cameraEntity} className="w-full h-full">
         <CameraController />
       </Viewport>

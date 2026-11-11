@@ -2,7 +2,10 @@ import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import { AssistActions } from "../components/assist/AssistActions";
 import { SecondaryToolbar } from "../components/common/SecondaryToolbar";
-import { TertiaryToolbar } from "../components/common/TertiaryToolbar";
+import {
+  TertiaryToolbar,
+  ToolbarDivider,
+} from "../components/common/TertiaryToolbar";
 import { ResetPositionButton } from "../components/ResetPositionButton";
 import { ViewMenu } from "../components/ViewMenu";
 import { XRSheet } from "../components/xr/XRSheet";
@@ -97,23 +100,30 @@ export function ViewerFooter({
       {!isPartMode && (
         <TertiaryToolbar aria-label="Camera and notes">
           {/* Assistance: pin a note, follow the other side's camera. */}
-          {isAssistMode && <AssistActions />}
+          {isAssistMode && (
+            <>
+              <AssistActions />
+              <ToolbarDivider />
+            </>
+          )}
           {/* Training: a second 3D viewpoint, not one of the cell's cameras. */}
           {isTrainingMode && (
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-pressed={isPipCameraOpen}
-              className={cn(isPipCameraOpen && "text-accent-300")}
-              title="A second 3D viewpoint"
-              onClick={onTogglePipCamera}
-            >
-              <Icon className="fas fa-video text-2xs" />
-              <span className="hidden sm:inline">Alt. camera</span>
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="xs"
+                aria-pressed={isPipCameraOpen}
+                className={cn("gap-2", isPipCameraOpen && "text-accent-300")}
+                title="A second 3D viewpoint"
+                onClick={onTogglePipCamera}
+              >
+                <Icon className="fas fa-video text-3xs" />
+                <span className="hidden sm:inline">Alt. camera</span>
+              </Button>
+              <ToolbarDivider />
+            </>
           )}
           <ResetPositionButton
-            variant="toolbar"
             onReset={onResetCamera}
             isAtDefaultPosition={isAtDefaultPosition}
             disabled={!isCameraReady}

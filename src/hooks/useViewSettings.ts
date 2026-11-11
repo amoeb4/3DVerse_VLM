@@ -13,8 +13,11 @@ export type ViewSettings = {
   atmosphere: boolean;
   outlines: boolean;
   grid: boolean;
-  /** Not `arcLight`, which was the scene's light: a choice stored under that name means nothing here. */
-  weldArc: boolean;
+  /**
+   * The View menu's "Arc sparkles". It was `weldArc` (`LEGACY_KEYS`). Not `arcLight`, which was the
+   * scene's light: a choice stored under that name means nothing here.
+   */
+  arcSparkles: boolean;
 };
 
 export type ViewSetting = keyof ViewSettings;
@@ -25,10 +28,15 @@ export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
   atmosphere: false,
   outlines: true,
   grid: false,
-  weldArc: true,
+  arcSparkles: true,
 };
 
 const STORAGE_KEY = "vlm.view";
+
+/** Former names of a setting, so a choice stored before it was renamed is kept. */
+const LEGACY_KEYS: Partial<Record<ViewSetting, string>> = {
+  arcSparkles: "weldArc",
+};
 
 export function useViewSettings(): {
   view: ViewSettings;
@@ -54,8 +62,9 @@ function readSettings(): ViewSettings {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
     const settings = { ...DEFAULT_VIEW_SETTINGS };
     for (const key of Object.keys(settings) as ViewSetting[]) {
-      if (typeof stored?.[key] === "boolean") {
-        settings[key] = stored[key];
+      const value = stored?.[key] ?? stored?.[LEGACY_KEYS[key] ?? ""];
+      if (typeof value === "boolean") {
+        settings[key] = value;
       }
     }
     return settings;

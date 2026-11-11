@@ -1,5 +1,6 @@
 import type { Entity, Scene, Vec3 } from "@3dverse/livelink";
 
+import { shownName } from "../utils/clientName";
 import {
   isAssistRole,
   isIncidentKind,
@@ -180,7 +181,12 @@ function asAuthor(value: unknown): Author | null {
   if (!value || typeof value !== "object") return null;
   const { clientId, name, role } = value as Record<string, unknown>;
   if (!isString(clientId) || !isString(name)) return null;
-  return { clientId, name, role: isAssistRole(role) ? role : null };
+  // A record may hold a name as it was written before `public_user` showed as `User`.
+  return {
+    clientId,
+    name: shownName(name),
+    role: isAssistRole(role) ? role : null,
+  };
 }
 
 function asClosure(value: unknown): Closure | null {
@@ -222,7 +228,7 @@ function parse(entity: Entity): { kind: Kind; record: Record_ } | null {
         record: {
           entityId,
           clientId,
-          name,
+          name: shownName(name),
           role,
           pointing: isString(pointing) ? pointing : null,
         },

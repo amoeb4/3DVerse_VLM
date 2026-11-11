@@ -11,6 +11,7 @@ import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";
 import { XRButton } from "../../webXR";
+import { useWebXRStore } from "../../xr/stores";
 
 const noHover = () => {};
 
@@ -38,6 +39,13 @@ export function AltCamera({
   );
   const { isConnecting, isDisconnected } = useContext(LivelinkContext);
   const canOpen = !isConnecting && !isDisconnected;
+  // Detected once for the viewer (`XRSupport`); false until it has answered.
+  const isARSupported = useWebXRStore(
+    (state) => state.xrSupport["immersive-ar"].isSupported,
+  );
+  const isVRSupported = useWebXRStore(
+    (state) => state.xrSupport["immersive-vr"].isSupported,
+  );
 
   return (
     <section
@@ -57,7 +65,8 @@ export function AltCamera({
         </h2>
 
         <div className="flex items-center gap-1">
-          {/* Entrées XR : seulement quand la carte est ouverte. They start the viewer's XR session
+          {/* Entrées XR : seulement quand la carte est ouverte, and only the modes this device
+              can enter: nothing where it cannot, nor until that is known. They start the viewer's XR session
               (`XRSession`, in `Viewer`), not one of this card's own: a `<WebXR>` mounted here sits
               inside the main `<Canvas>`, which then stays mounted and is drawn over the headset's
               image, a floating frame in its top left. The part overlay of this card does not
@@ -65,8 +74,8 @@ export function AltCamera({
               into an XR frame. */}
           {open && canOpen && (
             <>
-              <XRButton mode="immersive-ar" text="Start" />
-              <XRButton mode="immersive-vr" text="Start" />
+              {isARSupported && <XRButton mode="immersive-ar" text="Start" />}
+              {isVRSupported && <XRButton mode="immersive-vr" text="Start" />}
             </>
           )}
           <Button

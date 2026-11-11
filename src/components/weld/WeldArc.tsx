@@ -30,7 +30,7 @@ const ARC_LIGHT_UPDATE_MS = 90;
  * Start Weld: blue glare, spatter, the pool's afterglow and a subtle fume — see `WeldArcEffect` —
  * plus the arc's real light on the scene.
  *
- * `showEffect` (the View menu's "Arc light") shows or hides the glare, sparks and fume, for this
+ * `showEffect` (the View menu's "Arc sparkles") shows or hides the glare, sparks and fume, for this
  * viewer only. The simulation carries on hidden, so the scene's light keeps flickering with it and
  * the effect comes back mid-flight. The light on the scene is an entity of the shared scene, there
  * for everyone while welding: created by the one viewer that writes the weld (`useWritesWeld`), so
@@ -140,7 +140,7 @@ export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
 
     instance.scene
       .newEntity({
-        name: "Weld arc light",
+        name: "Weld arc sparks",
         parent: torch,
         components: {
           local_transform: { position: [0, 0.005, 0] },
