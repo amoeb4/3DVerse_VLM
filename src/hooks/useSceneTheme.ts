@@ -113,7 +113,7 @@ function themeBackground(theme: SceneTheme): Background {
   return {
     ambientColorTop: [...color],
     ambientColorBottom: [...color],
-    clearColor: [...color],
+    clearColor: [0, 0, 0],
   };
 }
 
@@ -126,8 +126,8 @@ function themeOf(environment: Environment): SceneTheme | null {
     const color = THEME_COLORS[theme];
     if (
       isColor(environment.ambientColorTop, color) &&
-      isColor(environment.ambientColorBottom, color) &&
-      isColor(environment.clearColor, color)
+      isColor(environment.ambientColorBottom, color)
+      
     ) {
       return theme;
     }

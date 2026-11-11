@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Button, Icon } from "@3dverse/ui-lib";
+import { Button } from "@3dverse/ui-lib";
 
 import { useMiniToastStore, useWebXRStore } from "./stores";
 import { useARPlacement } from "./useARPlacement";
@@ -38,12 +38,10 @@ export const AnchorControls = () => {
           : "Point at a surface to place the model"
       }
       variant="ghost"
-      size="icon-xl"
       round
       className="border border-secondary bg-ground/65 backdrop-blur-lg"
     >
-      {/* The original's `fal fa-anchor` is a Font Awesome Pro weight. */}
-      <Icon className="text-lg fas fa-anchor" />
+      Place model
     </Button>
   );
 };

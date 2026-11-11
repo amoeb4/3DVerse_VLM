@@ -112,7 +112,7 @@ export function ViewMenu({
       active={isOpen}
       title="View: what the 3D view shows"
       aria-label="View"
-      className="pl-5 md:pl-0"
+      className="pl-7 md:pl-0"
     />
   );
   const eye = (

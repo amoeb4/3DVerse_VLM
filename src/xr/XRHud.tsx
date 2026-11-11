@@ -42,7 +42,7 @@ export function XRHud() {
     <>
       <XRToolbar
         // Under the header and the job strip, between the columns.
-        className="fixed z-50 left-1/2 -translate-x-1/2 top-40 lg:top-28"
+        className="fixed z-50 left-1/2 -translate-x-1/2 top-32 lg:top-28"
       />
       <ARStartingOverlay />
 
@@ -51,13 +51,13 @@ export function XRHud() {
           "fixed z-50 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none",
           isPart
             ? "bottom-[calc(var(--spacing-navbar)+8.5rem)]"
-            : "bottom-[calc(var(--spacing-navbar)+2.75rem)]",
+            : "bottom-[calc(var(--spacing-navbar)+1rem)]",
         )}
       >
         {webXRUtils && (
           <div
             className={cn(
-              "flex flex-col items-center gap-3 pointer-events-auto transition-opacity ease-in-out",
+              "flex items-center gap-3 pointer-events-auto transition-opacity ease-in-out",
               areControlsVisible ? "duration-150" : "duration-1000",
             )}
             style={{
@@ -72,7 +72,6 @@ export function XRHud() {
                 showMiniToast("Exited XR mode");
               }}
               variant="default"
-              size="sm"
               round
             >
               <Icon className="fas fa-xmark" />

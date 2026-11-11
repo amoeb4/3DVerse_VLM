@@ -41,7 +41,7 @@ export function DisconnectedModal({
 
   return (
     <Dialog open>
-      <DialogContent className="text-center">
+      <DialogContent className="text-center text-balance border-none">
         {isReconnecting ? (
           <p role="status" className="shimmer text-xs tracking-wide">
             Reconnecting...
@@ -49,8 +49,8 @@ export function DisconnectedModal({
         ) : (
           <div>
             {/* The original's `fad fa-cloud-xmark` is a Font Awesome Pro icon. */}
-            <Icon className="fas fa-plug-circle-xmark text-4xl text-accent drop-shadow-[0_10px_10px] drop-shadow-accent" />
-            <h1 className="mt-4 text-xl font-medium text-balance">
+            <Icon isSlash className="fas fa-cloud text-4xl text-accent drop-shadow-[0_12px_24px] drop-shadow-accent" />
+            <h1 className="mt-4 text-2xl font-semibold">
               Disconnected
             </h1>
             <p className="mt-1 text-xs text-secondary tracking-wide">
