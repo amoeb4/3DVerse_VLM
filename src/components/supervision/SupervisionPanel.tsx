@@ -410,7 +410,10 @@ function EventSection() {
                     {event.source}
                   </span>
                   {event.simulated && (
-                    <SourceBadge source="sim" className="mr-1.5 align-[1px]" />
+                    <SourceBadge
+                      source="sim"
+                      className="mr-1.5 align-[1px] text-[9px]"
+                    />
                   )}
                 </div>
                 <span className="text-balance">{event.text}</span>

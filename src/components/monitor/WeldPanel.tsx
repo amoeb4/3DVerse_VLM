@@ -5,17 +5,21 @@ import { SourceBadge } from "../common/SourceBadge";
 import { Sparkline } from "../common/Sparkline";
 import { RECENT_WELDS, useWeldStats } from "../../live/weldLog";
 import { formatClock } from "../../live/format";
+import { useProcessFeed } from "../../live/processFeed";
+import { SignalRow } from "./SignalRow";
 
 /** The temperature scale the weld points are coloured on (`weldBead.tsx`). */
 const WELD_SCALE = { min: 0, max: 100 };
 
 /**
  * Monitor's welding: whether the arc burns, the weld points laid in this session (`weldLog`) and the
- * temperature of the last ones. The bead is laid while the machine runs (`AutoWeld`), on simulated
- * data for now.
+ * temperature of the last ones; then the stick-out (CTWD), the distance from the torch's tip to
+ * the bead under it. The bead is laid while the machine runs (`AutoWeld`), on simulated data for
+ * now.
  */
 export function WeldPanel({ className }: { className?: string }) {
   const welds = useWeldStats();
+  const process = useProcessFeed(250);
   const fmt = (value: number | null) =>
     value === null ? "—" : `${Math.round(value)} °C`;
 
@@ -60,6 +64,13 @@ export function WeldPanel({ className }: { className?: string }) {
             Since {formatClock(welds.startedAt)} · last {RECENT_WELDS} points
           </p>
         )}
+      </div>
+      <div className="px-4 py-2 border-t border-tertiary">
+        <SignalRow
+          id="ctwd"
+          value={process.values.ctwd}
+          history={process.history.ctwd}
+        />
       </div>
     </Panel>
   );

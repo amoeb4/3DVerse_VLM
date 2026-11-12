@@ -21,29 +21,30 @@ export function CollapsibleSection({
   const contentId = useId();
 
   return (
-    <section className="px-4 py-1">
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={contentId}
-          onClick={() => setIsOpen((open) => !open)}
-          className="-translate-x-1 flex items-center gap-1.5 -ml-1 pl-1 pr-2 py-1 text-left rounded-md cursor-pointer hover:bg-primary/10 outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
+    <section className="">
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => setIsOpen((open) => !open)}
+        className="group flex justify-between items-center gap-1.5 w-full pl-4 pr-2 py-1 text-left cursor-pointer hover:bg-primary/5 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <div className="-translate-x-1  flex items-center justify-between gap-2">
           <Icon
             className={cn(
-              "fas fa-angle-right text-5xs text-secondary transition-transform duration-200",
+              "fas fa-angle-right text-[9px] text-secondary group-hover:text-primary transition-transform duration-200",
               isOpen && "rotate-90",
             )}
           />
           <h2 className="text-3xs font-bold tracking-wider uppercase">
             {title}
           </h2>
-        </button>
+        </div>
         {aside}
-      </div>
+      </button>
+
       {isOpen && (
-        <div id={contentId} className="mt-1.5 mb-1">
+        <div id={contentId} className="px-4 py-1">
           {children}
         </div>
       )}

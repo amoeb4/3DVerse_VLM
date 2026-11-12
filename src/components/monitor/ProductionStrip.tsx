@@ -106,7 +106,7 @@ export function ProductionStrip({
         </Item>
         <Item label="Wire">{job.wireKg.toFixed(2)} kg</Item>
         <Item label="Gas">{Math.round(job.gasL)} L</Item>
-        <Item label="Arc energy" className={wideOnly}>
+        <Item label="Arc energy 4NC" className={wideOnly}>
           {job.energyKWh.toFixed(2)} kWh
         </Item>
       </div>

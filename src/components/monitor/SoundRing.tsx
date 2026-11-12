@@ -48,7 +48,7 @@ function wavePath(level: number, phase: number) {
 
 /**
  * The current sound level as a round meter: a wave line across a circle, like the sparkline's but
- * bigger, the value under it, coloured by its status. `level` is in `unit` on the `min`–`max`
+ * bigger, the value and its unit under it, coloured by its status. `level` is in `unit` on the `min`–`max`
  * scale; `null` (the arc is off) leaves a flat line. Animated outside React, frame by frame; still,
  * but still showing the level, with reduced motion.
  */
@@ -161,7 +161,16 @@ export function SoundRing({
         />
       </svg>
       <span className="absolute inset-x-0 bottom-1 text-center text-4xs font-bold leading-none tabular-nums text-primary">
-        {level === null ? "—" : Math.round(level)}
+        {level === null ? (
+          "—"
+        ) : (
+          <>
+            {Math.round(level)}
+            <span className="ml-px text-5xs font-normal text-secondary">
+              {unit}
+            </span>
+          </>
+        )}
       </span>
     </div>
   );

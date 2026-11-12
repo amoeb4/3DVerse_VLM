@@ -5,8 +5,9 @@ import type { DataSource } from "./dataSource";
 
 /**
  * The welding process as the Monitor and Part modes show it: the arc's electrical signals, wire and
- * gas, the arc's sound, the bead's temperature, the CN's state, the job's progress, and the record of
- * every layer laid (`useBuildRecord`), which the Part mode colours the part with.
+ * gas, the torch's travel (TCP speed, the wire-to-travel speed ratio, the arc's energy per length,
+ * its stick-out), the arc's sound, the bead's temperature, the CN's state, the job's progress, and
+ * the record of every layer laid (`useBuildRecord`), which the Part mode colours the part with.
  *
  * Nothing from the machine reaches the app for these yet (see the plan's real-vs-mock table), so
  * this store runs a SIMULATION while `source` is `sim`, and says so: every widget built on it
@@ -29,15 +30,20 @@ export type SignalId =
   | "current"
   | "voltage"
   | "wireSpeed"
+  | "tcpSpeed"
+  | "speedRatio"
   | "gasFlow"
+  | "arcEnergy"
   | "arcSound"
-  | "arcStability"
-  | "temperature";
+  | "temperature"
+  | "ctwd";
 
 export type SignalSpec = {
   label: string;
+  /** Empty for a ratio. */
   unit: string;
   decimals: number;
+  tooltip?: string;
   /** The welding procedure's window (WPS): inside it, the process is in spec. */
   band: readonly [number, number];
   /** The range the signal is charted on. */
@@ -68,6 +74,23 @@ export const SIGNALS: Record<SignalId, SignalSpec> = {
     band: [7.2, 8.8],
     scale: [6, 10],
   },
+  // The torch tip's speed along the bead: the programmed feed, times the CN's feed override.
+  tcpSpeed: {
+    label: "TCP speed",
+    tooltip: "Transmission Control Protocol",
+    unit: "mm/s",
+    decimals: 1,
+    band: [8.5, 11.5],
+    scale: [4, 14],
+  },
+  // Wire speed over travel speed, both in the same unit: how much wire is laid per length of bead.
+  speedRatio: {
+    label: "Speed ratio",
+    unit: "",
+    decimals: 1,
+    band: [12, 14.7],
+    scale: [8, 18],
+  },
   gasFlow: {
     label: "Gas flow",
     unit: "L/min",
@@ -75,6 +98,15 @@ export const SIGNALS: Record<SignalId, SignalSpec> = {
     band: [12, 18],
     scale: [6, 22],
   },
+  // The arc's power over the travel speed: the energy put into each centimetre of bead.
+  arcEnergy: {
+    label: "Arc energy 4NC",
+    unit: "kJ/cm",
+    decimals: 2,
+    band: [3.3, 4.5],
+    scale: [2, 6],
+  },
+  // The microphone's level, in decibels.
   arcSound: {
     label: "Arc sound",
     unit: "dB",
@@ -82,20 +114,22 @@ export const SIGNALS: Record<SignalId, SignalSpec> = {
     band: [78, 90],
     scale: [65, 105],
   },
-  arcStability: {
-    label: "Arc stability",
-    unit: "%",
-    decimals: 0,
-    band: [85, 100],
-    scale: [50, 100],
-  },
   // Behind the torch, as a pyrometer or a thermal camera would read it.
   temperature: {
     label: "Bead temp.",
     unit: "°C",
     decimals: 0,
-    band: [1700, 2400],
-    scale: [1500, 3000],
+    band: [1500, 3000],
+    scale: [1000, 3500],
+  },
+  // Contact tip to work distance, the stick-out: from the torch's tip to the bead under it.
+  ctwd: {
+    label: "CTWD",
+    tooltip: "Contact-Tip-to-Work Distance",
+    unit: "mm",
+    decimals: 1,
+    band: [8, 24],
+    scale: [4, 30],
   },
 };
 
@@ -122,6 +156,14 @@ export function formatSignal(id: SignalId, value: number | null) {
     ? "—"
     : value.toFixed(SIGNALS[id].decimals);
 }
+
+/** Wire speed (m/min) over travel speed (mm/s), as a plain ratio. */
+const speedRatioOf = (wireSpeed: number, tcpSpeed: number) =>
+  (wireSpeed * 1000) / 60 / tcpSpeed;
+
+/** The arc's energy per length, kJ/cm: its power (V × A) over the travel speed (mm/s). */
+const arcEnergyOf = (voltage: number, current: number, tcpSpeed: number) =>
+  (voltage * current) / tcpSpeed / 100;
 
 /**
  * The process settings a remote expert may change, and their bounds: Fronius-style arc-length and
@@ -213,9 +255,12 @@ const NOMINAL_VOLTAGE = 21.5;
 const AMPS_PER_WIRE_SPEED = 22.5;
 const NOMINAL_GAS = 15;
 const NOMINAL_SOUND = 84;
-const NOMINAL_STABILITY = 96;
 const NOMINAL_POWER = NOMINAL_VOLTAGE * 180;
-const NOMINAL_TEMPERATURE = 430;
+const NOMINAL_TEMPERATURE = 2050;
+/** The programmed travel speed, mm/s: what the torch moves at with the feed override at 100 %. */
+const NOMINAL_TCP_SPEED = 10;
+/** mm. */
+const NOMINAL_CTWD = 15;
 /** The layer the build has reached when the viewer opens. */
 const START_LAYER = 42;
 /** A status must hold this long before it is logged, so a value grazing a limit does not flap. */
@@ -227,7 +272,7 @@ type Drift = {
   wireSpeed: number;
   gas: number;
   sound: number;
-  /** 0–25: how much the arc's stability suffers. */
+  /** 0–25: how unsteady the arc is. It shows in its sound and in the noise of its signals. */
   instability: number;
   temperature: number;
 };
@@ -273,7 +318,7 @@ const EPISODES: Episode[] = [
   },
   {
     name: "heat build-up",
-    peak: { temperature: 150 },
+    peak: { temperature: 450 },
     rampS: 25,
     holdS: 40,
     backS: 20,
@@ -321,10 +366,13 @@ let values: Record<SignalId, number | null> = {
   current: 180,
   voltage: NOMINAL_VOLTAGE,
   wireSpeed: 8,
+  tcpSpeed: NOMINAL_TCP_SPEED,
+  speedRatio: speedRatioOf(8, NOMINAL_TCP_SPEED),
   gasFlow: NOMINAL_GAS,
+  arcEnergy: arcEnergyOf(NOMINAL_VOLTAGE, 180, NOMINAL_TCP_SPEED),
   arcSound: NOMINAL_SOUND,
-  arcStability: NOMINAL_STABILITY,
   temperature: NOMINAL_TEMPERATURE,
+  ctwd: NOMINAL_CTWD,
 };
 /** What the noise wanders around, kept while the arc is off so it comes back where it was. */
 const smoothed: Record<SignalId, number> = { ...values } as Record<
@@ -440,8 +488,8 @@ function logStatusChanges(
       continue;
     }
     const { label, unit, band } = SIGNALS[id];
-    const reading = `${formatSignal(id, next[id])} ${unit}`;
-    const range = `WPS ${band[0]}–${band[1]} ${unit}`;
+    const reading = `${formatSignal(id, next[id])} ${unit}`.trim();
+    const range = `WPS ${band[0]}–${band[1]} ${unit}`.trim();
     if (status === "ok") {
       logEvent("ok", "process", `${label} back in range (${reading})`, {
         simulated,
@@ -527,42 +575,40 @@ function step(dt: number, silent = false) {
     0.15 * shaky,
     dt,
   );
+  // The torch follows the feed override: slower, it lays more wire and more energy per length.
+  const tcpSpeed = wander("tcpSpeed", NOMINAL_TCP_SPEED * speedOf(), 0.12, dt);
+  const speedRatio = speedRatioOf(wireSpeed, tcpSpeed);
+  const arcEnergy = arcEnergyOf(voltage, current, tcpSpeed);
   const gasFlow = wander("gasFlow", NOMINAL_GAS + drift.gas, 0.25, dt);
   // Crackling: short bursts of sound while the arc is unstable.
   const crackle =
     instability > 4 && Math.random() < 0.2 ? 5 + Math.random() * 8 : 0;
   const arcSound =
     wander("arcSound", NOMINAL_SOUND + drift.sound, 1.2 * shaky, dt) + crackle;
-  const arcStability = clamp(
-    wander(
-      "arcStability",
-      NOMINAL_STABILITY - instability + 0.2 * corrections.dynamics,
-      0.8,
-      dt,
-    ),
-    0,
-    100,
-  );
   // The arc's power heats the bead, and so does the heat the part has stored, higher up the build.
   const temperature = wander(
     "temperature",
     NOMINAL_TEMPERATURE +
-      (voltage * current - NOMINAL_POWER) * 0.05 +
-      80 * (layer / layers) +
+      (voltage * current - NOMINAL_POWER) * 0.25 +
+      200 * (layer / layers) +
       drift.temperature,
-    3,
+    12,
     dt,
   );
+  const ctwd = wander("ctwd", NOMINAL_CTWD, 0.2, dt);
 
   values = arcOn
     ? {
         current,
         voltage,
         wireSpeed,
+        tcpSpeed,
+        speedRatio,
         gasFlow,
+        arcEnergy,
         arcSound,
-        arcStability,
         temperature,
+        ctwd,
       }
     : NO_VALUES;
 
@@ -740,6 +786,20 @@ export function ingestProcessSample(sample: Partial<Record<SignalId, number>>) {
     history = emptyHistory();
   }
   values = { ...values, ...sample };
+  // The two computed from the others, when the machine does not send them itself.
+  const { voltage, current, wireSpeed, tcpSpeed } = values;
+  if (tcpSpeed !== null && tcpSpeed > 0) {
+    if (sample.speedRatio === undefined && wireSpeed !== null) {
+      values.speedRatio = speedRatioOf(wireSpeed, tcpSpeed);
+    }
+    if (
+      sample.arcEnergy === undefined &&
+      voltage !== null &&
+      current !== null
+    ) {
+      values.arcEnergy = arcEnergyOf(voltage, current, tcpSpeed);
+    }
+  }
   arcOn = SIGNAL_IDS.some((id) => values[id] !== null);
   pushHistory(values);
   logStatusChanges(values, false);

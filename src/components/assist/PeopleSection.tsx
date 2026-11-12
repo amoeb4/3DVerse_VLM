@@ -83,7 +83,7 @@ function Person({
   return (
     <li className="flex items-center gap-2 text-2xs min-h-6">
       <span
-        className="size-4 shrink-0 grid place-items-center rounded-full text-[55%] uppercase text-white"
+        className="size-4 shrink-0 grid place-items-center rounded-full text-[50%] uppercase text-white -translate-y-px"
         style={{ background: look.color }}
         aria-hidden
       >
@@ -91,7 +91,9 @@ function Person({
       </span>
       <span className="min-w-0 grow truncate">
         {look.name}
-        {isMe && <span className="font-normal text-tertiary"> (you)</span>}
+        {isMe && (
+          <span className="font-normal text-4xs text-tertiary"> (you)</span>
+        )}
       </span>
       {role ? (
         <RoleChip role={role} />

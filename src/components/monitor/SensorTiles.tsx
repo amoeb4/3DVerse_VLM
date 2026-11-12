@@ -66,8 +66,8 @@ function CameraTile({ label, url }: { label: string; url?: string }) {
 }
 
 /**
- * The microphone: the arc's sound over the last minute, against its window, and its level now, as a
- * ring that ripples with it.
+ * The microphone: the arc's sound over the last minute, in decibels, against its window, and its
+ * level now, as a ring that ripples with it.
  */
 function MicMeter() {
   const process = useProcessFeed(200);
@@ -82,6 +82,9 @@ function MicMeter() {
           <Icon className="fas fa-microphone" />
           Mic
         </span>
+        <span className="text-5xs text-tertiary whitespace-nowrap">
+          {unit} · WPS {band[0]}–{band[1]}
+        </span>
       </div>
       <Sparkline
         values={process.history.arcSound}
@@ -89,7 +92,7 @@ function MicMeter() {
         min={scale[0]}
         max={scale[1]}
         band={band}
-        label="Arc sound over the last minute"
+        label={`Arc sound over the last minute, in ${unit}`}
         className={cn("h-10 min-w-0 grow", SIGNAL_LINE_COLOR[status])}
       />
       <SoundRing

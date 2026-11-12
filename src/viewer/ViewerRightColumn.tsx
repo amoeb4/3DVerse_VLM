@@ -37,10 +37,7 @@ export function ViewerRightColumn({
         onOpenAssistance={onOpenAssistance}
         inAssistance={isAssistMode}
         // Alone in the Diagnostic; over the mode's own panel elsewhere.
-        className={cn(
-          "overflow-y-auto",
-          isAssistMode ? "min-h-0" : "shrink-0 max-h-[55%]",
-        )}
+        className={cn(isAssistMode ? "min-h-0" : "shrink-0 max-h-[55%]")}
       >
         {/* The Diagnostic: who is in the session, with the expert to ask for. */}
         {isAssistMode && <PeopleSection />}
