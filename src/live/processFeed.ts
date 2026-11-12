@@ -94,8 +94,8 @@ export const SIGNALS: Record<SignalId, SignalSpec> = {
     label: "Bead temp.",
     unit: "°C",
     decimals: 0,
-    band: [380, 540],
-    scale: [320, 620],
+    band: [1700, 2400],
+    scale: [1500, 3000],
   },
 };
 
