@@ -10,15 +10,16 @@ import { cameraRenderSettings } from "./renderSettings";
  * some are in the View menu.
  */
 export function useViewerCameras({
+  atmosphere,
   outlines,
   grid,
-}: Pick<ViewSettings, "outlines" | "grid">) {
+}: Pick<ViewSettings, "atmosphere" | "outlines" | "grid">) {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCameraEntity } = useCameraEntity();
 
   const renderSettings = useMemo(
-    () => cameraRenderSettings({ outlines, grid }),
-    [outlines, grid],
+    () => cameraRenderSettings({ atmosphere, outlines, grid }),
+    [atmosphere, outlines, grid],
   );
 
   useEffect(() => {

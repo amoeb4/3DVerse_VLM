@@ -10,7 +10,7 @@ import { Button, Icon, cn } from "@3dverse/ui-lib";
 import type { PickedPoint } from "../assist/AssistProvider";
 import { AssistCheckpoints } from "../components/assist/AssistCheckpoints";
 import { AssistPins } from "../components/assist/AssistPins";
-import { Atmosphere } from "../components/Atmosphere";
+import { Haze } from "../components/Haze";
 import { HoloHud } from "../components/holo/HoloHud";
 import { SharedOverlayProvider } from "../components/holo/SharedOverlayProvider";
 import { JointAnglesOverlay } from "../components/joints/JointAnglesOverlay";
@@ -92,8 +92,7 @@ export function ViewerCanvas({
         setHoveredEntity={onHover}
         setPickedEntity={onPick}
       >
-        {/* Under every other overlay, so they stay crisp over it. */}
-        {view.atmosphere && <Atmosphere theme={theme} />}
+        <Haze theme={theme} />
 
         <CameraController
           ref={(controller) => onCameraControllerChange(controller ?? null)}

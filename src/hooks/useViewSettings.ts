@@ -2,14 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * What the 3D view shows, toggled from the toolbar's View menu and remembered on this device:
- * - drawn over the stream, in this browser only: the hologram HUD, the joint angles, the
- *   atmosphere, and the welding arc's glare and sparks at the torch (`WeldArc`);
- * - rendered by 3dverse for this viewer's camera only: the outlines and the floor grid
- *   (`cameraRenderSettings`).
+ * - drawn over the stream, in this browser only: the hologram HUD, the joint angles, and the
+ *   welding arc's glare and sparks at the torch (`WeldArc`);
+ * - rendered by 3dverse for this viewer's camera only: the atmosphere, the outlines and the floor
+ *   grid (`cameraRenderSettings`).
  */
 export type ViewSettings = {
   holo: boolean;
   jointAngles: boolean;
+  /**
+   * The render graph's atmosphere. Under this name it was the haze drawn over the stream, which is
+   * now always there (`Haze`): a choice stored then carries over to this one.
+   */
   atmosphere: boolean;
   outlines: boolean;
   grid: boolean;

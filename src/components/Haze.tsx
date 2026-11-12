@@ -17,11 +17,13 @@ const VIGNETTE_LIGHT =
   "radial-gradient(ellipse at center, transparent 60%, rgb(15 40 80 / 0.14) 100%)";
 
 /**
- * The mood of a hologram render, laid over the whole 3D view: haze, floor glow and vignette. CSS
- * only, so it costs nothing, and in this browser only. Must be rendered inside the `Viewport`,
- * before its other overlays so they stay crisp over it.
+ * The mood of a hologram render, laid over the whole 3D view, always: haze (the blue light), floor
+ * glow and vignette. CSS only, so it costs nothing, and in this browser only. Must be rendered
+ * inside the `Viewport`, before its other overlays so they stay crisp over it.
+ *
+ * Not the View menu's "Atmosphere", which is the render graph's (`cameraRenderSettings`).
  */
-export function Atmosphere({ theme }: { theme: SceneTheme }) {
+export function Haze({ theme }: { theme: SceneTheme }) {
   const isDark = theme === "dark";
   return (
     <div

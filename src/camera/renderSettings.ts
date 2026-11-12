@@ -11,14 +11,16 @@ import type { ViewSettings } from "../hooks/useViewSettings";
  * 398ee642-030a-45e7-95df-7147f6c43392), and the editor shows them on a camera.
  */
 export function cameraRenderSettings({
+  atmosphere,
   outlines,
   grid,
-}: Pick<ViewSettings, "outlines" | "grid">) {
+}: Pick<ViewSettings, "atmosphere" | "outlines" | "grid">) {
   return {
     ambientBRDF: true,
     ambientSpecular: true,
     filterSpecular: true,
     sharpen: true,
+    atmosphere,
     edgeOutlines: outlines,
     edgeOnSelf: outlines,
     grid,

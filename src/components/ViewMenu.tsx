@@ -52,7 +52,6 @@ const GROUPS: ViewGroup[] = [
         icon: "fa-compass-drafting",
         ofTheCell: true,
       },
-      { setting: "atmosphere", label: "Atmosphere", icon: "fa-smog" },
       // The blue glare and the sparks at the torch while it welds. Over the part too, in Part.
       {
         setting: "arcSparkles",
@@ -64,6 +63,7 @@ const GROUPS: ViewGroup[] = [
   {
     label: "Render",
     items: [
+      { setting: "atmosphere", label: "Atmosphere", icon: "fa-smog" },
       { setting: "outlines", label: "Edge outlines", icon: "fa-border-none" },
       { setting: "grid", label: "Floor grid", icon: "fa-table-cells" },
     ],
@@ -79,12 +79,7 @@ const HEAD_LIGHT = { label: "Head light", icon: "fa-lightbulb" };
 const SWITCH_TOOL_ICON = "fa-right-left";
 
 /** What the eye on the button says: something is drawn over or into the picture. */
-const SHOWN_SETTINGS: ViewSetting[] = [
-  "holo",
-  "jointAngles",
-  "atmosphere",
-  "arcSparkles",
-];
+const SHOWN_SETTINGS: ViewSetting[] = ["holo", "jointAngles", "arcSparkles"];
 
 /**
  * What the cell's 3D view shows, in every mode (`useViewSettings`): an icon button, the eye shut
