@@ -14,6 +14,7 @@ import { XRHeadsetUI } from "./XRHeadsetUI";
 import { waitForCameras } from "./utils";
 import { isVlaunchClipApp, xrHudForced } from "./searchParams";
 import { useXRSettingsStore } from "./stores";
+import { themeCameraSettings, useThemeStore } from "../hooks/useTheme";
 
 //------------------------------------------------------------------------------
 /**
@@ -328,6 +329,12 @@ export class WebXRUtils {
         camera.camera!.dataJSON.displayBackground = false;
         camera.camera!.dataJSON.grid = false;
         camera.camera!.dataJSON.bloom = false;
+      } else {
+        // VR: the background of this viewer's theme, as out of XR (`useViewerCameras`).
+        Object.assign(
+          camera.camera!.dataJSON,
+          themeCameraSettings(useThemeStore.getState().theme),
+        );
       }
       console.debug("set viewport camera settings", camera.camera);
     });

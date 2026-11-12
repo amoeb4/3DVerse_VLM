@@ -9,7 +9,7 @@ import {
 import { ResetPositionButton } from "../components/ResetPositionButton";
 import { ViewMenu } from "../components/ViewMenu";
 import { XRSheet } from "../components/xr/XRSheet";
-import type { SceneTheme } from "../hooks/useSceneTheme";
+import type { Theme } from "../hooks/useTheme";
 import type { ViewSetting, ViewSettings } from "../hooks/useViewSettings";
 import { ModeSwitcher } from "../modes/ModeSwitcher";
 import type { ViewMode } from "../modes/modes";
@@ -46,8 +46,8 @@ export function ViewerFooter({
   /** What the View menu toggles (`useViewSettings`). */
   view: ViewSettings;
   onToggleView: (setting: ViewSetting) => void;
-  /** The scene's theme; `null` until it is known. */
-  theme: SceneTheme | null;
+  /** This viewer's theme (`useTheme`). */
+  theme: Theme;
   onToggleTheme: () => void;
   /** Training's second 3D viewpoint (`ViewerCanvas`). */
   isPipCameraOpen: boolean;

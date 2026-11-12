@@ -17,7 +17,7 @@ import {
 } from "@3dverse/ui-lib";
 
 import type { ViewSetting, ViewSettings } from "../hooks/useViewSettings";
-import type { SceneTheme } from "../hooks/useSceneTheme";
+import type { Theme } from "../hooks/useTheme";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { TOOL_LABELS, useToolHead } from "./weld/useToolHead";
@@ -102,8 +102,8 @@ export function ViewMenu({
   view: ViewSettings;
   onToggle: (setting: ViewSetting) => void;
   cellHidden?: boolean;
-  /** The scene's theme; `null` until it is known. */
-  theme: SceneTheme | null;
+  /** This viewer's theme (`useTheme`): the interface's and the 3D view's. */
+  theme: Theme;
   onToggleTheme: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -195,9 +195,6 @@ export function ViewMenu({
               <ViewSheetRow
                 icon={theme === "dark" ? "fa-sun" : "fa-moon"}
                 label={theme === "dark" ? "Light theme" : "Dark theme"}
-                disabledReason={
-                  theme ? undefined : "The theme is not known yet"
-                }
                 onClick={onToggleTheme}
               />
             </div>
@@ -263,7 +260,6 @@ export function ViewMenu({
         <MenuSeparator className="bg-tertiary/20" />
         <MenuItem
           closeOnClick={false}
-          disabled={!theme}
           title={`Theme (${SHORTCUTS.theme.toUpperCase()})`}
           onClick={onToggleTheme}
         >

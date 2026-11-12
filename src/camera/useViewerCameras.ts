@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useCameraEntity } from "@3dverse/livelink-react";
 
+import { themeCameraSettings, useThemeStore } from "../hooks/useTheme";
 import type { ViewSettings } from "../hooks/useViewSettings";
 import { cameraRenderSettings } from "./renderSettings";
 
@@ -22,16 +23,20 @@ export function useViewerCameras({
     [atmosphere, outlines, grid],
   );
 
+  // The background of this viewer's theme: theirs alone, as the cameras are.
+  const theme = useThemeStore((state) => state.theme);
+
   useEffect(() => {
     for (const camera of [cameraEntity, pipCameraEntity]) {
       if (camera?.camera) {
         camera.camera.dataJSON = {
           ...camera.camera.dataJSON,
           ...renderSettings,
+          ...themeCameraSettings(theme),
         };
       }
     }
-  }, [cameraEntity, pipCameraEntity, renderSettings]);
+  }, [cameraEntity, pipCameraEntity, renderSettings, theme]);
 
   return { cameraEntity, pipCameraEntity };
 }

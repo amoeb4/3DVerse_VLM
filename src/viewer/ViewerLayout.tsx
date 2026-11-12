@@ -14,7 +14,7 @@ import { AutoWeld } from "../components/weld/AutoWeld";
 import { useFroniusTorchByDefault } from "../components/weld/useFroniusTorchByDefault";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useResetCamera } from "../hooks/useResetCamera";
-import { useSceneTheme, useSceneThemeWatcher } from "../hooks/useSceneTheme";
+import { useTheme, useThemeOnPage } from "../hooks/useTheme";
 import { useViewSettings } from "../hooks/useViewSettings";
 import { AssistChrome } from "../modes/AssistChrome";
 import { MonitorChrome } from "../modes/MonitorChrome";
@@ -102,8 +102,8 @@ export function ViewerLayout({
   const diagnosticPointOfInterest = usePointOfInterest(
     DIAGNOSTIC_POINT_OF_INTEREST,
   );
-  const { theme, toggleTheme } = useSceneTheme();
-  const sceneTheme = theme ?? "light";
+  // This viewer's own, the interface's and the 3D view's at once.
+  const { theme, toggleTheme } = useTheme();
   // Selecting entities (a click, the pointer over them) is Training's.
   const { pickedEntity, hoveredEntity, onPick, onHover, pickInterceptor } =
     useEntityPicking({ enabled: isTrainingMode });
@@ -130,7 +130,7 @@ export function ViewerLayout({
 
   // --- Effects --------------------------------------------------------------------------------
   useModeAttribute(mode);
-  useSceneThemeWatcher();
+  useThemeOnPage();
   // The cell welds: the Fronius torch on the arm, not the milling spindle.
   useFroniusTorchByDefault();
   const { goToModeView } = useModeCamera({
@@ -206,7 +206,7 @@ export function ViewerLayout({
           )}
           {isPartMode && (
             <PartChrome
-              theme={sceneTheme}
+              theme={theme}
               state={partView}
               plateMissing={!buildPlate}
               onOpenAssistance={openAssistance}
@@ -229,7 +229,7 @@ export function ViewerLayout({
             mode={mode}
             isLargeScreen={isLargeScreen}
             view={view}
-            theme={sceneTheme}
+            theme={theme}
             cameraEntity={cameraEntity}
             pipCameraEntity={pipCameraEntity}
             cameraController={cameraController}

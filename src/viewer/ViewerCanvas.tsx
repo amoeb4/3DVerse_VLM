@@ -17,7 +17,7 @@ import { JointAnglesOverlay } from "../components/joints/JointAnglesOverlay";
 import { AltCamera } from "../components/monitor/AltCamera";
 import { PartInCell } from "../components/part/PartInCell";
 import { WeldArc } from "../components/weld/WeldArc";
-import type { SceneTheme } from "../hooks/useSceneTheme";
+import type { Theme } from "../hooks/useTheme";
 import type { ViewSettings } from "../hooks/useViewSettings";
 import { Avatars } from "../invite/Avatars";
 import type { ViewMode } from "../modes/modes";
@@ -53,7 +53,7 @@ export function ViewerCanvas({
   isLargeScreen: boolean;
   /** What the View menu toggles (`useViewSettings`). */
   view: ViewSettings;
-  theme: SceneTheme;
+  theme: Theme;
   cameraEntity: Entity | null;
   /** The camera of the picture-in-picture views: Monitor's alternate camera, Training's second viewpoint. */
   pipCameraEntity: Entity | null;

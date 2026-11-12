@@ -1,4 +1,4 @@
-import type { SceneTheme } from "../hooks/useSceneTheme";
+import type { Theme } from "../hooks/useTheme";
 
 /**
  * In the dark theme: a cold blue haze bleeding in from the top-left corner, as if from a light just
@@ -23,7 +23,7 @@ const VIGNETTE_LIGHT =
  *
  * Not the View menu's "Atmosphere", which is the render graph's (`cameraRenderSettings`).
  */
-export function Haze({ theme }: { theme: SceneTheme }) {
+export function Haze({ theme }: { theme: Theme }) {
   const isDark = theme === "dark";
   return (
     <div
