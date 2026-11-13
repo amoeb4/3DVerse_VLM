@@ -223,12 +223,16 @@ export function DiagnosticRunPanel({
           <>
             <div>
               <h2 className="text-sm font-bold">Diagnostic done</h2>
-              <p className="text-2xs text-secondary">
+              <div className="space-y-1 mt-2 text-2xs text-secondary">
+              <p>
                 {okCount} of {CHECKPOINTS.length} points OK
+                </p>
+                <p>
                 {skipped.length > 0 &&
-                  ` · skipped: ${skipped.map(({ label }) => label).join(", ")}`}
+                  `Skipped: ${skipped.map(({ label }) => label).join(", ")}`}
                 .
               </p>
+            </div>
             </div>
             <footer className="flex items-center justify-end gap-2">
               <Button variant="outline" size="sm" onClick={askExpert}>

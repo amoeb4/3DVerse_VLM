@@ -91,7 +91,7 @@ function refreshStatus() {
   const previous = lastStatus;
   lastStatus = status;
   if (status === "idle" && previous === "live") {
-    logEvent("warn", "link", "No data from the robot for 2 s");
+    logEvent("warn", "link", "No data from the robot for 2s");
   } else if (status === "live" && previous === "idle") {
     logEvent("ok", "link", "Robot data flowing");
   }

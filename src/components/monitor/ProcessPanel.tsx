@@ -1,13 +1,13 @@
 import { cn } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
 
+import { Panel } from "../common/Panel";
 import { SourceBadge } from "../common/SourceBadge";
+import { PanelTitle, SectionHeader } from "../common/Section";
 import {
   useProcessFeed,
   type CnState,
   type SignalId,
 } from "../../live/processFeed";
-import { PanelTitle, SectionHeader } from "../common/Section";
 import { HISTORY_SECONDS, SignalRow } from "./SignalRow";
 
 const STATE: Record<CnState, { label: string; className: string }> = {
@@ -59,11 +59,11 @@ export function ProcessPanel({ className }: { className?: string }) {
           </span>
         </PanelTitle>
       </SectionHeader>
-      <div className="min-h-0 overflow-y-auto scroll-fade-y divide-y divide-tertiary">
+      <div className="min-h-0 pb-2 overflow-y-auto scroll-fade-y">
         {PANEL_SIGNALS.map((id) => (
           <SignalRow
             key={id}
-            className="px-4 py-1.5"
+            className="px-4 py-2"
             id={id}
             value={process.values[id]}
             history={process.history[id]}

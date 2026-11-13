@@ -1,6 +1,7 @@
 import { cn } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
 
+import { Panel } from "../common/Panel";
+import { Stat } from "../common/Stat";
 import { PanelTitle, SectionBody, SectionHeader } from "../common/Section";
 import { SourceBadge } from "../common/SourceBadge";
 import { Sparkline } from "../common/Sparkline";
@@ -76,14 +77,5 @@ export function WeldPanel({ className }: { className?: string }) {
         />
       </div>
     </Panel>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-3xs text-secondary">{label}</span>
-      <span className="text-xs font-bold tabular-nums">{value}</span>
-    </div>
   );
 }

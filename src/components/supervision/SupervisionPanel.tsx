@@ -227,7 +227,7 @@ function LinkDetails() {
         label="Data latency"
         value={
           link.latencyMs !== null
-            ? `${Math.round(link.latencyMs)} ms`
+            ? `${Math.round(link.latencyMs)}ms`
             : "not timestamped"
         }
       />
@@ -235,7 +235,7 @@ function LinkDetails() {
         label="3D stream latency"
         value={
           typeof streamLatency === "number" && streamLatency > 0
-            ? `${Math.round(streamLatency)} ms`
+            ? `${Math.round(streamLatency)}ms`
             : "—"
         }
       />

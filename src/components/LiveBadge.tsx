@@ -72,7 +72,7 @@ export function LiveBadge({
   if (status === "live") {
     detail = `${Math.round(link.rate)} msg/s`;
     if (link.latencyMs !== null) {
-      detail += ` · ${Math.round(link.latencyMs)} ms`;
+      detail += ` · ${Math.round(link.latencyMs)}ms`;
     }
   } else if (status === "connecting") {
     detail =
@@ -80,9 +80,9 @@ export function LiveBadge({
         ? `Waiting for the robot model… · attempt ${link.attempt}`
         : "Waiting for the robot model…";
   } else if (link.retryAt !== null) {
-    detail = `Retry in ${Math.max(0, Math.ceil((link.retryAt - Date.now()) / 1000))} s`;
+    detail = `Retry in ${Math.max(0, Math.ceil((link.retryAt - Date.now()) / 1000))}s`;
   } else if (link.lastMessageAt !== null) {
-    detail = `last ${formatRelative(link.lastMessageAt)}`;
+    detail = `Last ${formatRelative(link.lastMessageAt)}`;
   } else if (status === "idle") {
     detail = "Waiting for the robot…";
   }
@@ -143,7 +143,7 @@ export function LiveBadge({
             title="Reconnect to the robot feed"
             onClick={reconnectLiveLink}
             className={cn(
-              collapsible ? "@xl:-mr-1.5" : "-mr-1.5",
+              collapsible ? "@xl:-mr-2" : "-mr-1.5",
               isSmall && "size-4 -mr-1",
             )}
           >
@@ -160,7 +160,7 @@ export function LiveBadge({
         <span
           className={cn(
             "hidden md:block ml-1 text-4xs text-tertiary",
-            status === "live" && "w-[10ex] text-right tabular-nums",
+          (status === "live" || link.retryAt) && "w-[10ex] text-right tabular-nums",
           )}
         >
           {detail}
