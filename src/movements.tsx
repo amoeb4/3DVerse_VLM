@@ -3,7 +3,7 @@ import * as THREE from "three";
 export async function setOrientation(
   instance: any,
   entityId: string,
-  axis: "x" | "y" | "z",
+  axis: "x" | "y" | "z" | "a" | "b",
   deltaDeg: number,
 ) {
   const [fullEntity] = await instance.scene.findEntities({
@@ -14,42 +14,42 @@ export async function setOrientation(
 
   if (
     entityId == "91153236-a05e-4127-a1c0-49b5761c41e3" &&
-    (axis == "x" || axis == "y")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "ec221ded-08df-4bae-8982-bb47c82a0917" &&
-    (axis == "z" || axis == "y")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "32cda313-895a-42e1-a5f6-dd50e398c332" &&
-    (axis == "x" || axis == "y")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "96b43de7-3c72-4ae5-8d1f-b2137c50bc61" &&
-    (axis == "z" || axis == "x")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "ed84c3ff-3c7f-445a-a1ff-d531c8f47133" &&
-    (axis == "x" || axis == "y")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "1274b32e-4d37-41cb-ad2b-0ed4886bf918" &&
-    (axis == "z" || axis == "y")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "df0b0b6f-789d-46a4-be69-4def0f8e1494" &&
-    (axis == "z" || axis == "x")
+    (axis == "a" || axis == "b")
   )
     return;
   if (
     entityId == "2276b2a3-8a16-4d42-934d-fee7376fab25" &&
-    (axis == "z" || axis == "x")
+    (axis == "a" || axis == "x")
   )
     return;
 

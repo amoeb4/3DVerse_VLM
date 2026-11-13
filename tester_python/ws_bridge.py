@@ -62,7 +62,7 @@ ORIENTATION_MAP = {
 SCENE_POSE = {
     "part_1": -1.0,
     "part_2": 0.0,
-    "part_3": 270.0,
+    "part_3": -83,
     "part_4": -180.0,
     "part_5": -13.8,
     "part_6": 180.0,

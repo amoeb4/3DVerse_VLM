@@ -12,7 +12,8 @@ import type { Entity } from "@3dverse/livelink";
 import { useBuildRecord } from "../../live/processFeed";
 import { useSharedOverlay } from "../holo/sharedOverlay";
 import type { PartMetric, Theme } from "./partColors";
-import { deepPlate } from "./partGeometry";
+//import { deepPlate } from "./partGeometry";
+import { waamPart } from "./waamPart";
 import { PartModel, type PartPoint } from "./PartModel";
 import { PartPeek } from "./PartPeek";
 
@@ -139,7 +140,7 @@ export function PartInCell({
   const { entity: plate } = useEntity({ euid: plateEuid });
   const build = useBuildRecord(500);
   const model = useMemo(
-    () => new PartModel(deepPlate(build.layers)),
+    () => new PartModel(waamPart()),
     [build.layers],
   );
   const placed = useRef(false);
