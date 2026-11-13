@@ -11,8 +11,9 @@ import { PartEntitiesContext } from "../partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "../movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Button, cn, Icon, Panel, PanelHeader } from "@3dverse/ui-lib";
-import { PanelTitle } from "./common/PanelTitle";
+import { Button, cn, Icon, PanelHeader } from "@3dverse/ui-lib";
+import { Panel } from "./common/Panel";
+import { PanelTitle } from "./common/Section";
 
 type SpeedContextType = {
   delayMs: number;
@@ -95,8 +96,9 @@ export default function TrainingPanel({ className }: { className?: string }) {
 
   return (
     <Panel
+      variant="glass"
       className={cn(
-        "divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "divide-y divide-tertiary",
         "origin-top-left transition-[opacity,translate,scale,visibility] duration-300 ease-out motion-reduce:transition-none",
         "starting:opacity-0 starting:-translate-x-4 starting:scale-95 starting:invisible",
         className,

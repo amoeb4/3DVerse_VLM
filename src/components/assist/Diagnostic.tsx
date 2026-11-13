@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import { lastClosedIncident } from "../../assist/assistStore";
@@ -28,7 +29,13 @@ import {
 } from "../../live/processFeed";
 import { SourceBadge } from "../common/SourceBadge";
 import { TimeAgo } from "../common/TimeAgo";
-import { Row, SectionTitle } from "../supervision/SupervisionPanel";
+import { Row } from "../common/Row";
+import {
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SectionTitle,
+} from "../common/Section";
 
 /** Warnings and errors from the event log this recent are worth a look. */
 const RECENT_MS = 15 * 60_000;
@@ -53,17 +60,16 @@ function Step({
   children: React.ReactNode;
 }) {
   return (
-    <section className="px-4 py-3">
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <h3 className="flex items-center gap-2 text-3xs font-bold tracking-wider uppercase">
+    <section>
+      <SectionHeader aside={aside}>
+        <SectionTitle as="h3" className="flex items-center gap-2">
           <span className="size-4 grid place-items-center rounded-full bg-accent text-white text-5xs tabular-nums">
             {number}
           </span>
           {title}
-        </h3>
-        {aside}
-      </div>
-      {children}
+        </SectionTitle>
+      </SectionHeader>
+      <SectionBody>{children}</SectionBody>
     </section>
   );
 }
@@ -120,21 +126,21 @@ export function Diagnostic({
   const last = lastClosedIncident(snapshot);
 
   return (
-    <Panel
-      className={cn(
-        "flex flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
-    >
-      <section className="shrink-0 px-4 py-3 border-b border-tertiary">
-        <SectionTitle aside={<SourceBadge source={process.source} />}>
-          Diagnostic
-        </SectionTitle>
-        <p className="text-2xs text-secondary">
-          {isOperator
-            ? "Find out what happened, then run the diagnostic."
-            : "See what the cell says and what the operator found, then open an incident."}
-        </p>
+    <Panel variant="glass" className={cn("flex flex-col", className)}>
+      <section className="shrink-0 border-b border-tertiary text-balance">
+        <SectionHeader
+          className="pb-0.5"
+          aside={<SourceBadge source={process.source} />}
+        >
+          <PanelTitle>Diagnostic</PanelTitle>
+        </SectionHeader>
+        <SectionBody>
+          <p className="text-3xs text-secondary">
+            {isOperator
+              ? "Find out what happened, then run the diagnostic."
+              : "See what the cell says and what the operator found, then open an incident."}
+          </p>
+        </SectionBody>
       </section>
 
       <div className="min-h-0 overflow-y-auto scroll-fade-y divide-y divide-tertiary">
@@ -154,7 +160,7 @@ export function Diagnostic({
             <Row
               label="Program"
               value={
-                <code className="text-3xs">
+                <code>
                   {process.cn.program || "—"} · N{process.cn.block}
                 </code>
               }

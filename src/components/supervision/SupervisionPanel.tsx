@@ -1,12 +1,20 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
-import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
-import { PanelTitle } from "../common/PanelTitle";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
+import {
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SectionTitle,
+} from "../common/Section";
+import { Row } from "../common/Row";
 
 import { PartEntitiesContext } from "../../partEntitiesContext";
 import { jointInfoFor, twistAngle } from "../joints/joints";
 import { LiveBadge } from "../LiveBadge";
 import { SourceBadge } from "../common/SourceBadge";
+
 import { useLiveLink } from "../../live/liveLink";
 import {
   clearEvents,
@@ -156,14 +164,15 @@ export function SupervisionPanel({
 
   return (
     <Panel
+      variant="glass"
       className={cn(
-        "flex flex-col min-h-0 divide-y divide-tertiary backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "flex flex-col min-h-0 divide-y divide-tertiary",
         className,
       )}
     >
-      <header className="flex justify-between items-center px-4 py-1.5">
+      <SectionHeader className="py-1.5">
         <PanelTitle>Cell</PanelTitle>
-      </header>
+      </SectionHeader>
 
       {/* The sections scroll, under the header: the panel never grows past its column. */}
       <div className="min-h-0 grow overflow-y-auto overscroll-contain scroll-fade-y divide-y divide-tertiary">
@@ -173,50 +182,6 @@ export function SupervisionPanel({
         <EventSection />
       </div>
     </Panel>
-  );
-}
-
-//------------------------------------------------------------------------------
-export function SectionTitle({
-  children,
-  aside,
-}: {
-  children: React.ReactNode;
-  aside?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 mb-1.5">
-      <h2 className="text-3xs font-bold tracking-wider uppercase">
-        {children}
-      </h2>
-      {aside}
-    </div>
-  );
-}
-
-export function Row({
-  label,
-  value,
-  orientation = "horizontal",
-}: {
-  label: string;
-  value: React.ReactNode;
-  orientation?: "horizontal" | "vertical";
-}) {
-  return (
-    <div
-      className={cn(
-        "flex gap-x-3 text-3xs",
-        orientation === "horizontal"
-          ? "justify-between *:data-[slot=value]:text-right"
-          : "flex-col",
-      )}
-    >
-      <span className="font-light text-secondary">{label}</span>
-      <span data-solt="value" className="tabular-nums text-4xs">
-        {value}
-      </span>
-    </div>
   );
 }
 
@@ -373,8 +338,8 @@ const LEVEL_ICON: Record<EventLevel, string> = {
 function EventSection() {
   const events = useEventLog();
   return (
-    <section className="px-4 py-3">
-      <SectionTitle
+    <section>
+      <SectionHeader
         aside={
           events.length > 0 && (
             <Button
@@ -388,47 +353,49 @@ function EventSection() {
           )
         }
       >
-        Events
-      </SectionTitle>
-      {events.length === 0 ? (
-        <p className="text-4xs text-tertiary">Nothing yet.</p>
-      ) : (
-        <ol className="-mx-1 px-1 space-y-2">
-          {events.map((event) => (
-            <li
-              key={event.id}
-              className="flex items-baseline gap-2 text-4xs leading-5"
-            >
-              <TimeAgo
-                at={event.at}
-                className="shrink-0 w-15 text-5xs text-secondary"
-              />
-              <div className="grow flex flex-col items-baseline">
-                <div className="flex items-center gap-1">
-                  {event.level !== "info" && (
-                    <Icon
-                      className={cn(
-                        "fas shrink-0 text-5xs",
-                        LEVEL_ICON[event.level],
-                      )}
-                    />
-                  )}
-                  <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary">
-                    {event.source}
-                  </span>
-                  {event.simulated && (
-                    <SourceBadge
-                      source="sim"
-                      className="mr-1.5 align-[1px] text-[9px] border-0"
-                    />
-                  )}
+        <SectionTitle>Events</SectionTitle>
+      </SectionHeader>
+      <SectionBody>
+        {events.length === 0 ? (
+          <p className="text-4xs text-tertiary">Nothing yet.</p>
+        ) : (
+          <ol className="-mx-1 px-1 space-y-2">
+            {events.map((event) => (
+              <li
+                key={event.id}
+                className="flex items-baseline gap-2 text-4xs leading-5"
+              >
+                <TimeAgo
+                  at={event.at}
+                  className="shrink-0 w-15 text-5xs text-secondary"
+                />
+                <div className="grow flex flex-col items-baseline">
+                  <div className="flex items-center gap-1">
+                    {event.level !== "info" && (
+                      <Icon
+                        className={cn(
+                          "fas shrink-0 text-5xs",
+                          LEVEL_ICON[event.level],
+                        )}
+                      />
+                    )}
+                    <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary">
+                      {event.source}
+                    </span>
+                    {event.simulated && (
+                      <SourceBadge
+                        source="sim"
+                        className="mr-1.5 align-[1px] text-[9px] border-0"
+                      />
+                    )}
+                  </div>
+                  <span className="text-balance">{event.text}</span>
                 </div>
-                <span className="text-balance">{event.text}</span>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </SectionBody>
     </section>
   );
 }

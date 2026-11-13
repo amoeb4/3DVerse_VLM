@@ -1,4 +1,5 @@
-import { cn, Panel } from "@3dverse/ui-lib";
+import { cn } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { SourceBadge } from "../common/SourceBadge";
 import {
@@ -6,7 +7,7 @@ import {
   type CnState,
   type SignalId,
 } from "../../live/processFeed";
-import { PanelTitle } from "../common/PanelTitle";
+import { PanelTitle, SectionHeader } from "../common/Section";
 import { HISTORY_SECONDS, SignalRow } from "./SignalRow";
 
 const STATE: Record<CnState, { label: string; className: string }> = {
@@ -41,24 +42,23 @@ export function ProcessPanel({ className }: { className?: string }) {
   const state = STATE[process.cn.state];
 
   return (
-    <Panel
-      className={cn(
-        "flex flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
-    >
-      <header className="flex justify-between items-center gap-2 px-4 py-2 border-b border-tertiary">
+    <Panel variant="glass" className={cn("flex flex-col", className)}>
+      <SectionHeader
+        className="border-b border-tertiary"
+        aside={
+          <span className="inline-flex items-center gap-1.5 text-3xs font-bold">
+            <span className={state.className}>{state.label}</span>
+            <SourceBadge source={process.source} />
+          </span>
+        }
+      >
         <PanelTitle>
           Process
           <span className="ml-2 text-5xs font-normal text-secondary">
             last {HISTORY_SECONDS} s
           </span>
         </PanelTitle>
-        <span className="inline-flex items-center gap-1.5 text-3xs font-bold">
-          <span className={state.className}>{state.label}</span>
-          <SourceBadge source={process.source} />
-        </span>
-      </header>
+      </SectionHeader>
       <div className="min-h-0 overflow-y-auto scroll-fade-y divide-y divide-tertiary">
         {PANEL_SIGNALS.map((id) => (
           <SignalRow

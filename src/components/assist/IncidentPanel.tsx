@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   Icon,
-  Panel,
 } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import {
@@ -22,8 +22,14 @@ import { INCIDENT_KINDS } from "../../assist/procedures";
 import { CAMERA_FEEDS } from "../../config";
 import { SourceBadge } from "../common/SourceBadge";
 import { Sparkline } from "../common/Sparkline";
-import { Row, SectionTitle } from "../supervision/SupervisionPanel";
+import { Row } from "../common/Row";
 import { TimeAgo } from "../common/TimeAgo";
+import {
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SectionTitle,
+} from "../common/Section";
 
 /**
  * The incident open, as the expert reads it for the diagnosis: the CN's alarm and the block it
@@ -42,12 +48,7 @@ export function IncidentPanel({
 }) {
   const { incident } = useAssist();
   return (
-    <Panel
-      className={cn(
-        "flex flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
-    >
+    <Panel variant="glass" className={cn("flex flex-col", className)}>
       <div className="min-h-0 overflow-y-auto scroll-fade-y divide-y divide-tertiary">
         {incident && <IncidentSections />}
         {children}
@@ -67,19 +68,17 @@ function IncidentSections() {
 
   return (
     <>
-      <section className="px-4 py-3">
-        <SectionTitle aside={<SourceBadge source="sim" />}>
-          Incident
-        </SectionTitle>
-        <p className="mb-1.5 flex items-start gap-1.5 text-2xs text-negative">
-          <Icon className="fas fa-triangle-exclamation mt-0.5" />
+      <section>
+        <SectionHeader aside={<SourceBadge source="sim" />}>
+          <PanelTitle>Incident</PanelTitle>
+        </SectionHeader>
+        <p className="flex items-start gap-1.5 px-4 py-2 text-2xs text-negative text-pretty bg-negative/15">
+          <Icon className="fas fa-triangle-exclamation text-5xs mt-1" />
           {info.alarm}
         </p>
-        <div className="space-y-0.5">
-          <Row
-            label="Program"
-            value={<code className="text-3xs">{incident.program || "—"}</code>}
-          />
+
+        <SectionBody className="space-y-0.5 pt-3">
+          <Row label="Program" value={<code>{incident.program || "—"}</code>} />
           <Row label="Stopped at" value={`N${incident.block}`} />
           <Row
             label="Opened"
@@ -89,19 +88,20 @@ function IncidentSections() {
               </>
             }
           />
-        </div>
-        {incident.note && (
-          <blockquote className="mt-2 border-l-2 border-accent/60 pl-2 text-2xs whitespace-pre-wrap break-words">
-            {incident.note}
-          </blockquote>
-        )}
+
+          {incident.note && (
+            <blockquote className="mt-2 border-l-2 border-accent pl-2 text-3xs whitespace-pre-wrap break-words bg-accent/5 text-balance">
+              {incident.note}
+            </blockquote>
+          )}
+        </SectionBody>
       </section>
 
-      <section className="px-4 py-3">
-        <SectionTitle aside={<SourceBadge source="sim" />}>
-          {TRACE_SECONDS} s before the stop
-        </SectionTitle>
-        <div className="flex flex-col gap-2">
+      <section>
+        <SectionHeader aside={<SourceBadge source="sim" />}>
+          <SectionTitle>{TRACE_SECONDS} s before the stop</SectionTitle>
+        </SectionHeader>
+        <SectionBody className="flex flex-col gap-2">
           {trace.map((signal) => (
             <div key={signal.id} className="flex flex-col gap-0.5">
               <div className="flex justify-between gap-2 text-3xs">
@@ -122,31 +122,33 @@ function IncidentSections() {
               />
             </div>
           ))}
-        </div>
+        </SectionBody>
       </section>
 
-      <section className="px-4 py-3">
-        <SectionTitle
+      <section>
+        <SectionHeader
           aside={<SourceBadge source="none" label="No recording" />}
         >
-          Cameras at the stop
-        </SectionTitle>
-        <div className="grid grid-cols-2 gap-2">
-          {CAMERA_FEEDS.map((feed) => (
-            <figure
-              key={feed.id}
-              className="relative aspect-video overflow-hidden rounded border border-tertiary bg-ground/70 grid place-items-center"
-            >
-              <Icon className="fas fa-clock-rotate-left pt-3 text-xs text-tertiary" />
-              <figcaption className="absolute inset-x-1 top-1 truncate text-5xs text-secondary">
-                {feed.label}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-        <p className="mt-1.5 text-5xs leading-tight text-tertiary text-balance">
-          The replay shows here once the cameras are recorded.
-        </p>
+          <SectionTitle>Cameras at the stop</SectionTitle>
+        </SectionHeader>
+        <SectionBody>
+          <div className="grid grid-cols-2 gap-2">
+            {CAMERA_FEEDS.map((feed) => (
+              <figure
+                key={feed.id}
+                className="relative aspect-video overflow-hidden rounded border border-tertiary bg-ground/70 grid place-items-center"
+              >
+                <Icon className="fas fa-clock-rotate-left pt-3 text-xs text-tertiary" />
+                <figcaption className="absolute inset-x-1 top-1 truncate text-5xs text-secondary">
+                  {feed.label}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <p className="mt-1.5 text-5xs leading-tight text-tertiary text-balance">
+            The replay shows here once the cameras are recorded.
+          </p>
+        </SectionBody>
       </section>
     </>
   );
@@ -183,7 +185,7 @@ function CloseIncident() {
       </footer>
 
       <Dialog open={isCloseOpen} onOpenChange={setIsCloseOpen}>
-        <DialogContent className="max-w-md backdrop-blur-xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Close the incident?</DialogTitle>
             <DialogDescription>

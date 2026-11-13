@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../components/common/Panel";
 
-import { PanelTitle } from "../components/common/PanelTitle";
+import { PanelTitle } from "../components/common/Section";
 import { ButtonGroup } from "../components/common/ButtonGroup";
 import { SourceBadge } from "../components/common/SourceBadge";
 import { BackButton } from "../components/common/BackButton";
@@ -172,10 +173,8 @@ export function PartChrome({
           className="max-lg:hidden"
         />
         <Panel
-          className={cn(
-            "flex flex-col gap-2.5 px-3 py-2.5",
-            "backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-          )}
+          variant="glass"
+          className={cn("flex flex-col gap-2.5 px-3 py-2.5")}
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-3xs font-bold tracking-wider uppercase">
@@ -260,10 +259,8 @@ export function PartChrome({
 
         {/* The build, layer by layer, the panel's full width: back to live is in its header. */}
         <Panel
-          className={cn(
-            "w-full lg:w-184 max-w-full",
-            "p-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-          )}
+          variant="glass"
+          className={cn("w-full lg:w-184 max-w-full", "p-2")}
         >
           <BuildTimeline
             build={build}
@@ -349,8 +346,9 @@ function FindingsPanel({
 }) {
   return (
     <Panel
+      variant="glass"
       className={cn(
-        "flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "flex-col",
         "starting:opacity-0 starting:translate-x-4 transition-all duration-500",
         className,
       )}

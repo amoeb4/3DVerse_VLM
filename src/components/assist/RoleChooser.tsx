@@ -1,4 +1,5 @@
-import { cn, Icon, Panel } from "@3dverse/ui-lib";
+import { cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { useAssist } from "../../assist/assistContext";
 import {
@@ -19,9 +20,10 @@ export function RoleChooser() {
   return (
     <div className="fixed inset-0 z-40 grid place-items-center p-4 pointer-events-none">
       <Panel
+        variant="glass"
         className={cn(
           "pointer-events-auto w-full max-w-sm px-5 py-4 flex flex-col gap-3",
-          "backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.15)]",
+          "shadow-[0_0_30px_rgba(0,0,0,0.15)]",
         )}
       >
         <header>

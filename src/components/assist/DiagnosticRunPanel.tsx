@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
-import { Button, cn, Icon, Panel } from "@3dverse/ui-lib";
+import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { useAssist } from "../../assist/assistContext";
 import type { CheckResult } from "../../assist/assistStore";
@@ -129,7 +130,10 @@ export function DiagnosticRunPanel({
         "starting:opacity-0 starting:translate-y-4 transition-all duration-300",
       )}
     >
-      <Panel className="flex flex-col gap-3 px-4 py-3 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.25)] border border-accent/40">
+      <Panel
+        variant="glass"
+        className="flex flex-col gap-3 px-4 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.25)] border border-accent/40"
+      >
         <header className="flex items-center justify-between gap-3">
           <div className="grow flex items-center gap-2 min-w-0">
             <Icon className="fas fa-stethoscope text-2xs text-accent-300" />

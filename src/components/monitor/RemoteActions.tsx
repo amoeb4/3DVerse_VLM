@@ -10,13 +10,13 @@ import {
   DialogTitle,
   DotPing,
   Icon,
-  Panel,
   Popover,
   PopoverContent,
   PopoverTrigger,
   Slider,
 } from "@3dverse/ui-lib";
-import { PanelTitle } from "../common/PanelTitle";
+import { Panel } from "../common/Panel";
+import { PanelTitle, SectionHeader } from "../common/Section";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import { INCIDENT_KINDS } from "../../assist/procedures";
@@ -94,15 +94,15 @@ export function RemoteActions({
 
   return (
     <Panel
-      className={cn(
-        "flex flex-col gap-2 px-3 py-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
+      variant="glass"
+      className={cn("flex flex-col gap-2 px-3 py-2", className)}
     >
-      <header className="flex items-center justify-between gap-2 mb-1">
+      <SectionHeader
+        aside={<SourceBadge source="none" label="Logged only" />}
+        className="p-0 mb-1"
+      >
         <PanelTitle>Remote actions</PanelTitle>
-        <SourceBadge source="none" label="Logged only" />
-      </header>
+      </SectionHeader>
 
       <div className="flex flex-wrap gap-x-2 gap-y-3">
         {/* The E-Stop, first and full width: the one action that must never be hunted for. */}
@@ -201,7 +201,7 @@ export function RemoteActions({
       )}
 
       <Dialog open={isStopOpen} onOpenChange={setIsStopOpen}>
-        <DialogContent className="max-w-lg backdrop-blur-xl text-balance">
+        <DialogContent className="max-w-lg text-balance">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
               E-Stop: stop the cell?
@@ -309,12 +309,14 @@ function AdjustProcess({
         className="w-80 border border-tertiary"
       >
         <div className="flex flex-col gap-3 p-3 text-2xs">
-          <header className="flex items-center justify-between gap-2">
+          <SectionHeader
+            aside={<SourceBadge source="none" label="Logged only" />}
+            className="p-0"
+          >
             <PanelTitle>
               {isReviewing ? "Confirm the changes" : "Adjust process"}
             </PanelTitle>
-            <SourceBadge source="none" label="Logged only" />
-          </header>
+          </SectionHeader>
 
           {isReviewing ? (
             <ul className="space-y-1">

@@ -7,7 +7,7 @@ import {
   useParticipantLook,
   type ParticipantLook,
 } from "../../assist/participantLook";
-import { SectionTitle } from "../supervision/SupervisionPanel";
+import { SectionBody, SectionHeader, SectionTitle } from "../common/Section";
 import { RoleChip } from "./RoleChip";
 
 /**
@@ -24,47 +24,51 @@ export function PeopleSection() {
   );
 
   return (
-    <section className="px-4 py-3">
-      <SectionTitle>In the session</SectionTitle>
-      <ul className="flex flex-col gap-1 empty:hidden">
-        {me && <Person look={lookOf(me.clientId)} role={role} isMe />}
-        {clients.map((client) => {
-          const isFollowed = following === client.id;
-          const look = lookOf(client.id, client.username);
-          const { name } = look;
-          return (
-            <Person
-              key={client.id}
-              look={look}
-              role={roles.get(client.id) ?? null}
-              action={
-                <Button
-                  variant={isFollowed ? "accent" : "ghost"}
-                  size="icon-xs"
-                  className={cn(isFollowed && "text-white!")}
-                  aria-pressed={isFollowed}
-                  title={
-                    isFollowed
-                      ? `Stop following ${name}`
-                      : `Follow ${name}'s camera`
-                  }
-                  aria-label={
-                    isFollowed
-                      ? `Stop following ${name}`
-                      : `Follow ${name}'s camera`
-                  }
-                  onClick={() => setFollowing(isFollowed ? null : client.id)}
-                >
-                  <Icon className="fas fa-eye text-5xs" />
-                </Button>
-              }
-            />
-          );
-        })}
-      </ul>
-      {clients.length === 0 && (
-        <p className="mt-1 text-3xs text-tertiary">No one else yet.</p>
-      )}
+    <section>
+      <SectionHeader>
+        <SectionTitle>In the session</SectionTitle>
+      </SectionHeader>
+      <SectionBody>
+        <ul className="flex flex-col gap-1 empty:hidden">
+          {me && <Person look={lookOf(me.clientId)} role={role} isMe />}
+          {clients.map((client) => {
+            const isFollowed = following === client.id;
+            const look = lookOf(client.id, client.username);
+            const { name } = look;
+            return (
+              <Person
+                key={client.id}
+                look={look}
+                role={roles.get(client.id) ?? null}
+                action={
+                  <Button
+                    variant={isFollowed ? "accent" : "ghost"}
+                    size="icon-xs"
+                    className={cn(isFollowed && "text-white!")}
+                    aria-pressed={isFollowed}
+                    title={
+                      isFollowed
+                        ? `Stop following ${name}`
+                        : `Follow ${name}'s camera`
+                    }
+                    aria-label={
+                      isFollowed
+                        ? `Stop following ${name}`
+                        : `Follow ${name}'s camera`
+                    }
+                    onClick={() => setFollowing(isFollowed ? null : client.id)}
+                  >
+                    <Icon className="fas fa-eye text-5xs" />
+                  </Button>
+                }
+              />
+            );
+          })}
+        </ul>
+        {clients.length === 0 && (
+          <p className="mt-1 text-3xs text-tertiary">No one else yet.</p>
+        )}
+      </SectionBody>
     </section>
   );
 }

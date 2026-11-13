@@ -1,4 +1,5 @@
-import { cn, Icon, Panel } from "@3dverse/ui-lib";
+import { cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { CAMERA_FEEDS } from "../../config";
 import { SourceBadge } from "../common/SourceBadge";
@@ -11,7 +12,7 @@ import {
 } from "../../live/processFeed";
 import { SIGNAL_LINE_COLOR } from "./signalColors";
 import { SoundRing } from "./SoundRing";
-import { PanelTitle } from "../common/PanelTitle";
+import { PanelTitle, SectionHeader } from "../common/Section";
 
 /** The ring's range, in dB: from a quiet cell to well past the arc's window. */
 const METER = { min: 50, max: 110 };
@@ -25,15 +26,15 @@ export function SensorTiles({ className }: { className?: string }) {
   const process = useProcessFeed(200);
   return (
     <Panel
-      className={cn(
-        "flex flex-col gap-2 px-3 py-1.5 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
+      variant="glass"
+      className={cn("flex flex-col gap-2 px-3 py-1.5", className)}
     >
-      <header className="flex items-center justify-between">
+      <SectionHeader
+        className="p-0"
+        aside={<SourceBadge source={process.source} />}
+      >
         <PanelTitle>Sensors</PanelTitle>
-        <SourceBadge source={process.source} />
-      </header>
+      </SectionHeader>
       <div className="grid grid-cols-2 gap-2">
         {CAMERA_FEEDS.map((feed) => (
           <CameraTile key={feed.id} label={feed.label} url={feed.url} />

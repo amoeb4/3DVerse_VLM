@@ -1,4 +1,5 @@
-import { cn, Panel } from "@3dverse/ui-lib";
+import { cn } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import { SourceBadge } from "../common/SourceBadge";
 import { useProcessFeed } from "../../live/processFeed";
@@ -52,8 +53,9 @@ export function ProductionStrip({
 
   return (
     <Panel
+      variant="glass"
       className={cn(
-        "flex items-center gap-2 overflow-hidden text-2xs backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
+        "flex items-center gap-2 overflow-hidden text-2xs",
         className,
       )}
     >

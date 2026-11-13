@@ -1,6 +1,7 @@
-import { cn, Panel } from "@3dverse/ui-lib";
+import { cn } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
-import { PanelTitle } from "../common/PanelTitle";
+import { PanelTitle, SectionBody, SectionHeader } from "../common/Section";
 import { SourceBadge } from "../common/SourceBadge";
 import { Sparkline } from "../common/Sparkline";
 import { RECENT_WELDS, useWeldStats } from "../../live/weldLog";
@@ -25,25 +26,27 @@ export function WeldPanel({ className }: { className?: string }) {
 
   return (
     <Panel
+      variant="glass"
       aria-label="Welding"
-      className={cn(
-        "flex flex-col backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.1)]",
-        className,
-      )}
+      className={cn("flex flex-col", className)}
     >
-      <header className="flex justify-between items-center gap-2 px-4 py-2 border-b border-tertiary">
+      <SectionHeader
+        className="border-b border-tertiary"
+        aside={
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 text-3xs font-bold",
+              welds.welding ? "text-accent-300" : "text-secondary",
+            )}
+          >
+            {welds.welding ? "WELDING" : "IDLE"}
+            <SourceBadge source="sim" />
+          </span>
+        }
+      >
         <PanelTitle>Welding</PanelTitle>
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 text-3xs font-bold",
-            welds.welding ? "text-accent-300" : "text-secondary",
-          )}
-        >
-          {welds.welding ? "WELDING" : "IDLE"}
-          <SourceBadge source="sim" />
-        </span>
-      </header>
-      <div className="px-4 py-3">
+      </SectionHeader>
+      <SectionBody className="pt-3">
         <div className="grid grid-cols-4 gap-2 mb-2">
           <Stat label="Points" value={welds.count.toLocaleString()} />
           <Stat label="Last" value={fmt(welds.last?.temperature ?? null)} />
@@ -64,7 +67,7 @@ export function WeldPanel({ className }: { className?: string }) {
             Since {formatClock(welds.startedAt)} · last {RECENT_WELDS} points
           </p>
         )}
-      </div>
+      </SectionBody>
       <div className="px-4 pt-2 pb-3 border-t border-tertiary">
         <SignalRow
           id="ctwd"

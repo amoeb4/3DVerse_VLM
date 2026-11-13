@@ -1,6 +1,8 @@
 import { useId, useState, type ReactNode } from "react";
 import { cn, Icon } from "@3dverse/ui-lib";
 
+import { SectionTitle } from "../common/Section";
+
 /**
  * A panel section folded by default: its title is the toggle, and `aside` (a badge, a status) stays
  * beside it, folded or not. `aside` sits next to the toggle rather than in it, so a button of its own
@@ -21,7 +23,7 @@ export function CollapsibleSection({
   const contentId = useId();
 
   return (
-    <section className="">
+    <section>
       <button
         type="button"
         aria-expanded={isOpen}
@@ -36,9 +38,7 @@ export function CollapsibleSection({
               isOpen && "rotate-90",
             )}
           />
-          <h2 className="text-3xs font-bold tracking-wider uppercase truncate">
-            {title}
-          </h2>
+          <SectionTitle className="truncate">{title}</SectionTitle>
         </div>
         {aside}
       </button>

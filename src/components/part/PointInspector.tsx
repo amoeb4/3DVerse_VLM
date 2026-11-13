@@ -1,4 +1,5 @@
-import { cn, Icon, Panel } from "@3dverse/ui-lib";
+import { cn, Icon } from "@3dverse/ui-lib";
+import { Panel } from "../common/Panel";
 
 import {
   formatSignal,
@@ -62,7 +63,10 @@ export function PointInspector({
       className="fixed z-50 pointer-events-none"
       style={{ left, top, width }}
     >
-      <Panel className="px-3 py-2 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.2)]">
+      <Panel
+        variant="glass"
+        className="px-3 py-2 shadow-[0_0_30px_rgba(0,0,0,0.2)]"
+      >
         <div className="flex items-baseline justify-between gap-2 mb-1.5">
           <span className="text-xs font-bold">Layer {record.layer}</span>
           <span className="text-3xs text-secondary tabular-nums">
