@@ -29,7 +29,7 @@ export function CollapsibleSection({
         aria-expanded={isOpen}
         aria-controls={contentId}
         onClick={() => setIsOpen((open) => !open)}
-        className="group flex justify-between items-center gap-1.5 w-full pl-4 pr-2 py-1 text-left cursor-pointer hover:bg-primary/5 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="group flex justify-between items-center gap-1.5 w-full pl-4 pr-3 py-1 text-left cursor-pointer hover:bg-primary/5 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <div className="-translate-x-1 flex items-center justify-between gap-2">
           <Icon

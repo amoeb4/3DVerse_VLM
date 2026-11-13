@@ -137,9 +137,9 @@ export function BuildTimeline({
     );
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       {/* The values, above the graph. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-3xs">
+      <div className="grid grid-cols-[1fr_1fr_auto] sm:grid-cols-[1fr_1fr_1fr] gap-x-3 gap-y-1 text-3xs">
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
@@ -162,33 +162,36 @@ export function BuildTimeline({
           </Button>
           <span className="whitespace-nowrap">
             <span className="text-secondary">Layer </span>
-            <b className="text-primary">{Math.max(1, shownLayer)}</b>
-            <span className="text-secondary">/{layers}</span>
-            {pinnedLayer === null && (
-              // Live: the dot beats while the arc burns.
-              <span
-                className="ml-1.5 inline-flex items-center gap-1 text-accent-300 font-bold"
-                title="Following the build as it is laid"
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "size-1.5 rounded-full",
-                    build.arcOn
-                      ? "bg-current animate-pulse"
-                      : "bg-secondary/60",
-                  )}
-                />
-                LIVE
-              </span>
-            )}
+            <span className="tabular-nums">
+              <b className="text-primary">{Math.max(1, shownLayer)}</b>
+              <span className="text-secondary">/{layers}</span>
+            </span>
           </span>
+        </div>
+        <div className="flex justify-self-end sm:justify-self-center">
+          {pinnedLayer === null && (
+            // Live: the dot beats while the arc burns.
+            <p
+              className="inline-flex items-center gap-1.5 text-accent-300 font-bold"
+              title="Following the build as it is laid"
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "inline-block size-1.5 rounded-full",
+                  build.arcOn ? "bg-current animate-pulse" : "bg-secondary/60",
+                )}
+              />
+              LIVE
+            </p>
+          )}
+
           {pinnedLayer !== null && (
             // Rewound: the way back stands out.
             <Button
               variant="accent"
               size="2xs"
-              className="gap-1 text-white! shadow-[0_0_10px_var(--color-accent)]"
+              className="gap-1 text-white! shadow-[0_0_3px_var(--color-accent)]"
               title="Back to the build as it is laid"
               onClick={() => onScrub(null)}
             >
@@ -197,14 +200,16 @@ export function BuildTimeline({
             </Button>
           )}
         </div>
-        <span className="whitespace-nowrap">
-          <b className="text-primary">{formatDuration(intoBuildS)}</b>
-          <span className="text-secondary">
+        <div className="justify-self-end whitespace-nowrap">
+          <span className="hidden sm:inline px-2">
+          <b className="text-primary tabular-nums">{formatDuration(intoBuildS)}</b>
+          <span className="text-secondary tabular-nums">
             {" "}
-            / {formatDuration(plannedS)} planned ·{" "}
+            / {formatDuration(plannedS)} planned
           </span>
-          <b className="text-primary">{completion} %</b>
-        </span>
+          </span>
+          <b className="text-primary tabular-nums">{completion} %</b>
+        </div>
       </div>
       <div
         ref={barRef}

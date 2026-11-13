@@ -59,7 +59,7 @@ export function Viewer({
   // --- Effects --------------------------------------------------------------------------------
   // Leaving the viewer leaves XR: the store outlives it.
   useEffect(() => () => setXRMode(null), [setXRMode]);
-  useDocumentTitle(`${scene.name} · VLM Vision`);
+  useDocumentTitle(`${scene.name} · VLM Dimension`);
   // The viewer fills the screen and never scrolls. Home, which does scroll, gets the body as it
   // was.
   useLockBodyScroll();

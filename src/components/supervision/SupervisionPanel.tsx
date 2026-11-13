@@ -255,6 +255,10 @@ function LinkDetails() {
 /** The design-token colour of a joint's axis, as `JointGauge` draws it. */
 const axisColor = (axis: JointReading["axis"]) => `var(--axis-color-${axis})`;
 
+/** Where an angle sits on a track running -180° … +180°: 0° at 50%. Kept on the track. */
+const trackPercent = (angle: number) =>
+  Math.min(100, Math.max(0, ((angle + 180) / 360) * 100));
+
 function RobotSection({
   readings,
   moving,
@@ -282,46 +286,54 @@ function RobotSection({
       {readings.length === 0 ? (
         <p className="text-2xs text-secondary">Waiting for the robot model…</p>
       ) : (
-        <table className="w-full text-2xs tabular-nums">
-          <tbody>
-            {readings.map((joint, index) => (
-              <tr key={joint.id} className="h-5">
-                <td className="pr-2 text-secondary whitespace-nowrap">
-                  J{index + 1}{" "}
-                  <span className="text-primary">{joint.label}</span>
-                </td>
-                <td className="w-full">
-                  {/* -180° … +180°, 0 in the middle. */}
-                  <div className="relative h-1 rounded-full bg-tertiary/40">
-                    <div className="absolute left-1/2 top-1/2 h-2 w-px -translate-y-1/2 bg-secondary/60" />
-                    <div
-                      className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      style={{
-                        left: `${((joint.angle + 180) / 360) * 100}%`,
-                        background: axisColor(joint.axis),
-                      }}
-                    />
-                  </div>
-                </td>
-                <td
-                  className="pl-2 text-right whitespace-nowrap"
-                  style={{ color: axisColor(joint.axis) }}
-                >
+        <div className="w-full text-xs">
+          {readings.map((joint, index) => (
+            <div
+              key={joint.id}
+              className="grid grid-cols-[6rem_1fr_6rem] items-center gap-2 py-0.5"
+            >
+              <div className="text-secondary whitespace-nowrap">
+                <span className="tabular-nums">J{index + 1}</span>{" "}
+                <span className="pl-1 text-primary">{joint.label}</span>
+              </div>
+              <div className="grow flex gap-2">
+                {/* -180° … +180°, 0 in the middle. */}
+                <div className="grow relative h-1 rounded-full bg-tertiary/40">
+                  {/* The track filled from 0 to the angle: its width says how far from default. */}
+                  <div
+                    className="absolute inset-y-0 rounded-full"
+                    style={{
+                      left: `${Math.min(50, trackPercent(joint.angle))}%`,
+                      width: `${Math.abs(trackPercent(joint.angle) - 50)}%`,
+                      background: axisColor(joint.axis),
+                    }}
+                  />
+                  <div className="absolute left-1/2 top-1/2 h-2 w-px -translate-y-1/2 bg-secondary/60" />
+                  <div
+                    className="absolute top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                    style={{
+                      left: `${trackPercent(joint.angle)}%`,
+                      background: axisColor(joint.axis),
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 text-3xs text-right whitespace-nowrap tabular-nums">
+                <p style={{ color: axisColor(joint.axis) }}>
                   {joint.angle >= 0 ? "+" : "−"}
                   {Math.abs(joint.angle).toFixed(1)}°
-                </td>
-                <td
+                </p>
+                <p
                   className={cn(
-                    "pl-2 w-16 text-right whitespace-nowrap",
-                    Math.abs(joint.speed) < STOPPED_SPEED && "text-secondary",
+                    Math.abs(joint.speed) < STOPPED_SPEED && "text-tertiary",
                   )}
                 >
                   {Math.abs(joint.speed).toFixed(1)}°/s
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </CollapsibleSection>
   );

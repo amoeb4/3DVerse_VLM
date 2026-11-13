@@ -27,7 +27,7 @@ const ITEM_EXIT = "exit";
 const ITEM_STATUS = "status";
 
 //------------------------------------------------------------------------------
-const PANEL_TITLE = "VLM Vision";
+const PANEL_TITLE = "VLM Dimension";
 
 //------------------------------------------------------------------------------
 /**

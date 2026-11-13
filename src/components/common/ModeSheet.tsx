@@ -77,7 +77,7 @@ export function ModeSheet<T extends string>({
 
       <BottomSheetContent
         showOverlay={false}
-        className="px-0 pb-[env(safe-area-inset-bottom)] max-h-[80dvh] sm:max-w-xl"
+        className="px-0 pb-[env(safe-area-inset-bottom)] max-h-[80dvh] sm:max-w-xl shadow-[0_-10px_24px_-10px_rgb(0_0_0/0.25)]"
       >
         <BottomSheetTitle className="shrink-0 px-4 pb-2">
           {label}

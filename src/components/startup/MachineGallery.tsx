@@ -83,11 +83,11 @@ export function MachineGallery() {
           </div>
         </header>
 
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 gap-4 flex flex-wrap sm:grid sm:grid-cols-2 lg:grid-cols-3">
           {MACHINES.map((machine, index) => (
             <li
               key={machine.sceneId}
-              className="starting:opacity-0 starting:translate-y-4 transition-all duration-500"
+              className="w-full starting:opacity-0 starting:translate-y-4 transition-all duration-500"
               style={{ transitionDelay: `${index * 70}ms` }}
             >
               <MachineTile

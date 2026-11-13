@@ -160,7 +160,8 @@ export function LiveBadge({
         <span
           className={cn(
             "hidden md:block ml-1 text-4xs text-tertiary",
-          (status === "live" || link.retryAt) && "w-[10ex] text-right tabular-nums",
+            (status === "live" || link.retryAt) &&
+              "w-[10ex] text-right tabular-nums",
           )}
         >
           {detail}
