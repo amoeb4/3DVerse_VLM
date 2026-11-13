@@ -50,7 +50,7 @@ export function AssistActions() {
         }
         className={cn("gap-2", isPlacingPin && "text-informative!")}
       >
-        <Icon className="fas fa-thumbtack text-2xs md:text-4xs" />
+        <Icon className="fas fa-thumbtack text-2xs md:text-3xs" />
         <span className="hidden sm:inline">Pin a note</span>
       </Button>
 
@@ -58,12 +58,12 @@ export function AssistActions() {
         <Button
           variant="ghost"
           size="sm"
-          className={cn("text-accent-300")}
+          className="gap-2 text-accent-300"
           aria-pressed
           onClick={() => setFollowing(null)}
           title="Stop following, and take the camera back"
         >
-          <Icon className="fas fa-eye-slash text-2xs" />
+          <Icon className="fas fa-eye-slash text-3xs" />
           <span className="hidden sm:inline">
             Stop following{followed ? ` ${followed.name}` : ""}
           </span>
@@ -73,10 +73,11 @@ export function AssistActions() {
           <Button
             variant="ghost"
             size="sm"
+            className="gap-2"
             onClick={() => setFollowing(other.clientId)}
             title={`See what ${other.name} sees`}
           >
-            <Icon className="fas fa-eye text-2xs" />
+            <Icon className="fas fa-eye text-3xs" />
             <span className="hidden sm:inline">Follow {other.name}</span>
           </Button>
         )

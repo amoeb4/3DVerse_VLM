@@ -62,8 +62,8 @@ function Step({
   return (
     <section>
       <SectionHeader aside={aside}>
-        <SectionTitle as="h3" className="flex items-center gap-2">
-          <span className="size-4 grid place-items-center rounded-full bg-accent text-white text-5xs tabular-nums">
+        <SectionTitle as="h3" className="flex items-center gap-2 text-md normal-case tracking-normal">
+          <span className="size-5 grid place-items-center rounded-full bg-accent text-white text-4xs tabular-nums">
             {number}
           </span>
           {title}
@@ -174,19 +174,19 @@ export function Diagnostic({
                   key={alarm}
                   className="flex items-start gap-1.5 text-negative"
                 >
-                  <Icon className="fas fa-triangle-exclamation mt-0.5" />
+                  <Icon className="fas fa-triangle-exclamation text-5xs mt-0.5" />
                   {alarm}
                 </li>
               ))
             ) : (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-check text-positive" />
+                <Icon className="fas fa-check text-positive text-5xs" />
                 No alarm on the CN
               </li>
             )}
             {!process.arcOn ? (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-power-off" />
+                <Icon className="fas fa-power-off text-5xs" />
                 Arc off: no welding signal to read
               </li>
             ) : outOfWindow.length > 0 ? (
@@ -200,7 +200,7 @@ export function Diagnostic({
                 >
                   <Icon
                     className={cn(
-                      "fas",
+                      "fas text-5xs",
                       status === "alarm"
                         ? "fa-circle-exclamation"
                         : "fa-triangle-exclamation",
@@ -214,7 +214,7 @@ export function Diagnostic({
               ))
             ) : (
               <li className="flex items-center gap-1.5 text-secondary">
-                <Icon className="fas fa-check text-positive" />
+                <Icon className="fas fa-check text-positive text-5xs" />
                 Every signal in its WPS window
               </li>
             )}
@@ -341,8 +341,8 @@ export function Diagnostic({
               </p>
               <Button
                 variant="accent"
-                size="sm"
-                className="self-start text-white!"
+                size="lg"
+                className=" text-white!"
                 onClick={() => onRequest(kind, askNote)}
               >
                 <Icon className="fas fa-plus text-2xs" />
