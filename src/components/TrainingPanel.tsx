@@ -12,8 +12,7 @@ import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "../movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Button, cn, Icon, PanelHeader } from "@3dverse/ui-lib";
-import { Panel } from "./common/Panel";
-import { PanelTitle } from "./common/Section";
+import { Panel, PanelTitle } from "./common";
 
 type SpeedContextType = {
   delayMs: number;

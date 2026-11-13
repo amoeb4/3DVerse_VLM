@@ -1,4 +1,4 @@
-import { MainNavbar, MainNavbarItem } from "../components/common/MainNavbar";
+import { MainNavbar, MainNavbarItem } from "../components/common";
 import { MODE_SHORTCUTS } from "../shortcuts/shortcuts";
 import { MODES, type ViewMode } from "./modes";
 import { triggerHapticFeedback } from "../utils/haptics";

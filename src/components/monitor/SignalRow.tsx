@@ -1,6 +1,6 @@
 import { cn, Icon } from "@3dverse/ui-lib";
 
-import { Sparkline } from "../common/Sparkline";
+import { Sparkline } from "../common";
 import {
   formatSignal,
   HISTORY_LENGTH,

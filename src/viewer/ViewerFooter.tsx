@@ -1,11 +1,11 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 
 import { AssistActions } from "../components/assist/AssistActions";
-import { SecondaryToolbar } from "../components/common/SecondaryToolbar";
 import {
+  SecondaryToolbar,
   TertiaryToolbar,
   ToolbarDivider,
-} from "../components/common/TertiaryToolbar";
+} from "../components/common";
 import { ResetPositionButton } from "../components/ResetPositionButton";
 import { ViewMenu } from "../components/ViewMenu";
 import { XRSheet } from "../components/xr/XRSheet";

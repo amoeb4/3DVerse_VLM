@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
-import { SubTitleSection } from "../common/Section";
+import { Panel, SubTitleSection, TimeAgo } from "../common";
 
 import { useAssist } from "../../assist/assistContext";
 import type { CheckResult } from "../../assist/assistStore";
@@ -17,7 +16,6 @@ import {
 } from "../../assist/diagnosticRun";
 import { INCIDENT_KINDS, type IncidentKind } from "../../assist/procedures";
 import { useCheckpointEntity } from "../../assist/useCheckpointEntities";
-import { TimeAgo } from "../common/TimeAgo";
 
 /** How far from a checkpoint the camera stands, in metres: nearer for the torch tip. */
 const VIEW_DISTANCE = 1.1;

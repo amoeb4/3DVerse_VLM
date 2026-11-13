@@ -4,13 +4,12 @@ import { cn } from "@3dverse/ui-lib";
 
 import { useAssist } from "../assist/assistContext";
 import type { IncidentKind } from "../assist/procedures";
-import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
+import { ModeSheet, type ModeSheetTab, BackButton } from "../components/common";
 import { IncidentPanel } from "../components/assist/IncidentPanel";
 import { PeopleSection } from "../components/assist/PeopleSection";
 import { Diagnostic } from "../components/assist/Diagnostic";
 import { RequestDialog } from "../components/assist/RequestDialog";
 import { RemoteActions } from "../components/monitor/RemoteActions";
-import { BackButton } from "../components/common/BackButton";
 import { DiagnosticRunPanel } from "../components/assist/DiagnosticRunPanel";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 

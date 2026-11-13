@@ -8,7 +8,7 @@ import { ROLE_LABELS } from "../../assist/procedures";
 import { colorFromClientId } from "../../utils/clientColor";
 import { EXPERT_COLOR, EXPERT_NAME } from "../../assist/participantLook";
 import type { Author } from "../../assist/assistStore";
-import { TimeAgo } from "../common/TimeAgo";
+import { TimeAgo } from "../common";
 import { triggerHapticFeedback } from "../../utils/haptics";
 
 /** An author's colour: an expert's is the accent (`participantLook`). */

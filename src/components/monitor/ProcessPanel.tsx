@@ -1,8 +1,6 @@
 import { cn } from "@3dverse/ui-lib";
 
-import { Panel } from "../common/Panel";
-import { SourceBadge } from "../common/SourceBadge";
-import { PanelTitle, SectionHeader } from "../common/Section";
+import { Panel, SourceBadge, PanelTitle, SectionHeader } from "../common";
 import {
   useProcessFeed,
   type CnState,

@@ -7,7 +7,7 @@ import {
   useParticipantLook,
   type ParticipantLook,
 } from "../../assist/participantLook";
-import { SectionBody, SectionHeader, SectionTitle } from "../common/Section";
+import { SectionBody, SectionHeader, SectionTitle } from "../common";
 import { RoleChip } from "./RoleChip";
 
 /**

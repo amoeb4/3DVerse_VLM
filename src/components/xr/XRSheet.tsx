@@ -7,7 +7,7 @@ import {
   Button,
 } from "@3dverse/ui-lib";
 
-import { SecondaryToolbar } from "../common/SecondaryToolbar";
+import { SecondaryToolbar } from "../common";
 import { XRPanel } from "./XRPanel";
 import { useEnterXR } from "../../xr/useXRSupport";
 

@@ -1,5 +1,5 @@
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { Kbd } from "./common/Kbd";
+import { Kbd } from "./common";
 import { SHORTCUTS } from "../shortcuts/shortcuts";
 import { triggerHapticFeedback } from "../utils/haptics";
 

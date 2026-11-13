@@ -4,7 +4,7 @@ import { BottomSheet, BottomSheetContent, Button, cn } from "@3dverse/ui-lib";
 import { MACHINES } from "../config";
 import { useProcessFeed } from "../live/processFeed";
 import type { ViewerScene } from "../routing";
-import { SourceBadge } from "./common/SourceBadge";
+import { SourceBadge } from "./common";
 import { MACHINE_STATUS } from "./startup/machineStatus";
 
 const formatTime = (at: number) =>

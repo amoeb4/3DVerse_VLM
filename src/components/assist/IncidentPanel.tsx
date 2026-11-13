@@ -10,7 +10,17 @@ import {
   DialogTitle,
   Icon,
 } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import {
+  Panel,
+  SourceBadge,
+  Sparkline,
+  Row,
+  TimeAgo,
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SectionTitle,
+} from "../common";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import {
@@ -20,16 +30,6 @@ import {
 } from "../../assist/incidentTrace";
 import { INCIDENT_KINDS } from "../../assist/procedures";
 import { CAMERA_FEEDS } from "../../config";
-import { SourceBadge } from "../common/SourceBadge";
-import { Sparkline } from "../common/Sparkline";
-import { Row } from "../common/Row";
-import { TimeAgo } from "../common/TimeAgo";
-import {
-  PanelTitle,
-  SectionBody,
-  SectionHeader,
-  SectionTitle,
-} from "../common/Section";
 
 /**
  * The incident open, as the expert reads it for the diagnosis: the CN's alarm and the block it

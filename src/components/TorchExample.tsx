@@ -1,8 +1,7 @@
 import { Entity } from "@3dverse/livelink";
 import { useEntity } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { ButtonGroup } from "./common/ButtonGroup";
-import { IconSlashed } from "./common/IconSlashed";
+import { ButtonGroup, IconSlashed } from "./common";
 import {
   FRONIUS_TORCH_EUID,
   HEAD_LIGHT_EUID,

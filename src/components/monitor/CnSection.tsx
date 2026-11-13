@@ -1,8 +1,7 @@
 import { cn } from "@3dverse/ui-lib";
 
-import { SourceBadge } from "../common/SourceBadge";
+import { SourceBadge, Row } from "../common";
 import { CollapsibleSection } from "../supervision/CollapsibleSection";
-import { Row } from "../common/Row";
 import { useProcessFeed, type CnState } from "../../live/processFeed";
 
 const STATE_LABELS: Record<CnState, string> = {

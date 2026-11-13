@@ -1,10 +1,14 @@
 import { cn } from "@3dverse/ui-lib";
 
-import { Panel } from "../common/Panel";
-import { Stat } from "../common/Stat";
-import { PanelTitle, SectionBody, SectionHeader } from "../common/Section";
-import { SourceBadge } from "../common/SourceBadge";
-import { Sparkline } from "../common/Sparkline";
+import {
+  Panel,
+  Stat,
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SourceBadge,
+  Sparkline,
+} from "../common";
 import { RECENT_WELDS, useWeldStats } from "../../live/weldLog";
 import { formatClock } from "../../live/format";
 import { useProcessFeed } from "../../live/processFeed";

@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import {
+  Panel,
+  SourceBadge,
+  TimeAgo,
+  Row,
+  PanelTitle,
+  SectionBody,
+  SectionHeader,
+  SectionTitle,
+} from "../common";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import { lastClosedIncident } from "../../assist/assistStore";
@@ -27,15 +36,6 @@ import {
   useProcessFeed,
   type CnState,
 } from "../../live/processFeed";
-import { SourceBadge } from "../common/SourceBadge";
-import { TimeAgo } from "../common/TimeAgo";
-import { Row } from "../common/Row";
-import {
-  PanelTitle,
-  SectionBody,
-  SectionHeader,
-  SectionTitle,
-} from "../common/Section";
 
 /** Warnings and errors from the event log this recent are worth a look. */
 const RECENT_MS = 15 * 60_000;
@@ -62,7 +62,10 @@ function Step({
   return (
     <section>
       <SectionHeader aside={aside}>
-        <SectionTitle as="h3" className="flex items-center gap-2 text-md normal-case tracking-normal">
+        <SectionTitle
+          as="h3"
+          className="flex items-center gap-2 text-md normal-case tracking-normal"
+        >
           <span className="size-5 grid place-items-center rounded-full bg-accent text-white text-4xs tabular-nums">
             {number}
           </span>

@@ -1,5 +1,5 @@
 import { cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import { Panel } from "../common";
 
 import { useAssist } from "../../assist/assistContext";
 import {

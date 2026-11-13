@@ -4,7 +4,7 @@ import type { PartViewState } from "../../modes/partViewState";
 import { SHORTCUTS } from "../../shortcuts/shortcuts";
 import { XRButton } from "../../webXR";
 import { useWebXRStore } from "../../xr/stores";
-import { TertiaryToolbar, ToolbarDivider } from "../common/TertiaryToolbar";
+import { TertiaryToolbar, ToolbarDivider } from "../common";
 
 /**
  * Part's toolbar, over its timeline (`PartChrome`): the camera on the whole part or close up on

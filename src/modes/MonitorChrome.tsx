@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@3dverse/ui-lib";
 
-import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
+import { ModeSheet, type ModeSheetTab } from "../components/common";
 import { CnSection } from "../components/monitor/CnSection";
 import { ProcessPanel } from "../components/monitor/ProcessPanel";
 import { RemoteActions } from "../components/monitor/RemoteActions";

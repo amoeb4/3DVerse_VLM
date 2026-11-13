@@ -1,7 +1,6 @@
 import { cn } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import { Panel, SourceBadge } from "../common";
 
-import { SourceBadge } from "../common/SourceBadge";
 import { useProcessFeed } from "../../live/processFeed";
 
 const formatTime = (at: number) =>

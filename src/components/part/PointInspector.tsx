@@ -1,5 +1,5 @@
 import { cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import { Panel, TimeAgo } from "../common";
 
 import {
   formatSignal,
@@ -11,7 +11,6 @@ import {
   type SignalId,
 } from "../../live/processFeed";
 import type { PartMetric } from "./partColors";
-import { TimeAgo } from "../common/TimeAgo";
 
 const STATUS_STYLE = {
   ok: { text: "text-primary", icon: null },

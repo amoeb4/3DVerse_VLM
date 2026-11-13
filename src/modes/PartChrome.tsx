@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../components/common/Panel";
+import {
+  Panel,
+  PanelTitle,
+  SubTitleSection,
+  ButtonGroup,
+  SourceBadge,
+  BackButton,
+  ModeSheet,
+  type ModeSheetTab,
+} from "../components/common";
 
-import { PanelTitle, SubTitleSection } from "../components/common/Section";
-import { ButtonGroup } from "../components/common/ButtonGroup";
-import { SourceBadge } from "../components/common/SourceBadge";
-import { BackButton } from "../components/common/BackButton";
-import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
 import { findingOf, type LayerFinding } from "../components/part/layerFindings";
 import {
   legendFor,

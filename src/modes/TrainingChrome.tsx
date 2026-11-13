@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Entity } from "@3dverse/livelink";
 import { cn } from "@3dverse/ui-lib";
 
-import { ModeSheet, type ModeSheetTab } from "../components/common/ModeSheet";
+import { ModeSheet, type ModeSheetTab } from "../components/common";
 import { EntityStatusPanel } from "../components/EntityPicking";
 import TrainingPanel from "../components/TrainingPanel";
 import { useMediaQuery } from "../hooks/useMediaQuery";

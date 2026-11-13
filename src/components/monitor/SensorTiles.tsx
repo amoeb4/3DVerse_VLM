@@ -1,9 +1,13 @@
 import { cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
+import {
+  Panel,
+  SourceBadge,
+  Sparkline,
+  PanelTitle,
+  SectionHeader,
+} from "../common";
 
 import { CAMERA_FEEDS } from "../../config";
-import { SourceBadge } from "../common/SourceBadge";
-import { Sparkline } from "../common/Sparkline";
 import {
   HISTORY_LENGTH,
   SIGNALS,
@@ -12,7 +16,6 @@ import {
 } from "../../live/processFeed";
 import { SIGNAL_LINE_COLOR } from "./signalColors";
 import { SoundRing } from "./SoundRing";
-import { PanelTitle, SectionHeader } from "../common/Section";
 
 /** The ring's range, in dB: from a quiet cell to well past the arc's window. */
 const METER = { min: 50, max: 110 };

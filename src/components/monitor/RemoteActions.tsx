@@ -15,8 +15,7 @@ import {
   PopoverTrigger,
   Slider,
 } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
-import { PanelTitle, SectionHeader } from "../common/Section";
+import { Panel, PanelTitle, SectionHeader, SourceBadge } from "../common";
 
 import { authorLabel, useAssist } from "../../assist/assistContext";
 import { INCIDENT_KINDS } from "../../assist/procedures";
@@ -31,7 +30,6 @@ import {
   useProcessFeed,
   type Corrections,
 } from "../../live/processFeed";
-import { SourceBadge } from "../common/SourceBadge";
 import { HAPTIC_STOP, triggerHapticFeedback } from "../../utils/haptics";
 
 const CORRECTION_KEYS = Object.keys(CORRECTION_LIMITS) as (keyof Corrections)[];

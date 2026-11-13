@@ -7,7 +7,7 @@ import {
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
 import { cn, Icon } from "@3dverse/ui-lib";
-import { SubTitleSection } from "../common/Section";
+import { SubTitleSection } from "../common";
 import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";

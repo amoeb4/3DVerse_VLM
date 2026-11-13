@@ -1,19 +1,20 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
-import { Panel } from "../common/Panel";
 import {
+  Panel,
   PanelTitle,
   SectionBody,
   SectionHeader,
   SectionTitle,
-} from "../common/Section";
-import { Row } from "../common/Row";
+  Row,
+  SourceBadge,
+  TimeAgo,
+} from "../common";
 
 import { PartEntitiesContext } from "../../partEntitiesContext";
 import { jointInfoFor, twistAngle } from "../joints/joints";
 import { LiveBadge } from "../LiveBadge";
-import { SourceBadge } from "../common/SourceBadge";
 
 import { useLiveLink } from "../../live/liveLink";
 import {
@@ -23,7 +24,6 @@ import {
   type EventLevel,
 } from "../../live/eventLog";
 import { formatClock, formatDuration } from "../../live/format";
-import { TimeAgo } from "../common/TimeAgo";
 import { CollapsibleSection } from "./CollapsibleSection";
 
 /** How often the joints are sampled, for their speeds and to tell moving from stopped. */

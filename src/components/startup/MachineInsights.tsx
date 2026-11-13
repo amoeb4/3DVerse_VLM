@@ -13,8 +13,7 @@ import {
   type CnState,
 } from "../../live/processFeed";
 import { findingOf } from "../part/layerFindings";
-import { SourceBadge } from "../common/SourceBadge";
-import { TimeAgo } from "../common/TimeAgo";
+import { SourceBadge, TimeAgo } from "../common";
 
 /** A closed incident stays on the tile this long. */
 const RECENT_INCIDENT_MS = 24 * 60 * 60_000;

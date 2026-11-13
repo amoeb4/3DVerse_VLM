@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { cn, Icon } from "@3dverse/ui-lib";
 
-import { SectionTitle } from "../common/Section";
+import { SectionTitle } from "../common";
 
 /**
  * A panel section folded by default: its title is the toggle, and `aside` (a badge, a status) stays
