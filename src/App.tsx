@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   Navigate,
   Route,
@@ -43,8 +44,21 @@ function HomeRoute() {
 
 function ViewerRoute() {
   const { scene: segment = "" } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get(SESSION_ID_PARAM) ?? undefined;
+
+  // The session the address names is over (an old invite link, a session everyone left): the
+  // address stops naming it, which opens the machine's own, its running session or a new one. The
+  // rest of the address stays (the mode, the role), and Back does not return to the dead link.
+  const leaveEndedSession = useCallback(() => {
+    setSearchParams(
+      (params) => {
+        params.delete(SESSION_ID_PARAM);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
 
   const scene = resolveViewerScene(segment);
   if (!scene) {
@@ -63,6 +77,7 @@ function ViewerRoute() {
         key={`${scene.sceneId}/${sessionId ?? ""}`}
         scene={scene}
         sessionId={sessionId}
+        onSessionEnded={leaveEndedSession}
       />
     </>
   );

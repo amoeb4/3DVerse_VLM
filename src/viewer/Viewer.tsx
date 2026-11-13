@@ -28,9 +28,13 @@ import { ViewerLayout } from "./ViewerLayout";
 export function Viewer({
   scene,
   sessionId,
+  onSessionEnded,
 }: {
   scene: ViewerScene;
+  /** The session to join, when the address names one; the machine's own otherwise. */
   sessionId?: string;
+  /** That session is over: for the address to stop naming it (`useReconnect`). */
+  onSessionEnded: () => void;
 }) {
   // --- Stores ---------------------------------------------------------------------------------
   // The XR session, as 3dverse-mobile-viewer runs it (`xr/`): the mode is set optimistically by
@@ -42,7 +46,10 @@ export function Viewer({
   // --- Local state ----------------------------------------------------------------------------
   // Where an XR session starts, from the scene's `xr_start` entity (`xrStartMarker.ts`).
   const [xrOrigin, setXROrigin] = useState<Partial<Transform>>();
-  const { connectionAttempt, ConnectionErrorPanel } = useReconnect();
+  const { connectionAttempt, ConnectionErrorPanel } = useReconnect({
+    sessionId,
+    onSessionEnded,
+  });
 
   // --- Derived --------------------------------------------------------------------------------
   const buildPlate = MACHINES.find(
