@@ -197,14 +197,25 @@ export function SectionTitle({
 export function Row({
   label,
   value,
+  orientation = "horizontal",
 }: {
   label: string;
   value: React.ReactNode;
+  orientation?: "horizontal" | "vertical";
 }) {
   return (
-    <div className="flex justify-between gap-3 text-2xs">
-      <span className="text-secondary">{label}</span>
-      <span className="tabular-nums text-right text-3xs">{value}</span>
+    <div
+      className={cn(
+        "flex gap-x-3 text-3xs",
+        orientation === "horizontal"
+          ? "justify-between *:data-[slot=value]:text-right"
+          : "flex-col",
+      )}
+    >
+      <span className="font-light text-secondary">{label}</span>
+      <span data-solt="value" className="tabular-nums text-4xs">
+        {value}
+      </span>
     </div>
   );
 }
@@ -219,7 +230,7 @@ function LinkSection() {
   return (
     <CollapsibleSection
       title="Link to the robot"
-      aside={<LiveBadge showDetail={false} className="translate-x-1" />}
+      aside={<LiveBadge showDetail={false} size="sm" />}
     >
       <LinkDetails />
     </CollapsibleSection>
@@ -234,10 +245,7 @@ function LinkDetails() {
 
   return (
     <div className="space-y-0.5">
-      <Row
-        label="Feed"
-        value={<code className="text-4xs">{link.url || "—"}</code>}
-      />
+      <Row label="Feed" value={<code>{link.url || "—"}</code>} />
       <Row
         label="Connected for"
         value={
@@ -302,13 +310,6 @@ function RobotSection({
             moving ? "text-positive" : "text-secondary",
           )}
         >
-          <span
-            className={cn(
-              "size-1.5 rounded-full",
-              moving ? "bg-positive animate-pulse" : "bg-secondary/50",
-            )}
-          />
-          {moving ? "MOVING" : "STOPPED"}
           <SourceBadge source={status === "live" ? "live" : "none"} />
         </span>
       }
@@ -379,7 +380,7 @@ function EventSection() {
             <Button
               variant="ghost"
               size="2xs"
-              className="text-3xs"
+              className="text-5xs text-primary"
               onClick={clearEvents}
             >
               Clear
@@ -396,32 +397,34 @@ function EventSection() {
           {events.map((event) => (
             <li
               key={event.id}
-              className="flex items-baseline gap-2 text-3xs leading-5"
+              className="flex items-baseline gap-2 text-4xs leading-5"
             >
+              <TimeAgo
+                at={event.at}
+                className="shrink-0 w-15 text-5xs text-secondary"
+              />
               <div className="grow flex flex-col items-baseline">
                 <div className="flex items-center gap-1">
-                  <Icon
-                    className={cn(
-                      "fas shrink-0 text-3xs",
-                      LEVEL_ICON[event.level],
-                    )}
-                  />
-                  <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary mt-px w-14">
+                  {event.level !== "info" && (
+                    <Icon
+                      className={cn(
+                        "fas shrink-0 text-5xs",
+                        LEVEL_ICON[event.level],
+                      )}
+                    />
+                  )}
+                  <span className="shrink-0 text-5xs uppercase tracking-wide text-secondary">
                     {event.source}
                   </span>
                   {event.simulated && (
                     <SourceBadge
                       source="sim"
-                      className="mr-1.5 align-[1px] text-[9px]"
+                      className="mr-1.5 align-[1px] text-[9px] border-0"
                     />
                   )}
                 </div>
                 <span className="text-balance">{event.text}</span>
               </div>
-              <TimeAgo
-                at={event.at}
-                className="shrink-0 w-15 text-right text-5xs text-secondary tabular-nums"
-              />
             </li>
           ))}
         </ol>

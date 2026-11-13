@@ -28,16 +28,21 @@ const LABELS: Record<LinkStatus, string> = {
  *
  * `collapsible`: the dot alone while its container (`@container`) is narrower than `xl`, the
  * viewer's header on a phone. The label stays there for screen readers.
+ *
+ * `size`: `sm` is the compact style of `SourceBadge`, for a panel's title row.
  */
 export function LiveBadge({
   className,
   showDetail = true,
   collapsible = false,
+  size = "md",
 }: {
   className?: string;
   showDetail?: boolean;
   collapsible?: boolean;
+  size?: "md" | "sm";
 }) {
+  const isSmall = size === "sm";
   const link = useLiveLink(500);
   const dot = useRef<HTMLSpanElement>(null);
 
@@ -87,11 +92,16 @@ export function LiveBadge({
       <div
         className={cn(
           // Solid and tinted by its state, so it reads over any picture.
-          "inline-flex items-center min-h-6 rounded-full border",
-          collapsible
-            ? "px-1.5 @xl:gap-2 @xl:pl-2 @xl:pr-3"
-            : "gap-2 pl-2 pr-3",
-          "bg-ground/90 backdrop-blur-xl text-3xs tabular-nums whitespace-nowrap",
+          "inline-flex items-center border",
+          isSmall
+            ? "h-4 gap-1 px-1 rounded-sm text-5xs"
+            : cn(
+                "min-h-6 rounded-full text-3xs",
+                collapsible
+                  ? "px-1.5 @xl:gap-2 @xl:pl-2 @xl:pr-3"
+                  : "gap-2 pl-2 pr-3",
+              ),
+          "bg-ground/90 backdrop-blur-xl tabular-nums whitespace-nowrap",
           status === "live" && "border-accent-300/60 bg-accent/20",
           (status === "idle" || status === "connecting") &&
             "border-warning/50 bg-warning/10",
@@ -104,7 +114,8 @@ export function LiveBadge({
           ref={dot}
           aria-hidden
           className={cn(
-            "size-2.5 rounded-full",
+            "rounded-full",
+            isSmall ? "size-1.5" : "size-2.5",
             status === "live" && "bg-accent-300 text-accent-300/60",
             status === "idle" && "bg-warning",
             status === "connecting" && "bg-warning",
@@ -131,9 +142,17 @@ export function LiveBadge({
             size="icon-xs"
             title="Reconnect to the robot feed"
             onClick={reconnectLiveLink}
-            className={collapsible ? "@xl:-mr-1.5" : "-mr-1.5"}
+            className={cn(
+              collapsible ? "@xl:-mr-1.5" : "-mr-1.5",
+              isSmall && "size-4 -mr-1",
+            )}
           >
-            <Icon className="fas fa-rotate-right text-5xs" />
+            <Icon
+              className={cn(
+                "fas fa-rotate-right text-5xs",
+                isSmall && "text-[8px]",
+              )}
+            />
           </Button>
         )}
       </div>

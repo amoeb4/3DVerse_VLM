@@ -65,7 +65,7 @@ export function WeldPanel({ className }: { className?: string }) {
           </p>
         )}
       </div>
-      <div className="px-4 py-2 border-t border-tertiary">
+      <div className="px-4 pt-2 pb-3 border-t border-tertiary">
         <SignalRow
           id="ctwd"
           value={process.values.ctwd}

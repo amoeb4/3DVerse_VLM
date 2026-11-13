@@ -43,13 +43,20 @@ export function CnSection() {
 function CnDetails() {
   const { cn: cnState } = useProcessFeed(500);
 
+  const orientation = "vertical";
+
   return (
-    <div className="space-y-0.5">
+    <div className={cn("grid grid-cols-3 gap-2")}>
       <Row
         label="Program"
-        value={<code className="text-3xs">{cnState.program}</code>}
+        value={<code>{cnState.program}</code>}
+        orientation={orientation}
       />
-      <Row label="Block" value={`N${cnState.block}`} />
+      <Row
+        label="Block"
+        value={`N${cnState.block}`}
+        orientation={orientation}
+      />
       <Row
         label="State"
         value={
@@ -62,17 +69,23 @@ function CnDetails() {
             {STATE_LABELS[cnState.state]}
           </span>
         }
+        orientation={orientation}
       />
-      <Row label="Feed override" value={`${cnState.override} %`} />
+      <Row
+        label="Feed override"
+        value={`${cnState.override} %`}
+        orientation={orientation}
+      />
       <Row
         label="Alarms"
         value={
           cnState.alarms.length > 0 ? (
             <span className="text-negative">{cnState.alarms.join(", ")}</span>
           ) : (
-            <span className="text-secondary">None</span>
+            <span className="text-tertiary">None</span>
           )
         }
+        orientation={orientation}
       />
     </div>
   );

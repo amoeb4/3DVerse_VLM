@@ -47,7 +47,7 @@ export function SignalRow({
   return (
     <div className={className}>
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-2xs text-secondary">
+        <span className="text-2xs text-secondary truncate">
           <LabelTag
             className={cn(
               tooltip && "cursor-help underline underline-offset-2",

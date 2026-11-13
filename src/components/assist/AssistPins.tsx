@@ -62,7 +62,7 @@ function PinMarker({ pin }: { pin: Pin }) {
   const { store } = useAssist();
   return (
     <div className="group flex flex-col items-center pointer-events-auto">
-      <div className="relative max-w-56 rounded-lg border-2 border-informative bg-ground/85 backdrop-blur-md px-2.5 py-1.5 shadow-lg">
+      <div className="relative min-w-48 max-w-56 rounded-lg border-2 border-informative bg-ground/85 backdrop-blur-md px-2.5 py-1.5 shadow-lg">
         <p className="text-2xs whitespace-pre-wrap break-words pr-3">
           {pin.text}
         </p>
@@ -80,7 +80,7 @@ function PinMarker({ pin }: { pin: Pin }) {
         <button
           type="button"
           className={cn(
-            "absolute top-0.5 right-0.5 size-4 grid place-items-center rounded text-secondary",
+            "absolute top-0.5 right-0.5 size-4 grid place-items-center rounded text-secondary cursor-pointer",
             "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:text-primary",
           )}
           title="Remove the note"
@@ -128,7 +128,7 @@ function PinComposer() {
           onChange={(event) => setText(event.target.value)}
           placeholder="Write a note..."
           aria-label="The note"
-          className="w-full px-2 py-1 text-xs outline-none border-none"
+          className="w-full px-2 py-1 text-xs bg-transparent border-none outline-none caret-informative"
         />
         <div className="flex justify-end gap-1 p-1 pt-0">
           <Button type="button" variant="ghost" size="xs" onClick={cancelPin}>

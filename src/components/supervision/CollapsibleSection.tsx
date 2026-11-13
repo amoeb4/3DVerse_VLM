@@ -29,14 +29,14 @@ export function CollapsibleSection({
         onClick={() => setIsOpen((open) => !open)}
         className="group flex justify-between items-center gap-1.5 w-full pl-4 pr-2 py-1 text-left cursor-pointer hover:bg-primary/5 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
-        <div className="-translate-x-1  flex items-center justify-between gap-2">
+        <div className="-translate-x-1 flex items-center justify-between gap-2">
           <Icon
             className={cn(
               "fas fa-angle-right text-[9px] text-secondary group-hover:text-primary transition-transform duration-200",
               isOpen && "rotate-90",
             )}
           />
-          <h2 className="text-3xs font-bold tracking-wider uppercase">
+          <h2 className="text-3xs font-bold tracking-wider uppercase truncate">
             {title}
           </h2>
         </div>
@@ -44,7 +44,7 @@ export function CollapsibleSection({
       </button>
 
       {isOpen && (
-        <div id={contentId} className="px-4 py-1">
+        <div id={contentId} className="px-4 pt-1 pb-2">
           {children}
         </div>
       )}

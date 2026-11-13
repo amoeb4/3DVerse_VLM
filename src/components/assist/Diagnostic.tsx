@@ -239,7 +239,7 @@ export function Diagnostic({
               ))}
             </ol>
           ) : (
-            <p className="text-2xs text-secondary">
+            <p className="text-3xs text-tertiary">
               No warning in the last {RECENT_MS / 60_000} minutes.
             </p>
           )}
