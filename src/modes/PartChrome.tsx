@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { Panel } from "../components/common/Panel";
 
-import { PanelTitle } from "../components/common/Section";
+import { PanelTitle, SubTitleSection } from "../components/common/Section";
 import { ButtonGroup } from "../components/common/ButtonGroup";
 import { SourceBadge } from "../components/common/SourceBadge";
 import { BackButton } from "../components/common/BackButton";
@@ -177,9 +177,7 @@ export function PartChrome({
           className={cn("flex flex-col gap-2.5 px-3 py-2.5")}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-3xs font-bold tracking-wider uppercase">
-              Colour by
-            </span>
+            <SubTitleSection as="span">Colour by</SubTitleSection>
             <SourceBadge source={build.source} />
           </div>
           <ButtonGroup isAttached className="w-full">

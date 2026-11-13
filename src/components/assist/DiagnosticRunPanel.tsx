@@ -3,6 +3,7 @@ import * as THREE from "three";
 import type { DefaultCameraController } from "@3dverse/livelink-react";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import { Panel } from "../common/Panel";
+import { SubTitleSection } from "../common/Section";
 
 import { useAssist } from "../../assist/assistContext";
 import type { CheckResult } from "../../assist/assistStore";
@@ -137,9 +138,9 @@ export function DiagnosticRunPanel({
         <header className="flex items-center justify-between gap-3">
           <div className="grow flex items-center gap-2 min-w-0">
             <Icon className="fas fa-stethoscope text-2xs text-accent-300" />
-            <span className="text-3xs font-bold tracking-wider uppercase truncate">
+            <SubTitleSection as="span" className="truncate">
               Diagnostic · {INCIDENT_KINDS[run.kind].label}
-            </span>
+            </SubTitleSection>
           </div>
           {checkpoint && (
             <p className="text-3xs text-secondary tabular-nums">
@@ -224,15 +225,15 @@ export function DiagnosticRunPanel({
             <div>
               <h2 className="text-sm font-bold">Diagnostic done</h2>
               <div className="space-y-1 mt-2 text-2xs text-secondary">
-              <p>
-                {okCount} of {CHECKPOINTS.length} points OK
+                <p>
+                  {okCount} of {CHECKPOINTS.length} points OK
                 </p>
                 <p>
-                {skipped.length > 0 &&
-                  `Skipped: ${skipped.map(({ label }) => label).join(", ")}`}
-                .
-              </p>
-            </div>
+                  {skipped.length > 0 &&
+                    `Skipped: ${skipped.map(({ label }) => label).join(", ")}`}
+                  .
+                </p>
+              </div>
             </div>
             <footer className="flex items-center justify-end gap-2">
               <Button variant="outline" size="sm" onClick={askExpert}>

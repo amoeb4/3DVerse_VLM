@@ -6,6 +6,10 @@ type HeadingProps = {
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 };
 
+type SubTitleProps = Omit<HeadingProps, "as"> & {
+  as?: HeadingProps["as"] | "span" | "p";
+};
+
 //------------------------------------------------------------------------------
 /** A panel's own title. */
 export function PanelTitle({ children, className, as = "h1" }: HeadingProps) {
@@ -18,8 +22,15 @@ export function PanelTitle({ children, className, as = "h1" }: HeadingProps) {
 }
 
 //------------------------------------------------------------------------------
-/** The small uppercase title of a section inside a panel. */
-export function SectionTitle({ children, className, as = "h2" }: HeadingProps) {
+/**
+ * The small uppercase label (`text-3xs font-bold tracking-wider uppercase`): a heading, or with
+ * `as="span"` a label in a row of its own (a control's caption, a card's title).
+ */
+export function SubTitleSection({
+  children,
+  className,
+  as = "h3",
+}: SubTitleProps) {
   const Component = as;
   return (
     <Component
@@ -27,6 +38,16 @@ export function SectionTitle({ children, className, as = "h2" }: HeadingProps) {
     >
       {children}
     </Component>
+  );
+}
+
+//------------------------------------------------------------------------------
+/** The title of a section inside a panel: a `SubTitleSection` at heading level 2. */
+export function SectionTitle({ children, className, as = "h2" }: HeadingProps) {
+  return (
+    <SubTitleSection as={as} className={className}>
+      {children}
+    </SubTitleSection>
   );
 }
 

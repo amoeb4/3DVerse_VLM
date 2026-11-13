@@ -6,7 +6,8 @@ import {
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
-import { Button, cn, Icon } from "@3dverse/ui-lib";
+import { cn, Icon } from "@3dverse/ui-lib";
+import { SubTitleSection } from "../common/Section";
 import { SharedOverlayProvider } from "../holo/SharedOverlayProvider";
 import { PartInCell } from "../part/PartInCell";
 import type { PartMetric, Theme } from "../part/partColors";
@@ -47,6 +48,10 @@ export function AltCamera({
     (state) => state.xrSupport["immersive-vr"].isSupported,
   );
 
+  const foldLabel = open
+    ? "Fold the alternate camera"
+    : "Show the alternate camera";
+
   return (
     <section
       aria-label="Alternate camera"
@@ -58,13 +63,30 @@ export function AltCamera({
         open ? "rounded-b-none" : "",
       )}
     >
-      <header className="flex items-center justify-between h-8 pl-3 pr-1 shrink-0 bg-ground/65 backdrop-blur-lg">
-        <h2 className="flex items-center gap-1.5 text-3xs font-bold tracking-wider uppercase">
+      {/* The whole header folds and unfolds the card: a button behind its content, which sits over
+          it and lets the click through, except for the XR entries, which are buttons of their own
+          (a button cannot hold a button). */}
+      <header className="relative flex items-center justify-between h-8 pl-3 pr-1 shrink-0 bg-ground/65 backdrop-blur-lg">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={foldLabel}
+          title={foldLabel}
+          onClick={onToggle}
+          className={cn(
+            "absolute inset-0 cursor-pointer hover:bg-primary/5 transition-colors duration-200",
+            "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
+          )}
+        />
+        <SubTitleSection
+          as="h2"
+          className="relative flex items-center gap-1.5 pointer-events-none"
+        >
           <Icon className="fas fa-video text-4xs text-secondary" />
           Piece details
-        </h2>
+        </SubTitleSection>
 
-        <div className="flex items-center gap-1">
+        <div className="relative flex items-center gap-1 pointer-events-none">
           {/* Entrées XR : seulement quand la carte est ouverte, and only the modes this device
               can enter: nothing where it cannot, nor until that is known. They start the viewer's XR session
               (`XRSession`, in `Viewer`), not one of this card's own: a `<WebXR>` mounted here sits
@@ -73,30 +95,19 @@ export function AltCamera({
               follow into the headset: livelink.webxr 0.8.4 cannot composite a viewport overlay
               into an XR frame. */}
           {open && canOpen && (
-            <>
+            <div className="flex items-center gap-1 pointer-events-auto">
               {isARSupported && <XRButton mode="immersive-ar" text="Start" />}
               {isVRSupported && <XRButton mode="immersive-vr" text="Start" />}
-            </>
+            </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-expanded={open}
-            title={
-              open ? "Fold the alternate camera" : "Show the alternate camera"
-            }
-            aria-label={
-              open ? "Fold the alternate camera" : "Show the alternate camera"
-            }
-            onClick={onToggle}
-          >
+          <span className="size-6 grid place-items-center text-secondary">
             <Icon
               className={cn(
                 "fas fa-chevron-down text-5xs transition-transform duration-200",
                 !open && "rotate-180",
               )}
             />
-          </Button>
+          </span>
         </div>
       </header>
 

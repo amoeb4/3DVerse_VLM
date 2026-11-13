@@ -84,7 +84,7 @@ function MicMeter() {
           Mic
         </span>
         <span className="text-5xs text-tertiary whitespace-nowrap">
-          {unit} · WPS {band[0]}–{band[1]}
+          WPS {band[0]}–{band[1]}
         </span>
       </div>
       <Sparkline
