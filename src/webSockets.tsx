@@ -12,6 +12,7 @@ import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
 import { useSpeed } from "./components/TrainingPanel";
 import { LIVE_FEED_URL } from "./config";
 import { liveLink, messageTimestamp } from "./live/liveLink";
+import { isArmHeld } from "./preview/armHold";
 
 /** Reconnection attempts before giving up; the LIVE badge can then retry by hand. */
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -76,7 +77,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }
         liveLink.message(messageTimestamp(parsed));
 
-        if (!instance || entitiesMap.size === 0) {
+        // Not while Preview plays a program back on the arm.
+        if (!instance || entitiesMap.size === 0 || isArmHeld()) {
           return;
         }
 

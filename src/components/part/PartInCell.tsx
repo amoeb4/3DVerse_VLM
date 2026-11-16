@@ -9,10 +9,10 @@ import {
 } from "@3dverse/livelink-react";
 import type { Entity } from "@3dverse/livelink";
 
-import { useBuildRecord } from "../../live/processFeed";
+import { useBuildRecord, type BuildRecord } from "../../live/processFeed";
 import { useSharedOverlay } from "../holo/sharedOverlay";
 import type { PartMetric, Theme } from "./partColors";
-//import { deepPlate } from "./partGeometry";
+import type { PartGeometry, Point3 } from "./partGeometry";
 import { waamPart } from "./waamPart";
 import { PartModel, type PartPoint } from "./PartModel";
 import { PartPeek } from "./PartPeek";
@@ -87,6 +87,29 @@ function placementOn(plate: Entity, up: { current: UpAxis | null }) {
 }
 
 /**
+ * Where the part stands when given its frame on the plate (`origin`): there, in the plate's own
+ * units, its axes the plate's — the part's x along the plate's x, its y (up) along the plate's z.
+ * A program's `G54`, carried by the positioner however it tilts.
+ */
+function placementAt(plate: Entity, origin: Point3) {
+  if (!plate.ls_to_ws) return null;
+  const world = new THREE.Matrix4().fromArray(plate.ls_to_ws);
+  const metresPerUnit = new THREE.Vector3()
+    .setFromMatrixColumn(world, 0)
+    .length();
+  const perMm = 0.001 / metresPerUnit;
+  const local = new THREE.Matrix4()
+    .makeBasis(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, 1),
+      new THREE.Vector3(0, -1, 0),
+    )
+    .scale(new THREE.Vector3(perMm, perMm, perMm))
+    .setPosition(origin[0], origin[1], origin[2]);
+  return world.multiply(local);
+}
+
+/**
  * The part in construction, in the cell: drawn whole in the viewport's shared overlay, over the
  * stream, standing on the build plate and following it.
  *
@@ -97,6 +120,10 @@ function placementOn(plate: Entity, up: { current: UpAxis | null }) {
  *
  * `onOpen` (the Monitor mode): the part under the pointer shows a link-like label (`PartPeek`),
  * and a click on it calls `onOpen` — opening it in Part mode.
+ *
+ * `geometry` and `build` (the Preview mode): another part than the one in construction, laid as
+ * far as `build` says, rather than the live build's. `origin` puts it on its frame on the plate
+ * (`placementAt`) rather than on the plate's top face.
  *
  * Must be rendered under a `SharedOverlayProvider`, inside the viewport.
  */
@@ -113,6 +140,10 @@ export function PartInCell({
   orbitPaused = false,
   closeUp = false,
   onOpen,
+  geometry,
+  build: givenBuild,
+  origin,
+  ghost = xray,
 }: {
   plateEuid: string;
   xray: boolean;
@@ -133,16 +164,33 @@ export function PartInCell({
   closeUp?: boolean;
   /** Not in `xray`: a click on the part calls it. */
   onOpen?: () => void;
+  /** Another part than the one in construction (Preview). */
+  geometry?: PartGeometry;
+  /** How far it is laid; the live build's if not given. */
+  build?: BuildRecord;
+  /** Its frame on the plate, in the plate's units; on the plate's top face if not given. */
+  origin?: Point3;
+  /** The layers still to lay, as faint lines; with `xray` if not given. */
+  ghost?: boolean;
 }) {
   const overlay = useSharedOverlay();
   const { isConnecting, isDisconnected } = useContext(LivelinkContext);
   const { viewport } = useContext(ViewportContext);
   const { entity: plate } = useEntity({ euid: plateEuid });
-  const build = useBuildRecord(500);
+  const liveBuild = useBuildRecord(500);
+  const build = givenBuild ?? liveBuild;
+  // The live part's model is made afresh as a new build starts (its layer count), as before.
+  const liveLayers = geometry ? 0 : liveBuild.layers;
   const model = useMemo(
-    () => new PartModel(waamPart()),
-    [build.layers],
+    () => new PartModel(geometry ?? waamPart()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [geometry, liveLayers],
   );
+  // Read by the draw listener: the frame may change without the part changing.
+  const originRef = useRef(origin);
+  useEffect(() => {
+    originRef.current = origin;
+  }, [origin]);
   const placed = useRef(false);
   const onHoverRef = useRef(onHover);
   useEffect(() => {
@@ -176,7 +224,9 @@ export function PartInCell({
     const up = { current: null as UpAxis | null };
     overlay.scene.add(model.root);
     const stop = overlay.addDrawListener(() => {
-      const matrix = placementOn(plate, up);
+      const matrix = originRef.current
+        ? placementAt(plate, originRef.current)
+        : placementOn(plate, up);
       model.root.visible = matrix !== null;
       if (matrix) {
         model.root.matrix.copy(matrix);
@@ -205,9 +255,9 @@ export function PartInCell({
     model.setTheme(theme);
     model.setShownLayer(shownLayer);
     model.setFocusLayer(focusLayer);
-    model.setGhost(xray);
+    model.setGhost(ghost);
     overlay?.requestRedraw();
-  }, [model, metric, theme, shownLayer, focusLayer, xray, overlay]);
+  }, [model, metric, theme, shownLayer, focusLayer, ghost, overlay]);
 
   // Part mode: the whole cell veiled, so the part stands out.
   useVeil(overlay, xray, theme);

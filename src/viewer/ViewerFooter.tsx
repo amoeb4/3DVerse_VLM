@@ -61,6 +61,8 @@ export function ViewerFooter({
   const isPartMode = mode === "part";
   const isAssistMode = mode === "assistance";
   const isTrainingMode = mode === "training";
+  // Part and Preview have their own bottom stack, its toolbar over their timeline.
+  const hasOwnStack = isPartMode || mode === "preview";
 
   return (
     // Fixed, as its corner toolbars are: docked to the viewport's bottom, and what spills out of it
@@ -101,8 +103,8 @@ export function ViewerFooter({
       {!isLargeScreen && !isXR && !isHeadset && <XRSheet />}
 
       {/* The top of the column: the camera, and what one does on the cell. Part has its own, over
-          its timeline (`PartCameraToolbar`). */}
-      {!isPartMode && (
+          its timeline (`PartCameraToolbar`), and so has Preview (`PreviewChrome`). */}
+      {!hasOwnStack && (
         <TertiaryToolbar aria-label="Camera and notes">
           {/* Assistance: pin a note, follow the other side's camera. */}
           {isAssistMode && (
@@ -140,7 +142,7 @@ export function ViewerFooter({
           always there, so the toolbar does not move as a line comes and goes. In Part it is the
           room left under the timeline, which stands on the navbar's spacing (`bottom-navbar`). */}
       <MiniToast
-        className={cn("w-72 max-w-full", isPartMode ? "h-7" : "h-10")}
+        className={cn("w-72 max-w-full", hasOwnStack ? "h-7" : "h-10")}
       />
 
       {/* The foot of the column: what else stands at the bottom centre goes above it. */}

@@ -6,7 +6,8 @@ export const SHORTCUTS = {
   // Not "r": keyBindings.tsx already uses it to move every entity back to the origin.
   reset: "p",
   theme: "t",
-  // Part mode: play the build's replay, or stop it. `event.key` for the space bar is " ".
+  // Part mode: play the build's replay, or stop it; Preview: play the program, or pause it.
+  // `event.key` for the space bar is " ".
   playBuild: " ",
 } as const;
 
@@ -18,5 +19,6 @@ export const MODE_SHORTCUTS: Record<ViewMode, string> = {
   monitor: "1",
   part: "2",
   assistance: "3",
+  preview: "4",
   training: "5",
 };

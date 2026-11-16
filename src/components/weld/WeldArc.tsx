@@ -25,6 +25,13 @@ const ARC_LIGHT_RANGE = 2.5;
 /** Each change of the light is a message to the server: its flicker is sent at ~11 Hz, not per frame. */
 const ARC_LIGHT_UPDATE_MS = 90;
 
+/** Where the arc burns, and whether, when not at the torch while the machine welds (`WeldArc`). */
+export type ArcSource = {
+  welding: boolean;
+  /** Its point in world space, read every frame; `null` for none. */
+  position: () => readonly [number, number, number] | null;
+};
+
 /**
  * The welding arc at the torch tip while welding — the machine running (`AutoWeld`) or Training's
  * Start Weld: blue glare, spatter, the pool's afterglow and a subtle fume — see `WeldArcEffect` —
@@ -36,14 +43,30 @@ const ARC_LIGHT_UPDATE_MS = 90;
  * for everyone while welding: created by the one viewer that writes the weld (`useWritesWeld`), so
  * there is one light, not one per viewer.
  *
+ * `source` (Preview): the arc is where and when it says — a program's point on the part, while its
+ * arc is on — rather than at the torch while the machine welds; no light is put in the scene.
+ *
  * Must be rendered inside a `Viewport`.
  */
-export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
+export function WeldArc({
+  showEffect = true,
+  source,
+}: {
+  showEffect?: boolean;
+  source?: ArcSource;
+}) {
   const { instance } = useContext(LivelinkContext);
   const { camera } = useContext(ViewportContext);
   const { entity: torch } = useEntity({ euid: TORCH_EUID });
-  const welding = useIsWelding();
-  const writesLight = useWritesWeld();
+  const machineWelding = useIsWelding();
+  const writesWeld = useWritesWeld();
+  const welding = source ? source.welding : machineWelding;
+  const writesLight = !source && writesWeld;
+  // Read by the frame loop, which is not restarted for it.
+  const positionRef = useRef(source?.position);
+  useEffect(() => {
+    positionRef.current = source?.position;
+  }, [source?.position]);
 
   const smokeRef = useRef<HTMLCanvasElement>(null);
   const lightRef = useRef<HTMLCanvasElement>(null);
@@ -81,7 +104,10 @@ export function WeldArc({ showEffect = true }: { showEffect?: boolean }) {
       const dt = (now - last) / 1000;
       last = now;
 
-      const position = torch?.global_transform?.position;
+      const fromSource = positionRef.current;
+      const position = fromSource
+        ? fromSource()
+        : torch?.global_transform?.position;
       effect.update(
         dt,
         now,

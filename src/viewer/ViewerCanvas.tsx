@@ -4,6 +4,7 @@ import {
   Viewport,
   type DefaultCameraController,
 } from "@3dverse/livelink-react";
+import { useMemo } from "react";
 import type { Entity } from "@3dverse/livelink";
 import { Button, Icon, cn } from "@3dverse/ui-lib";
 
@@ -22,6 +23,11 @@ import type { ViewSettings } from "../hooks/useViewSettings";
 import { Avatars } from "../invite/Avatars";
 import type { ViewMode } from "../modes/modes";
 import type { PartViewState } from "../modes/partViewState";
+import type { Point3 } from "../components/part/partGeometry";
+import type { RobotKinematics } from "../config";
+import { pointAt } from "../preview/mpf";
+import { usePlaybackTick } from "../preview/playback";
+import type { PreviewState } from "../preview/usePreview";
 
 /**
  * The 3D view: the canvas, its viewport on the main camera, and everything drawn in it or over the
@@ -43,6 +49,8 @@ export function ViewerCanvas({
   onPick,
   buildPlate,
   partView,
+  preview,
+  kinematics,
   onOpenPart,
   isAltCameraOpen,
   onToggleAltCamera,
@@ -68,6 +76,10 @@ export function ViewerCanvas({
   /** Where the part in construction stands in the cell (`Machine.buildPlate`). */
   buildPlate?: string;
   partView: PartViewState;
+  /** Preview's program, its part and its playback (`usePreview`). */
+  preview: PreviewState;
+  /** The robot's, for where Preview's part stands (`Machine.kinematics`). */
+  kinematics?: RobotKinematics;
   /** Monitor: a click on the part opens it in Part mode. */
   onOpenPart: () => void;
   /** Monitor's alternate camera, bottom left: open, or folded to its title bar. */
@@ -81,8 +93,10 @@ export function ViewerCanvas({
   const isPartMode = mode === "part";
   const isAssistMode = mode === "assistance";
   const isTrainingMode = mode === "training";
-  // The part in construction: shown in the cell in Monitor, Part and Assistance.
-  const isPartShown = !isTrainingMode;
+  const isPreviewMode = mode === "preview";
+  // The part in construction: shown in the cell in Monitor, Part and Assistance. Preview shows the
+  // part its program lays instead.
+  const isPartShown = !isTrainingMode && !isPreviewMode;
 
   return (
     <Canvas className="w-full h-dvh">
@@ -129,10 +143,24 @@ export function ViewerCanvas({
               onOpen={isMonitorMode ? onOpenPart : undefined}
             />
           )}
+          {isPreviewMode && (
+            <PreviewPart
+              preview={preview}
+              // On the program's frame where the robot's kinematics give it, else on the plate.
+              plateEuid={kinematics?.workpiece.euid ?? buildPlate}
+              origin={kinematics?.workpiece.origin}
+              theme={theme}
+              cameraController={cameraController}
+            />
+          )}
         </SharedOverlayProvider>
 
         {/* The welding arc at the torch tip, while the machine runs or "Start Weld" is on. */}
-        <WeldArc showEffect={view.arcSparkles} />
+        {isPreviewMode ? (
+          <PreviewWeldArc preview={preview} showEffect={view.arcSparkles} />
+        ) : (
+          <WeldArc showEffect={view.arcSparkles} />
+        )}
 
         {view.jointAngles && !isPartMode && <JointAnglesOverlay />}
 
@@ -159,6 +187,72 @@ export function ViewerCanvas({
       </Viewport>
     </Canvas>
   );
+}
+
+/**
+ * Preview: the part the program lays, as far as the playback has gone — every bead before the one
+ * under way, and that one up to the torch. Re-rendered with the playback, not every frame.
+ */
+function PreviewPart({
+  preview,
+  plateEuid,
+  origin,
+  theme,
+  cameraController,
+}: {
+  preview: PreviewState;
+  plateEuid?: string;
+  origin?: Point3;
+  theme: Theme;
+  cameraController: DefaultCameraController | null;
+}) {
+  usePlaybackTick(preview.playback);
+  const { program, geometry, record, playback } = preview;
+  if (!plateEuid || program.status !== "ready" || !geometry || !record) {
+    return null;
+  }
+  const { index, fraction } = pointAt(program.program, playback.time);
+  return (
+    <PartInCell
+      plateEuid={plateEuid}
+      origin={origin}
+      geometry={geometry}
+      build={record.at(index, fraction)}
+      xray={false}
+      // What is still to lay, as faint lines: the shape the program heads for.
+      ghost
+      metric="temperature"
+      theme={theme}
+      shownLayer={Infinity}
+      focusLayer={null}
+      onHover={ignoreHover}
+      cameraController={cameraController}
+      focusSignal={0}
+    />
+  );
+}
+
+const ignoreHover = () => {};
+
+/**
+ * Preview: the arc where the program lays metal, on the part itself, while it plays and its arc
+ * is on — not at the torch, nor while the (simulated) machine welds.
+ */
+function PreviewWeldArc({
+  preview,
+  showEffect,
+}: {
+  preview: PreviewState;
+  showEffect: boolean;
+}) {
+  usePlaybackTick(preview.playback);
+  const welding = preview.isArcOn();
+  const { arcPosition } = preview;
+  const source = useMemo(
+    () => ({ welding, position: arcPosition }),
+    [welding, arcPosition],
+  );
+  return <WeldArc showEffect={showEffect} source={source} />;
 }
 
 /** Training: a second 3D viewpoint, not one of the cell's cameras. */

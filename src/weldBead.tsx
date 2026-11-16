@@ -85,11 +85,14 @@ const distance = (a: number[], b: number[]) =>
  *
  * In every mode, whether the weld was started by the machine (`AutoWeld`) or by Training's Start
  * Weld. Mount once, inside `Livelink`.
+ *
+ * Not while `enabled` is false: in Preview, the torch follows a program played back, not the
+ * machine, and nothing it does is laid.
  */
-export function WeldBeads() {
+export function WeldBeads({ enabled = true }: { enabled?: boolean }) {
   const { instance } = useContext(LivelinkContext);
   const { entity: torch } = useEntity({ euid: TORCH_EUID });
-  const isLaying = useWritesWeld();
+  const isLaying = useWritesWeld() && enabled;
 
   const lastPosition = useRef<[number, number, number] | null>(null);
   const queue = useRef<[number, number, number][]>([]);

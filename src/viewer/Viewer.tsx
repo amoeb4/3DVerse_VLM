@@ -52,9 +52,10 @@ export function Viewer({
   });
 
   // --- Derived --------------------------------------------------------------------------------
-  const buildPlate = MACHINES.find(
-    (machine) => machine.sceneId === scene.sceneId,
-  )?.buildPlate;
+  const machine = MACHINES.find(
+    (candidate) => candidate.sceneId === scene.sceneId,
+  );
+  const buildPlate = machine?.buildPlate;
 
   // --- Effects --------------------------------------------------------------------------------
   // Leaving the viewer leaves XR: the store outlives it.
@@ -72,6 +73,7 @@ export function Viewer({
       machineName={scene.name}
       sceneId={scene.sceneId}
       buildPlate={buildPlate}
+      kinematics={machine?.kinematics}
     />
   );
 

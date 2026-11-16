@@ -27,6 +27,11 @@ import {
   useModeCamera,
 } from "../modes/useModeCamera";
 import { useViewMode } from "../modes/useViewMode";
+import { PreviewChrome } from "../modes/PreviewChrome";
+import { usePreview } from "../preview/usePreview";
+import { TertiaryToolbar } from "../components/common";
+import { ResetPositionButton } from "../components/ResetPositionButton";
+import type { RobotKinematics } from "../config";
 import { useKeyboardShortcuts } from "../shortcuts/useKeyboardShortcuts";
 import { WeldBeads } from "../weldBead";
 import { useEntityPicking } from "./useEntityPicking";
@@ -47,6 +52,7 @@ export function ViewerLayout({
   machineName,
   sceneId,
   buildPlate,
+  kinematics,
   isXR = false,
 }: {
   machineName: string;
@@ -54,6 +60,8 @@ export function ViewerLayout({
   sceneId: string;
   /** Where the part in construction stands in the cell (`Machine.buildPlate`). */
   buildPlate?: string;
+  /** How the robot moves, for Preview's playback (`Machine.kinematics`). */
+  kinematics?: RobotKinematics;
   /**
    * Inside `<WebXR>`: the DOM around the view only, no desktop `<Canvas>`. Livelink packs every
    * rendering surface into one streamed frame by its page rect, and the XR surface's rect is
@@ -82,6 +90,7 @@ export function ViewerLayout({
   const isPartMode = mode === "part";
   const isAssistMode = mode === "assistance";
   const isTrainingMode = mode === "training";
+  const isPreviewMode = mode === "preview";
   // Large screens, Monitor, Part and the Diagnostic: the actions on the right.
   const hasRightColumn =
     isLargeScreen && (isMonitorMode || isPartMode || isAssistMode);
@@ -110,6 +119,9 @@ export function ViewerLayout({
   // The part in construction: shown in the cell in Monitor, Part and Assistance; Part also has its
   // panels, brings the camera to the part and fades the arm.
   const partView = usePartViewState();
+  // Preview: the program played back, its part, and the robot moving along it. Only while in
+  // Preview does it load a program or take the arm.
+  const preview = usePreview({ active: isPreviewMode, kinematics });
 
   // --- Callbacks ------------------------------------------------------------------------------
   // Monitor: a click on the part opens it in Part mode.
@@ -158,9 +170,10 @@ export function ViewerLayout({
         pickInterceptor={pickInterceptor}
       >
         <IncidentDigestRecorder sceneId={sceneId} />
-        {/* In every mode: welding while the machine runs, and the bead it lays. */}
+        {/* In every mode: welding while the machine runs, and the bead it lays — but in Preview,
+            where the torch plays a program back and lays nothing. */}
         <AutoWeld />
-        <WeldBeads />
+        <WeldBeads enabled={!isPreviewMode} />
         <EntityProvider>
           <ViewerHeader
             machineName={machineName}
@@ -196,9 +209,24 @@ export function ViewerLayout({
               onRunEnd={goToModeView}
             />
           )}
-          {/* The job, under the header, in every mode but Training. Below `lg`, all of it on one
-              line, swiped sideways. */}
-          {!isTrainingMode && (
+          {isPreviewMode && (
+            <PreviewChrome
+              preview={preview}
+              machineName={machineName}
+              toolbar={
+                <TertiaryToolbar aria-label="Camera">
+                  <ResetPositionButton
+                    onReset={resetCamera}
+                    isAtDefaultPosition={isAtDefaultPosition}
+                    disabled={cameraController === null}
+                  />
+                </TertiaryToolbar>
+              }
+            />
+          )}
+          {/* The job, under the header, in every mode but Training and Preview (a program played
+              back, not the build). Below `lg`, all of it on one line, swiped sideways. */}
+          {!isTrainingMode && !isPreviewMode && (
             <ProductionStrip
               swipeable
               className="fixed top-16 left-4 right-4 z-40 starting:opacity-0 transition-opacity duration-500"
@@ -238,6 +266,8 @@ export function ViewerLayout({
             onPick={onPick}
             buildPlate={buildPlate}
             partView={partView}
+            preview={preview}
+            kinematics={kinematics}
             onOpenPart={openPart}
             isAltCameraOpen={isAltCameraOpen}
             onToggleAltCamera={toggleAltCamera}

@@ -34,10 +34,10 @@ export function XRHud() {
   useIdleControlsVisibility(!xrMode || isMediumScreen);
 
   // The session's controls stand over what the mode has at the bottom centre: the camera's toolbar
-  // (`TertiaryToolbar`), or in Part its bottom stack, the toolbar over the timeline, taller on a
-  // phone. Where they stood when the confirming line was under them.
+  // (`TertiaryToolbar`), or in Part and Preview their bottom stack, the toolbar over the timeline,
+  // taller on a phone. Where they stood when the confirming line was under them.
   const { mode } = useViewMode();
-  const isPartMode = mode === "part";
+  const isPartMode = mode === "part" || mode === "preview";
 
   return (
     <>

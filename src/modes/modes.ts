@@ -6,18 +6,22 @@
  * The use-cases behind them follow the client's incident loop, Diagnostic ➔ Résolution ➔ Reprise:
  * - Monitor: remote monitoring of the process (process drift, quality indicators, remote actions).
  * - Part: the part's own digital twin, beads coloured by process data. Opened from Monitor.
+ * - Preview: a part program (`.mpf`) played back on the cell — the part as it lays it, and the
+ *   robot moving along it by inverse kinematics. Before running it, or to see how it was run.
  * - Assistance: an operator at the cell helped by a remote expert (tool wear, torch collision).
  *   Opened from the actions (`RemoteActions`) and the incident alert.
  * - Training: every tool the viewer has had so far, mocks included, for development, demos and
  *   training. It was `sandbox`: `?mode=sandbox` still opens it (`LEGACY_MODES`).
  *
- * The navbar (`ModeSwitcher`) shows Monitor, Assistance and Training; Part is a view of Monitor.
+ * The navbar (`ModeSwitcher`) shows Monitor, Assistance (as Diagnostic), Preview and Training;
+ * Part is a view of Monitor.
  */
 
 export const VIEW_MODES = [
   "monitor",
   "part",
   "assistance",
+  "preview",
   "training",
 ] as const;
 
@@ -45,6 +49,13 @@ export const MODES: Record<ViewMode, ModeInfo> = {
     icon: "fa-cube",
     description:
       "The part's digital twin: where on the part did the process drift?",
+    ready: true,
+  },
+  preview: {
+    label: "Preview",
+    icon: "fa-route",
+    description:
+      "Play a part program back: the part as it is laid, the robot moving along it",
     ready: true,
   },
   assistance: {
