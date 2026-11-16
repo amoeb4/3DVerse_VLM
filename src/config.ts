@@ -11,9 +11,10 @@ export const LIVE_FEED_URL =
 /**
  * Variant Launch, which brings WebXR AR to iOS through an App Clip (`xr/xrSupport.ts`): its
  * project key, and its SDK. Without a key, AR stays unavailable on iPhones and iPads.
+ * `VITE_VARIANT_API_KEY` overrides the project's key.
  */
 export const VARIANT_API_KEY: string =
-  import.meta.env.VITE_VARIANT_API_KEY || "";
+  import.meta.env.VITE_VARIANT_API_KEY || "hIMKeTkjMIJBrHeSy4JE1St6JX5INJ2o";
 export const VARIANT_URL: string =
   import.meta.env.VITE_VARIANT_URL || "https://launchar.app/sdk/v1";
 
