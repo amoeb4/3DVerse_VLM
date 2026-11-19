@@ -51,6 +51,14 @@ test:
 	gnome-terminal --tab -- bash -c "npx tsx grpc_proxy.ts; exec bash"
 	$(open_browser)
 
+sim:
+	gnome-terminal --tab -- bash -c "npm run dev; exec bash"
+#	gnome-terminal --tab -- bash -c "cd tester_python && source .venv/bin/activate && python server.py; exec bash"
+	sleep 0.1
+	gnome-terminal --tab -- bash -c "node src/server.js; exec bash"
+	gnome-terminal --tab -- bash -c "npx tsx grpc_sim.ts; exec bash"
+	$(open_browser)
+
 # -----------------------------------------------------------------------------
 # Python → navigateur, sans gRPC (macOS et Linux, un seul terminal)
 #

@@ -77,7 +77,7 @@ const orientationMap: Record<
   // robot
   1: (val) => [90, 0, val],
   2: (val) => [0, val, 90],
-  3: (val) => [-180, 0, val],
+  3: (val) => [0, 0, val-180],
   4: (val) => [val+180, 0, -180],
   5: (val) => [0, 0, val],
   6: (val) => [val, 0, -180],

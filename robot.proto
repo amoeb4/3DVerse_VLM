@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package robot.v1;
+
+// Pilotage d'un robot 6 axes en rejouant une trajectoire (trace SINUMERIK).
+service RobotControl {
+  // Métadonnées de la trajectoire chargée (axes, durée, plages d'angles).
+  rpc GetInfo (Empty) returns (TrajectoryInfo);
+  // Etat instantané : position des 6 axes, temps courant, mode.
+  rpc GetState (Empty) returns (RobotState);
+  // Démarre ou reprend la lecture de la trajectoire.
+  rpc Play (PlayRequest) returns (RobotState);
+  // Arrêt sur place (le curseur de trajectoire est conservé).
+  rpc Pause (Empty) returns (RobotState);
+  // Arrêt + retour au début de la trajectoire. Acquitte aussi un défaut.
+  rpc Stop (Empty) returns (RobotState);
+  // Positionne le curseur de trajectoire (uniquement hors lecture).
+  rpc Seek (SeekRequest) returns (RobotState);
+  // Change le facteur de vitesse (1.0 = temps réel), même en cours de lecture.
+  rpc SetSpeed (SpeedRequest) returns (RobotState);
+  // Flux continu de l'état (pour tableau de bord / supervision).
+  rpc StreamState (StreamRequest) returns (stream RobotState);
+}
+src/sim_hyperspace/robot.proto
+message Empty {}
+
+enum RunState {
+  RUN_STATE_UNSPECIFIED = 0;
+  RUN_STATE_IDLE = 1;
+  RUN_STATE_PLAYING = 2;
+  RUN_STATE_PAUSED = 3;
+  RUN_STATE_FINISHED = 4;
+  RUN_STATE_FAULT = 5;
+}
+
+message TrajectoryInfo {
+  string source_file = 1;
+  repeated string axis_names = 2;     // A1..A6
+  repeated string signal_names = 3;   // noms des variables Sinumerik d'origine
+  double duration_s = 4;
+  double sample_period_s = 5;
+  uint32 record_count = 6;
+  repeated double min_deg = 7;
+  repeated double max_deg = 8;
+  double idle_s = 9;                  // temps total sans mouvement (> 0.5 s)
+}
+
+message PlayRequest {
+  double speed = 1;       // <= 0 : conserve la vitesse actuelle
+  bool skip_idle = 2;     // saute les pauses immobiles de la trace
+  bool loop = 3;          // reboucle à la fin
+  bool from_start = 4;    // repart du début
+}
+
+message SeekRequest { double time_s = 1; }
+message SpeedRequest { double speed = 1; }
+
+message StreamRequest {
+  double rate_hz = 1;             // 0 : 25 Hz ; max 125 Hz
+  bool stop_when_finished = 2;    // termine le flux à FINISHED / FAULT
+}
+
+message RobotState {
+  RunState run_state = 1;
+  double time_s = 2;
+  double duration_s = 3;
+  double speed = 4;
+  repeated double axes_deg = 5;   // A1..A6 en degrés
+  string fault = 6;
+  bool skip_idle = 7;
+  bool loop = 8;
+}

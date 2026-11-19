@@ -5,22 +5,21 @@ import * as THREE from "three";
 
 // ---------- Configuration des articulations ----------
 
-// Ordre d'Euler utilisé par 3DVerse pour `eulerOrientation` (XYZ, XZY, YXZ, YZX, ZXY ou ZYX).
-// Surchargeable en ligne de commande : --order=XYZ
-const orderArg = process.argv.find((a) => a.startsWith("--order="));
-const EULER_ORDER = orderArg ? orderArg.split("=")[1] : "ZYX";
+// Ordre d'Euler utilisé par 3DVerse pour `eulerOrientation`. Fixe : plus d'argument en ligne de commande.
+const EULER_ORDER = "XYZ";
 
 // axis   : axe LOCAL de rotation de l'entité (x, y ou z)
 // sign   : +1 ou -1 si le sens est inversé
 // offset : décalage en degrés
 // base   : orientation de repos [x, y, z] en degrés
+
 const JOINTS = {
-  part_1: { axis: "y", sign: 1, offset: 0, base: [90, 0, 180] },
-  part_2: { axis: "z", sign: -1, offset: 0, base: [0, 90, 0] },
+  part_1: { axis: "y", sign: 1, offset: 0, base: [0, 0, 0] },
+  part_2: { axis: "z", sign: 1, offset: 0, base: [0, 0, 0] },
   part_3: { axis: "z", sign: 1, offset: 0, base: [0, 0, 0] },
-  part_4: { axis: "x", sign: 1, offset: 0, base: [0, 0, 90] },
-  part_5: { axis: "z", sign: -1, offset: 0, base: [0, 0, 160] },
-  part_6: { axis: "x", sign: 1, offset: 0, base: [0, 0, 180] },
+  part_4: { axis: "x", sign: 1, offset: 0, base: [0, 0, 0] },
+  part_5: { axis: "z", sign: 1, offset: 0, base: [0, 0, 0] },
+  part_6: { axis: "x", sign: 1, offset: 0, base: [0, 0, 0] },
 };
 
 const AXES = {
