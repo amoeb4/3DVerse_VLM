@@ -18,11 +18,16 @@ type LayerDeviation = { deviation: number; status: "ok" | "warn" | "alarm" };
 const deviationY = (deviation: number) =>
   88 - (Math.min(2, deviation) / 2) * 74;
 
-const formatDuration = (seconds: number) => {
-  const s = Math.max(0, Math.round(seconds));
+/** `1h05` or `12 min`; with `withSeconds`, a clock: `1:05:23` or `12:05`. */
+const formatDuration = (seconds: number, withSeconds = false) => {
+  const s = Math.max(0, Math.floor(seconds));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  return h > 0 ? `${h}h${String(m).padStart(2, "0")}` : `${m} min`;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (withSeconds) {
+    return h > 0 ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`;
+  }
+  return h > 0 ? `${h}h${pad(m)}` : `${m} min`;
 };
 
 /**
@@ -139,18 +144,28 @@ export function BuildTimeline({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {/* The values, above the graph. */}
-      <div className="grid grid-cols-[1fr_1fr_auto] sm:grid-cols-[1fr_1fr_1fr] gap-x-3 gap-y-1 text-3xs">
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-3xs">
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="2xs"
             title={
-              isPlaying ? "Stop the replay (Space)" : "Replay the build (Space)"
+              isPlaying
+                ? "Pause the replay (Space)"
+                : pinnedLayer !== null
+                  ? `Play on from layer ${shownLayer} (Space)`
+                  : "Replay the build (Space)"
             }
-            aria-label={isPlaying ? "Stop the replay" : "Replay the build"}
+            aria-label={
+              isPlaying
+                ? "Pause the replay"
+                : pinnedLayer !== null
+                  ? "Play on"
+                  : "Replay the build"
+            }
             onClick={() => (isPlaying ? setIsPlaying(false) : play())}
             disabled={built < 2}
-            className="w-18 justify-start gap-1"
+            className="sm:w-18 justify-start gap-1"
           >
             <Icon
               className={cn(
@@ -158,57 +173,63 @@ export function BuildTimeline({
                 isPlaying ? "fa-pause" : "fa-play",
               )}
             />
-            {isPlaying ? "Pause" : "Replay"}
+            <span className="hidden sm:inline">
+              {isPlaying ? "Pause" : pinnedLayer !== null ? "Play" : "Replay"}
+            </span>
           </Button>
-          <span className="whitespace-nowrap">
+          <p className="min-w-21 whitespace-nowrap">
             <span className="text-secondary">Layer </span>
             <span className="tabular-nums">
-              <b className="text-primary">{Math.max(1, shownLayer)}</b>
-              <span className="text-secondary">/{layers}</span>
+              <b className="inline-block min-w-[2ch] text-right text-primary">
+                {Math.max(1, shownLayer)}
+              </b>
+              <span className="text-secondary"> / {layers}</span>
             </span>
-          </span>
+          </p>
+          <p className="hidden sm:inline">
+            {/* To the second, so it visibly ticks while live. */}
+            <b className="inline-block min-w-[7ch] text-right text-primary tabular-nums">
+              {formatDuration(intoBuildS, true)}
+            </b>
+            <span className="text-secondary tabular-nums">
+              {" "}
+              / {formatDuration(plannedS)} planned
+            </span>
+          </p>
         </div>
-        <div className="flex justify-self-end sm:justify-self-center">
-          {pinnedLayer === null && (
-            // Live: the dot beats while the arc burns.
-            <p
-              className="inline-flex items-center gap-1.5 text-accent-300 font-bold"
-              title="Following the build as it is laid"
-            >
-              <span
-                aria-hidden
-                className={cn(
-                  "inline-block size-1.5 rounded-full",
-                  build.arcOn ? "bg-current animate-pulse" : "bg-secondary/60",
-                )}
-              />
-              LIVE
-            </p>
-          )}
+        <div className="flex justify-self-end gap-x-3 whitespace-nowrap">
+          <div className="flex justify-self-end sm:justify-self-center">
+            {pinnedLayer === null && (
+              // Live: the dot beats while the arc burns.
+              <p
+                className="inline-flex items-center gap-1.5 text-accent-300 font-bold"
+                title="Following the build as it is laid"
+              >
+                <span
+                  aria-hidden
+                  className="inline-block size-2 rounded-full bg-current animate-pulse"
+                />
+                LIVE
+              </p>
+            )}
 
-          {pinnedLayer !== null && (
-            // Rewound: the way back stands out.
-            <Button
-              variant="accent"
-              size="2xs"
-              className="gap-1 text-white! shadow-[0_0_3px_var(--color-accent)]"
-              title="Back to the build as it is laid"
-              onClick={() => onScrub(null)}
-            >
-              <Icon className="fas fa-forward-step text-[9px]" />
-              Back to Live
-            </Button>
-          )}
-        </div>
-        <div className="justify-self-end whitespace-nowrap">
-          <span className="hidden sm:inline px-2">
-          <b className="text-primary tabular-nums">{formatDuration(intoBuildS)}</b>
-          <span className="text-secondary tabular-nums">
-            {" "}
-            / {formatDuration(plannedS)} planned
-          </span>
-          </span>
-          <b className="text-primary tabular-nums">{completion} %</b>
+            {pinnedLayer !== null && (
+              // Rewound: the way back stands out.
+              <Button
+                variant="accent"
+                size="2xs"
+                className="gap-1 pr-2 text-white! shadow-[0_0_3px_var(--color-accent)]"
+                title="Back to the build as it is laid"
+                onClick={() => onScrub(null)}
+              >
+                <Icon className="fas fa-forward-step text-[9px]" />
+                Back to Live
+              </Button>
+            )}
+          </div>
+          <p className="w-[4ch] font-semibold text-primary tabular-nums">
+            {completion} %
+          </p>
         </div>
       </div>
       <div

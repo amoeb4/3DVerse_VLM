@@ -64,8 +64,11 @@ export function TertiaryToolbar({
 }
 
 /** A thin vertical line between groups of a toolbar's entries. */
-export function ToolbarDivider() {
+export function ToolbarDivider({ className }: { className?: string }) {
   return (
-    <span aria-hidden className="h-full mx-0.5 border-l border-secondary/60" />
+    <span
+      aria-hidden
+      className={cn("h-full mx-0.5 border-l border-secondary/60", className)}
+    />
   );
 }

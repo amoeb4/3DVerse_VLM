@@ -124,7 +124,10 @@ export function ViewerCanvas({
               cameraController={cameraController}
               focusSignal={partView.focusSignal}
               // Held still while the build replays, or a past layer is shown.
-              orbitPaused={isPartMode && partView.pinnedLayer !== null}
+              orbitPaused={
+                isPartMode &&
+                (partView.pinnedLayer !== null || !partView.autoRotate)
+              }
               closeUp={isPartMode && partView.closeUp}
               onOpen={isMonitorMode ? onOpenPart : undefined}
             />

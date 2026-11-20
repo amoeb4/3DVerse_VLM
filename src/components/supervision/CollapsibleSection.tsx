@@ -24,24 +24,26 @@ export function CollapsibleSection({
 
   return (
     <section>
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        aria-controls={contentId}
-        onClick={() => setIsOpen((open) => !open)}
-        className="group flex justify-between items-center gap-1.5 w-full pl-4 pr-3 py-1 text-left cursor-pointer hover:bg-primary/5 transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        <div className="-translate-x-1 flex items-center justify-between gap-2">
-          <Icon
-            className={cn(
-              "fas fa-angle-right text-[9px] text-secondary group-hover:text-primary transition-transform duration-200",
-              isOpen && "rotate-90",
-            )}
-          />
-          <SectionTitle className="truncate">{title}</SectionTitle>
-        </div>
+      <div className="flex items-center gap-1.5 pr-3 hover:bg-primary/5 transition-colors duration-200">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={contentId}
+          onClick={() => setIsOpen((open) => !open)}
+          className="group flex grow min-w-0 items-center pl-4 py-1 text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <div className="-translate-x-1 flex min-w-0 items-center gap-2">
+            <Icon
+              className={cn(
+                "fas fa-angle-right text-[9px] text-secondary group-hover:text-primary transition-transform duration-200",
+                isOpen && "rotate-90",
+              )}
+            />
+            <SectionTitle className="truncate">{title}</SectionTitle>
+          </div>
+        </button>
         {aside}
-      </button>
+      </div>
 
       {isOpen && (
         <div id={contentId} className="px-4 pt-1 pb-2">

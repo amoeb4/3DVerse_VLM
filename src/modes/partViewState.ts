@@ -7,7 +7,8 @@ import type { PartHit } from "../components/part/PartInCell";
  * What the Part mode shows, shared by its panels (`PartChrome`) and the part in the cell
  * (`PartInCell`): the metric the part is coloured by, the layer it is rewound to (`null`: the whole
  * build, live), the layer ringed, the point under the pointer, a signal that brings the camera
- * back to the part, and whether the camera is in close-up on the point being welded.
+ * back to the part, whether the camera is in close-up on the point being welded, and whether it
+ * turns around it on its own.
  */
 export function usePartViewState() {
   const [metric, setMetric] = useState<PartMetric>("temperature");
@@ -17,6 +18,8 @@ export function usePartViewState() {
   const [focusSignal, setFocusSignal] = useState(0);
   // Close up on the point being welded, the camera turning around it and following it.
   const [closeUp, setCloseUp] = useState(false);
+  // The camera turning slowly around the part (or the bead, in close-up) while left alone.
+  const [autoRotate, setAutoRotate] = useState(true);
   // Back to the whole part, out of close-up.
   const refocus = useCallback(() => {
     setCloseUp(false);
@@ -35,6 +38,8 @@ export function usePartViewState() {
     refocus,
     closeUp,
     setCloseUp,
+    autoRotate,
+    setAutoRotate,
   };
 }
 

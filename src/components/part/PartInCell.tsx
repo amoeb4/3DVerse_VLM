@@ -139,10 +139,7 @@ export function PartInCell({
   const { viewport } = useContext(ViewportContext);
   const { entity: plate } = useEntity({ euid: plateEuid });
   const build = useBuildRecord(500);
-  const model = useMemo(
-    () => new PartModel(waamPart()),
-    [build.layers],
-  );
+  const model = useMemo(() => new PartModel(waamPart()), [build.layers]);
   const placed = useRef(false);
   const onHoverRef = useRef(onHover);
   useEffect(() => {

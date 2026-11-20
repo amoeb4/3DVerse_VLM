@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, cn, Icon } from "@3dverse/ui-lib";
 import {
@@ -113,9 +113,16 @@ export function PartChrome({
     return () => window.clearInterval(timer);
   }, [isPlaying, built, setPinnedLayer]);
 
-  // Space: play the build from its first layer, or stop the replay. Captured, so the scene's own
-  // space binding (keyBindings.tsx) does not move the camera meanwhile.
+  // Play: on from the layer shown when rewound (a paused replay, or a scrub), else from the first.
   const canPlay = built >= 2;
+  const play = useCallback(() => {
+    setFocusLayer(null);
+    setPinnedLayer((layer) => layer ?? 1);
+    setIsPlaying(true);
+  }, [setFocusLayer, setPinnedLayer]);
+
+  // Space: play the build, or pause the replay. Captured, so the scene's own space binding
+  // (keyBindings.tsx) does not move the camera meanwhile.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (
@@ -134,21 +141,13 @@ export function PartChrome({
       if (isPlaying) {
         setIsPlaying(false);
       } else {
-        setFocusLayer(null);
-        setPinnedLayer(1);
-        setIsPlaying(true);
+        play();
       }
     };
     window.addEventListener("keydown", onKey, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
-  }, [canPlay, isPlaying, setFocusLayer, setPinnedLayer]);
-
-  const play = () => {
-    setFocusLayer(null);
-    setPinnedLayer(1);
-    setIsPlaying(true);
-  };
+  }, [canPlay, isPlaying, play]);
 
   const selectFinding = (finding: LayerFinding) => {
     setIsPlaying(false);
@@ -178,7 +177,7 @@ export function PartChrome({
         />
         <Panel
           variant="glass"
-          className={cn("flex flex-col gap-2.5 px-3 py-2.5")}
+          className="min-h-34 flex flex-col gap-2.5 px-3 py-2.5"
         >
           <div className="flex items-center justify-between gap-2">
             <SubTitleSection as="span">Colour by</SubTitleSection>
@@ -357,7 +356,7 @@ function FindingsPanel({
     >
       <header className="px-4 py-2 border-b border-tertiary">
         <PanelTitle>Out of WPS</PanelTitle>
-        <p className="text-3xs text-secondary">
+        <p className="mt-0.5 text-3xs text-secondary">
           {findings.length === 0
             ? `All ${built} layers laid stayed in their window.`
             : `${findings.length} of ${built} layers laid left their window.`}
