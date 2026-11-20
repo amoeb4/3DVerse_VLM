@@ -1,4 +1,12 @@
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
   Button,
@@ -14,7 +22,11 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { viewerPath } from "../routing";
 import { DEFAULT_MODE, type ViewMode } from "../modes/modes";
 import { useViewMode } from "../modes/useViewMode";
-import { QrCodeModal } from "./QrCodeModal";
+
+// Its own chunk with the QR code library, loaded the first time the QR code is asked for.
+const QrCodeModal = lazy(() =>
+  import("./QrCodeModal").then((module) => ({ default: module.QrCodeModal })),
+);
 
 // Unlike the mobile viewer, this app connects with a public token, which cannot mint guest tokens
 // (that needs `manage` scope). The invite link therefore names the session itself, and the guest
@@ -37,6 +49,8 @@ const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
 export const InvitePanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isQrCodeModalOpen, setIsQrCodeModalOpen] = useState(false);
+  // Mounted from its first opening on, so that it keeps its closing animation from then on.
+  const [hasQrCodeModalOpened, setHasQrCodeModalOpened] = useState(false);
   const [isTextCopied, setTextCopied] = useState(false);
   const { instance } = useContext(LivelinkContext);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -82,7 +96,10 @@ export const InvitePanel = () => {
   const actions = [
     {
       label: "QR code",
-      onClick: () => setIsQrCodeModalOpen(true),
+      onClick: () => {
+        setHasQrCodeModalOpened(true);
+        setIsQrCodeModalOpen(true);
+      },
       icon: "fas fa-qrcode",
     },
     { label: "Copy link", onClick: copyGuestLink, icon: "fas fa-link" },
@@ -182,12 +199,16 @@ export const InvitePanel = () => {
         </Menu>
       )}
 
-      <QrCodeModal
-        guestLink={guestLink}
-        open={isQrCodeModalOpen}
-        onClose={() => setIsQrCodeModalOpen(false)}
-        anchorRef={triggerRef}
-      />
+      {hasQrCodeModalOpened && (
+        <Suspense fallback={null}>
+          <QrCodeModal
+            guestLink={guestLink}
+            open={isQrCodeModalOpen}
+            onClose={() => setIsQrCodeModalOpen(false)}
+            anchorRef={triggerRef}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

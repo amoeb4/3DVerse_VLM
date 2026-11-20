@@ -10,8 +10,16 @@ import TorchExample from "./TorchExample";
 import { PartEntitiesContext } from "../partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "../movements";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Button, cn, Icon, PanelHeader } from "@3dverse/ui-lib";
+import {
+  Button,
+  cn,
+  Icon,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuTrigger,
+  PanelHeader,
+} from "@3dverse/ui-lib";
 import { Panel, PanelTitle } from "./common";
 
 type SpeedContextType = {
@@ -258,31 +266,18 @@ export function EntityDropdown() {
   }, [partEntities]);
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <MenuButton className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-overground px-2 py-px text-xs border border-tertiary hover:bg-primary/10">
-          {selectedEntity?.name || "Entities"}
-          <Icon className="fas fa-angle-down text-5xs opacity-60" />
-        </MenuButton>
-      </div>
-      <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-overground shadow-lg border border-tertiary focus:outline-hidden">
-        <div className="py-1">
-          {entities.map((entity) => (
-            <MenuItem key={entity.id}>
-              {({ active }) => (
-                <button
-                  onClick={() => setSelectedEntity(entity)}
-                  className={`${
-                    active ? "bg-primary/10 text-primary" : "text-secondary"
-                  } block w-full text-left px-4 py-2 text-sm`}
-                >
-                  {entity.name}
-                </button>
-              )}
-            </MenuItem>
-          ))}
-        </div>
-      </MenuItems>
+    <Menu>
+      <MenuTrigger render={<Button variant="outline" size="xs" />}>
+        {selectedEntity?.name || "Entities"}
+        <Icon className="fas fa-angle-down text-5xs opacity-60" />
+      </MenuTrigger>
+      <MenuContent className="w-56 max-h-80 overflow-y-auto border border-tertiary">
+        {entities.map((entity) => (
+          <MenuItem key={entity.id} onClick={() => setSelectedEntity(entity)}>
+            {entity.name}
+          </MenuItem>
+        ))}
+      </MenuContent>
     </Menu>
   );
 }

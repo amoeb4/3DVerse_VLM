@@ -1,8 +1,12 @@
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import type { HTMLMotionProps } from "framer-motion";
+import {
+  useEffect,
+  useState,
+  useRef,
+  type ComponentProps,
+  type CSSProperties,
+} from "react";
 
-const styles = {
+const styles: Record<"wrapper" | "srOnly" | "jitterStyle", CSSProperties> = {
   wrapper: {
     display: "inline-block",
     whiteSpace: "pre-wrap",
@@ -40,13 +44,10 @@ if (typeof window !== "undefined") {
   }
 }
 
-interface DecryptedTextProps extends HTMLMotionProps<"span"> {
+interface DecryptedTextProps extends ComponentProps<"span"> {
   text: string;
   speed?: number;
   maxIterations?: number;
-  sequential?: boolean;
-  revealDirection?: "start" | "end" | "center";
-  useOriginalCharsOnly?: boolean;
   characters?: string;
   className?: string;
   parentClassName?: string;
@@ -153,7 +154,7 @@ export default function DecryptedText({
       : {};
 
   return (
-    <motion.span
+    <span
       className={parentClassName}
       ref={containerRef}
       style={styles.wrapper}
@@ -176,6 +177,6 @@ export default function DecryptedText({
           );
         })}
       </span>
-    </motion.span>
+    </span>
   );
 }
